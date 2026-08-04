@@ -1,0 +1,1167 @@
+/* ==========================================
+   RETROVERSE - SISTEMA DE DESIGN PREMIUM
+   "Todos os Mundos. Todos os Clássicos."
+   ========================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700;900&display=swap');
+
+:root {
+  color-scheme: dark;
+
+  /* Fundo e Superfícies */
+  --bg:           #030604;
+  --card:         #090e0b;
+  --surface-hover:#121c16;
+
+  /* Neon Glow & Acentos */
+  --green-neon:   #00ff41;
+  --green-glow:   rgba(0, 255, 65, 0.4);
+  --green-soft:   rgba(0, 255, 65, 0.08);
+  --green-mid:    rgba(0, 255, 65, 0.18);
+
+  /* Bordas */
+  --border:       #1a261e;
+  --border-bright:#00ff41;
+
+  /* Tipografia */
+  --text:         #ffffff;
+  --text-muted:   #8e9e94;
+  --radius:       12px;
+
+  /* Fontes */
+  --font-display: 'Orbitron', 'Segoe UI', Roboto, sans-serif;
+  --font-body:    'Rajdhani', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 50% -5%, rgba(0,255,65,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 100% 100%, rgba(0,255,65,0.06) 0%, transparent 50%),
+    #030604;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-family: var(--font-body);
+}
+
+/* ==========================================
+   EFEITO CRT SCANLINES (leve, não bloqueia)
+   ========================================== */
+.crt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.07) 2px,
+    rgba(0, 0, 0, 0.07) 4px
+  );
+  animation: crtFlicker 8s linear infinite;
+}
+
+@keyframes crtFlicker {
+  0%,100% { opacity: 1; }
+  92%      { opacity: 1; }
+  93%      { opacity: 0.97; }
+  94%      { opacity: 1; }
+}
+
+/* ==========================================
+   NAVBAR
+   ========================================== */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: rgba(3, 6, 4, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+  padding: 14px 32px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), 0 0 1px rgba(0,255,65,0.15);
+}
+
+/* --- NAVBAR INDEX (centralizada, com branding) --- */
+.navbar:not(.games-navbar) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* BRAND BLOCK */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+}
+
+.brand-logo {
+  width: 46px;
+  height: 46px;
+  border: 2px solid var(--green-neon);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--green-neon);
+  letter-spacing: 1px;
+  box-shadow: 0 0 14px var(--green-glow), inset 0 0 10px rgba(0,255,65,0.06);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.brand:hover .brand-logo {
+  box-shadow: 0 0 25px var(--green-neon), inset 0 0 18px rgba(0,255,65,0.14);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 900;
+  letter-spacing: 6px;
+  color: var(--text);
+  text-transform: uppercase;
+  text-shadow: 0 0 14px var(--green-glow), 0 0 28px rgba(0,255,65,0.18);
+  transition: all 0.3s ease;
+}
+
+.brand:hover .brand-name {
+  color: var(--green-neon);
+  text-shadow: 0 0 18px var(--green-neon), 0 0 36px var(--green-glow);
+}
+
+.brand-slogan {
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 5px;
+  color: var(--green-neon);
+  text-transform: uppercase;
+  margin-top: 4px;
+  opacity: 0.75;
+}
+
+/* --- NAVBAR GAMES ---
+   Desktop: row1 (flex-row: btn-back + center) + search-box lado a lado
+   Mobile:  coluna única (row1 em cima, busca embaixo)
+── */
+.games-navbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Linha 1 (botão + centro) — no desktop ocupa o espaço disponível */
+.games-navbar-row1 {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* Centro do header de games */
+.games-header-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.games-header-brand {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 5px;
+  color: var(--green-neon);
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.console-header-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: var(--text);
+  text-transform: uppercase;
+  text-shadow: 0 0 12px var(--green-glow);
+  white-space: nowrap;
+  margin: 0;
+}
+
+.games-count-badge {
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* --- BOTÃO VOLTAR --- */
+.btn-back {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--green-soft);
+  border: 1px solid rgba(0, 255, 65, 0.35);
+  color: var(--green-neon);
+  padding: 8px 20px 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.88rem;
+  white-space: nowrap;
+  letter-spacing: 1px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-back::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-color: var(--green-neon);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z'/%3E%3C/svg%3E") no-repeat center / contain;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z'/%3E%3C/svg%3E") no-repeat center / contain;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.btn-back:hover {
+  background: var(--green-neon);
+  color: #030604;
+  box-shadow: 0 0 18px var(--green-glow);
+  border-color: var(--green-neon);
+}
+
+.btn-back:hover::before {
+  background-color: #030604;
+  transform: translateX(-4px);
+}
+
+/* --- BUSCA --- */
+.search-box {
+  flex-shrink: 0;
+  width: 240px;
+  position: relative;
+}
+
+/* Ícone lupa SVG neon via pseudo-elemento — sem emoji */
+.search-box::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 1;
+  background-color: var(--text-muted);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z' stroke='white' stroke-width='2.2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") no-repeat center / contain;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z' stroke='white' stroke-width='2.2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") no-repeat center / contain;
+  transition: background-color 0.3s ease;
+}
+
+.search-box:focus-within::before {
+  background-color: var(--green-neon);
+}
+
+.search-box input {
+  background: #070c09;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 9px 18px 9px 36px; /* espaço para o ícone à esquerda */
+  border-radius: 6px;         /* retangular com leve arredondamento — mais cyberpunk */
+  outline: none;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  caret-color: var(--green-neon);
+}
+
+.search-box input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.45;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+}
+
+.search-box input:focus {
+  border-color: var(--green-neon);
+  box-shadow:
+    0 0 0 2px rgba(0,255,65,0.12),
+    0 0 16px rgba(0,255,65,0.2);
+  background: #070d09;
+  color: var(--green-neon);
+}
+
+/* ==========================================
+   HERO SECTION
+   ========================================== */
+.hero {
+  position: relative;
+  padding: 70px 24px 60px;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Partículas decorativas */
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-particles span {
+  position: absolute;
+  display: block;
+  width: 2px;
+  height: 2px;
+  background: var(--green-neon);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--green-neon);
+  animation: float 8s infinite linear;
+  opacity: 0;
+}
+
+.hero-particles span:nth-child(1)  { left: 10%; top: 20%; animation-delay: 0s;    animation-duration: 7s; }
+.hero-particles span:nth-child(2)  { left: 25%; top: 60%; animation-delay: 1s;    animation-duration: 9s; }
+.hero-particles span:nth-child(3)  { left: 45%; top: 35%; animation-delay: 2s;    animation-duration: 6s; }
+.hero-particles span:nth-child(4)  { left: 70%; top: 75%; animation-delay: 0.5s;  animation-duration: 8s; }
+.hero-particles span:nth-child(5)  { left: 85%; top: 15%; animation-delay: 3s;    animation-duration: 7.5s; }
+.hero-particles span:nth-child(6)  { left: 55%; top: 85%; animation-delay: 1.5s;  animation-duration: 10s; }
+.hero-particles span:nth-child(7)  { left: 5%;  top: 50%; animation-delay: 4s;    animation-duration: 6.5s; }
+.hero-particles span:nth-child(8)  { left: 90%; top: 40%; animation-delay: 2.5s;  animation-duration: 9.5s; }
+.hero-particles span:nth-child(9)  { left: 38%; top: 10%; animation-delay: 0.8s;  animation-duration: 8.5s; }
+.hero-particles span:nth-child(10) { left: 78%; top: 55%; animation-delay: 3.5s;  animation-duration: 7s; }
+
+@keyframes float {
+  0%   { transform: translateY(0) scale(1); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 0.6; }
+  100% { transform: translateY(-80px) scale(0.4); opacity: 0; }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.hero-badge {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 4px;
+  color: var(--green-neon);
+  text-transform: uppercase;
+  border: 1px solid rgba(0,255,65,0.3);
+  padding: 5px 18px;
+  border-radius: 20px;
+  margin-bottom: 28px;
+  background: rgba(0,255,65,0.06);
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5.5vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1.15;
+  color: var(--text);
+  margin-bottom: 18px;
+  letter-spacing: 1px;
+}
+
+.hero-title-glow {
+  color: var(--green-neon);
+  text-shadow:
+    0 0 20px rgba(0,255,65,0.8),
+    0 0 45px rgba(0,255,65,0.4),
+    0 0 80px rgba(0,255,65,0.15);
+}
+
+.hero-desc {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-bottom: 36px;
+  letter-spacing: 0.5px;
+  line-height: 1.7;
+}
+
+.hero-line {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--green-neon), transparent);
+  margin: 0 auto 32px;
+  box-shadow: 0 0 12px var(--green-neon);
+}
+
+/* Stats */
+.hero-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.hero-stat-num {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--green-neon);
+  text-shadow: 0 0 14px var(--green-glow);
+  line-height: 1;
+}
+
+.hero-stat-label {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.hero-stat-divider {
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(180deg, transparent, rgba(0,255,65,0.35), transparent);
+}
+
+/* ==========================================
+   SEÇÃO CONSOLES
+   ========================================== */
+.consoles-section {
+  padding: 0 20px 80px;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.section-tag {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 4px;
+  color: rgba(0,255,65,0.45);
+  text-transform: uppercase;
+}
+
+/* ==========================================
+   GRID E CARDS - INDEX (CONSOLES)
+   ========================================== */
+.grid-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 0 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 22px;
+}
+
+.console-card, .card {
+  background: linear-gradient(145deg, #0d1410 0%, #050807 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+/* Linha neon no topo */
+.card-glow-top {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--green-neon), transparent);
+  opacity: 0.2;
+  transition: opacity 0.35s ease;
+}
+
+.console-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,255,65,0.04) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.console-card:hover {
+  transform: translateY(-10px) scale(1.025);
+  border-color: var(--border-bright);
+  background: linear-gradient(145deg, #131f18 0%, #080d0a 100%);
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.9),
+    0 0 30px rgba(0, 255, 65, 0.22),
+    0 0 60px rgba(0, 255, 65, 0.06);
+}
+
+.console-card:hover .card-glow-top {
+  opacity: 1;
+}
+
+.console-card:hover::after {
+  opacity: 1;
+}
+
+.console-img {
+  width: 100%;
+  max-width: 160px;
+  height: 115px;
+  object-fit: contain;
+  margin-bottom: 22px;
+  filter: drop-shadow(0px 8px 18px rgba(0, 0, 0, 0.9));
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+.console-card:hover .console-img {
+  transform: scale(1.14) rotate(-2deg);
+  filter:
+    drop-shadow(0px 12px 28px var(--green-glow))
+    brightness(1.08);
+}
+
+.console-info {
+  text-align: center;
+  width: 100%;
+}
+
+.console-info h2 {
+  font-family: var(--font-body);
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.console-card:hover .console-info h2 {
+  color: var(--green-neon);
+  text-shadow: 0 0 12px var(--green-glow);
+}
+
+.console-info p {
+  display: inline-block;
+  color: var(--green-neon);
+  background: rgba(0, 255, 65, 0.07);
+  border: 1px solid rgba(0, 255, 65, 0.22);
+  padding: 3px 14px;
+  border-radius: 20px;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.console-card:hover .console-info p {
+  background: var(--green-neon);
+  color: #000;
+  box-shadow: 0 0 12px var(--green-glow);
+}
+
+/* ==========================================
+   GRID E CARDS - GAMES (NOVO — GRADE DE CAPAS)
+   Inspiração: Steam / GOG / Nintendo eShop
+   Imagem completa, nome embaixo, hover premium
+   ========================================== */
+.games-grid {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  padding-top: 24px;
+  align-items: start;
+}
+
+/* ── Card vertical ── */
+.game-card {
+  background: #090e0b;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  height: auto;
+  min-height: unset;
+  padding: 0;
+  gap: 0;
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              border-color 0.25s ease,
+              box-shadow 0.25s ease;
+  cursor: pointer;
+}
+
+.game-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  border-color: var(--green-neon);
+  box-shadow:
+    0 16px 40px rgba(0,0,0,0.9),
+    0 0 20px rgba(0,255,65,0.25),
+    0 0 60px rgba(0,255,65,0.08);
+}
+
+/* ── Wrapper da imagem — altura fixa, todas iguais ── */
+.game-cover-wrap {
+  position: relative;
+  width: 100%;
+  height: 200px;          /* altura fixa — mesma para todas as capas */
+  overflow: hidden;
+  background: #0a100d;
+  border-radius: 10px 10px 0 0;
+}
+
+/* ── Capa — preenche o espaço, centraliza ── */
+.game-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;        /* preenche sem distorcer */
+  object-position: center top; /* alinha ao topo — mostra a parte importante */
+  display: block;
+  transition: transform 0.4s ease, filter 0.4s ease;
+  border-radius: 0;
+  box-shadow: none;
+  max-width: unset;
+  flex-shrink: unset;
+}
+
+.game-card:hover .game-cover-img {
+  transform: scale(1.06);
+  filter: brightness(1.08);
+  box-shadow: none;
+}
+
+/* ── Overlay de hover com botão JOGAR ── */
+.game-cover-wrap::after {
+  content: 'JOGAR ▶';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0,255,65,0.92) 0%,
+    rgba(0,30,10,0.75) 50%,
+    transparent 100%
+  );
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 14px;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: #000;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  border-radius: 10px 10px 0 0;
+}
+
+.game-card:hover .game-cover-wrap::after {
+  opacity: 1;
+}
+
+/* ── Linha neon no topo do card ── */
+.game-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--green-neon), transparent);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 2;
+}
+
+.game-card:hover::before {
+  opacity: 1;
+}
+
+/* ── Fallback RV quando não há capa ── */
+.game-icon {
+  width: 100%;
+  height: 200px;           /* mesma altura fixa dos covers */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #0d1a10, #060c08);
+  border-radius: 10px 10px 0 0;
+  flex-shrink: 0;
+  min-width: unset;
+  transition: none;
+}
+
+.rv-fallback {
+  background: linear-gradient(145deg, #0a1a0d, #050c07);
+  border: none;
+  border-radius: 10px 10px 0 0;
+  box-shadow: inset 0 0 30px rgba(0,255,65,0.06);
+}
+
+.rv-fallback-text {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--green-neon);
+  letter-spacing: 3px;
+  text-shadow: 0 0 20px var(--green-neon), 0 0 40px var(--green-glow);
+  opacity: 0.5;
+}
+
+.game-card:hover .game-icon {
+  transform: none;
+}
+
+/* ── Info (nome + subtítulo) — altura fixa para alinhar todos ── */
+.game-info {
+  flex: 0 0 auto;
+  height: 54px;             /* altura fixa: espaço para nome + subtítulo */
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;  /* centraliza verticalmente */
+  gap: 2px;
+  background: linear-gradient(180deg, #0b1309 0%, #080d0a 100%);
+  border-radius: 0 0 10px 10px;
+  overflow: hidden;
+  text-align: left;
+}
+
+.game-info h3 {
+  font-family: var(--font-body);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 0;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  transition: color 0.25s ease;
+}
+
+.game-card:hover .game-info h3 {
+  color: var(--green-neon);
+}
+
+/* Subtítulo — sempre reserva espaço, mesmo quando vazio */
+.game-subtitle {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 1em;  /* reserva espaço mesmo sem conteúdo */
+}
+
+/* ── Botão JOGAR — removido do HTML, substituído pelo overlay ── */
+.play-btn { display: none; }
+
+.empty-msg {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  margin-top: 50px;
+  letter-spacing: 1px;
+}
+
+/* ==========================================
+   FOOTER
+   ========================================== */
+.rv-footer {
+  text-align: center;
+  padding: 40px 24px;
+  border-top: 1px solid rgba(0,255,65,0.1);
+  margin-top: 20px;
+}
+
+.rv-footer--mini {
+  padding: 20px 24px;
+  margin-top: 0;
+}
+
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid rgba(0,255,65,0.4);
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: rgba(0,255,65,0.5);
+  margin-bottom: 10px;
+}
+
+.footer-copy {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 5px;
+  color: rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.footer-sub {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.12);
+}
+
+/* ==========================================
+   RESPONSIVIDADE
+   ========================================== */
+
+/* ── TABLET ── */
+@media (max-width: 768px) {
+  .hero {
+    padding: 50px 20px 44px;
+  }
+
+  .hero-title {
+    font-size: clamp(1.6rem, 7vw, 2.4rem);
+  }
+
+  .hero-stats {
+    gap: 18px;
+  }
+
+  .hero-stat-num {
+    font-size: 1.4rem;
+  }
+
+  .grid-container {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  /* Grid de jogos tablet — 4 colunas */
+  .games-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .game-cover-wrap,
+  .game-icon {
+    height: 160px;
+  }
+
+  /* Navbar games: compacta o centro */
+  .games-header-brand {
+    font-size: 0.52rem;
+    letter-spacing: 3px;
+  }
+
+  .console-header-title {
+    font-size: 1.05rem;
+  }
+
+  .games-count-badge {
+    font-size: 0.55rem;
+    letter-spacing: 1px;
+  }
+}
+
+/* ── MOBILE (≤ 600px) ── */
+@media (max-width: 600px) {
+
+  /* ── Navbar base ── */
+  .navbar {
+    padding: 10px 14px;
+  }
+
+  /* ── Navbar Index (home) ── */
+  .navbar:not(.games-navbar) {
+    justify-content: flex-start;
+  }
+
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+  }
+
+  .brand-name {
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+  }
+
+  .brand-slogan {
+    font-size: 0.55rem;
+    letter-spacing: 3px;
+  }
+
+  /* ── Navbar Games (games.html) ──
+     Layout em 2 linhas:
+       Linha 1: [← Consoles]   [TÍTULO + badge]
+       Linha 2: [campo de busca — largura total]
+  ── */
+  .games-navbar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 10px 14px;
+  }
+
+  /* Linha 1: botão + centro, lado a lado */
+  .games-navbar .btn-back {
+    /* ficará dentro da linha 1 (row natural do flex) */
+    flex-shrink: 0;
+  }
+
+  /* Envolve linha 1 num flex row */
+  .games-navbar-row1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+  }
+
+  /* Centro: título alinhado à direita na linha 1 */
+  .games-header-center {
+    align-items: flex-end;
+    text-align: right;
+    flex: 1;
+    min-width: 0;           /* evita overflow */
+  }
+
+  .games-header-brand {
+    font-size: 0.5rem;
+    letter-spacing: 3px;
+  }
+
+  .console-header-title {
+    font-size: 0.92rem;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .games-count-badge {
+    font-size: 0.52rem;
+    letter-spacing: 1px;
+  }
+
+  /* Linha 2: busca ocupa 100% */
+  .search-box {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .search-box input {
+    width: 100%;
+    font-size: 0.7rem;
+    padding: 10px 16px 10px 36px;
+    letter-spacing: 1.5px;
+  }
+
+  /* ── Grid de jogos — 3 colunas no mobile ── */
+  .games-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding-top: 14px;
+  }
+
+  /* Altura menor no mobile */
+  .game-cover-wrap,
+  .game-icon {
+    height: 130px;
+  }
+
+  .game-info {
+    height: 46px;
+    padding: 6px 8px;
+  }
+
+  .game-info h3 {
+    font-size: 0.72rem;
+  }
+
+  .game-subtitle {
+    font-size: 0.60rem;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 32px 16px 28px;
+  }
+
+  .hero-badge {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    padding: 4px 14px;
+    margin-bottom: 20px;
+  }
+
+  .hero-desc {
+    font-size: 0.95rem;
+  }
+
+  .hero-particles {
+    display: none;
+  }
+
+  .hero-stats {
+    gap: 12px;
+  }
+
+  .hero-stat-num {
+    font-size: 1.3rem;
+  }
+
+  .hero-stat-label {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+  }
+
+  /* ── Grid consoles ── */
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 0 0 30px;
+  }
+
+  .console-card {
+    padding: 22px 14px 18px;
+  }
+
+  .console-img {
+    height: 80px;
+    margin-bottom: 14px;
+  }
+
+  .console-info h2 {
+    font-size: 1rem;
+  }
+
+  .console-info p {
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    padding: 2px 10px;
+  }
+}
+
+/* ── MOBILE XS (≤ 380px) ── */
+@media (max-width: 380px) {
+  .brand-slogan {
+    display: none;
+  }
+
+  .brand-name {
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+  }
+
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .console-img {
+    height: 70px;
+  }
+
+  .console-info h2 {
+    font-size: 0.88rem;
+  }
+
+  .games-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .game-cover-wrap,
+  .game-icon {
+    height: 110px;
+  }
+
+  .game-info {
+    height: 42px;
+    padding: 5px 6px;
+  }
+
+  .game-info h3 {
+    font-size: 0.62rem;
+  }
+
+  .game-subtitle {
+    font-size: 0.55rem;
+  }
+}
