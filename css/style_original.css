@@ -497,51 +497,6 @@ body {
 }
 
 /* ==========================================
-   CATEGORIAS DE CONSOLES
-   ========================================== */
-.category-section {
-  margin-bottom: 40px;
-}
-
-.category-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-  padding: 0 4px;
-}
-
-.category-title {
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 4px;
-  color: var(--green-neon);
-  text-transform: uppercase;
-  white-space: nowrap;
-  text-shadow: 0 0 10px var(--green-glow);
-}
-
-.category-line {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(0,255,65,0.3), transparent);
-}
-
-.category-badge {
-  font-family: var(--font-body);
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 2px;
-  color: var(--text-muted);
-  background: rgba(0,255,65,0.06);
-  border: 1px solid rgba(0,255,65,0.15);
-  padding: 3px 12px;
-  border-radius: 20px;
-  white-space: nowrap;
-}
-
-/* ==========================================
    GRID E CARDS - INDEX (CONSOLES)
    ========================================== */
 .grid-container {

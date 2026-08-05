@@ -51,14 +51,10 @@
       'nes':    { title: 'Nintendo Classic',   core: 'nes' },
       'gba':    { title: 'Game Boy Advance',   core: 'gba' },
       'gbc':    { title: 'Game Boy Color',     core: 'gbc' },
-      'gb':     { title: 'Game Boy',           core: 'gb' },
       'sega':   { title: 'Mega Drive',         core: 'segaMD' },
       'arcade': { title: 'Arcade / Fliperama', core: 'fbneo' },
       'n64':    { title: 'Nintendo 64',        core: 'n64' },
-      'psx':    { title: 'PlayStation 1',      core: 'pcsx_rearmed' },
-      'nds':    { title: 'Nintendo DS',        core: 'nds' },
-      'segacd': { title: 'Sega CD',            core: 'segaCD' },
-      'gamegear': { title: 'Game Gear',        core: 'segaGG' }
+      'psx':    { title: 'PlayStation 1',      core: 'pcsx_rearmed' }
     };
 
     const currentConfig = config[consoleType] || config['snes'];
@@ -192,51 +188,6 @@
         { name: 'Tekken', file: 'Tekken (USA).chd' },
         { name: 'Tekken 3', file: 'Tekken 3 (USA).chd' },
         { name: "Tony Hawk's", subtitle: 'Pro Skater 2', file: "Tony Hawk's Pro Skater 2 (USA).chd" }
-      ],
-      'nds': [
-        { name: 'New Super Mario Bros.', file: 'New Super Mario Bros. (USA).nds' },
-        { name: 'Mario Kart DS', file: 'Mario Kart DS (USA).nds' },
-        { name: 'Pokémon', subtitle: 'Diamond Version', file: 'Pokemon - Diamond Version (USA).nds' },
-        { name: 'Pokémon', subtitle: 'Pearl Version', file: 'Pokemon - Pearl Version (USA).nds' },
-        { name: 'Pokémon', subtitle: 'Platinum Version', file: 'Pokemon - Platinum Version (USA).nds' },
-        { name: 'Pokémon', subtitle: 'HeartGold Version', file: 'Pokemon - HeartGold Version (USA).nds' },
-        { name: 'Pokémon', subtitle: 'SoulSilver Version', file: 'Pokemon - SoulSilver Version (USA).nds' },
-        { name: 'Pokémon', subtitle: 'Black Version', file: 'Pokemon - Black Version (USA).nds' },
-        { name: 'Pokémon', subtitle: 'White Version', file: 'Pokemon - White Version (USA).nds' },
-        { name: 'The Legend of Zelda', subtitle: 'Phantom Hourglass', file: 'Legend of Zelda, The - Phantom Hourglass (USA).nds' },
-        { name: 'The Legend of Zelda', subtitle: 'Spirit Tracks', file: 'Legend of Zelda, The - Spirit Tracks (USA).nds' },
-        { name: 'Super Mario 64 DS', file: 'Super Mario 64 DS (USA).nds' },
-        { name: 'Castlevania', subtitle: 'Dawn of Sorrow', file: 'Castlevania - Dawn of Sorrow (USA).nds' },
-        { name: 'Castlevania', subtitle: 'Portrait of Ruin', file: 'Castlevania - Portrait of Ruin (USA).nds' },
-        { name: 'Castlevania', subtitle: 'Order of Ecclesia', file: 'Castlevania - Order of Ecclesia (USA).nds' },
-        { name: 'Metroid Prime Hunters', file: 'Metroid Prime - Hunters (USA).nds' },
-        { name: 'Kirby', subtitle: 'Canvas Curse', file: 'Kirby - Canvas Curse (USA).nds' },
-        { name: 'Advance Wars', subtitle: 'Dual Strike', file: 'Advance Wars - Dual Strike (USA).nds' },
-        { name: 'Chrono Trigger', file: 'Chrono Trigger (USA).nds' },
-        { name: 'Fire Emblem', subtitle: 'Shadow Dragon', file: 'Fire Emblem - Shadow Dragon (USA).nds' }
-      ],
-      'segacd': [
-        { name: 'Sonic CD', file: 'Sonic CD (USA).chd' },
-        { name: 'Snatcher', file: 'Snatcher (USA).chd' },
-        { name: 'Lunar', subtitle: 'The Silver Star', file: 'Lunar - The Silver Star (USA).chd' },
-        { name: 'Lunar 2', subtitle: 'Eternal Blue', file: 'Lunar 2 - Eternal Blue (USA).chd' },
-        { name: 'Popful Mail', file: 'Popful Mail (USA).chd' },
-        { name: 'Shining Force CD', file: 'Shining Force CD (USA).chd' },
-        { name: 'Ecco the Dolphin', subtitle: 'CD', file: 'Ecco the Dolphin - CD (USA).chd' },
-        { name: 'Final Fight CD', file: 'Final Fight CD (USA).chd' },
-        { name: 'Streets of Rage', subtitle: 'Sega CD', file: 'Streets of Rage (USA) (Sega CD).chd' }
-      ],
-      'gamegear': [
-        { name: 'Sonic the Hedgehog', file: 'Sonic the Hedgehog (World).gg' },
-        { name: 'Sonic the Hedgehog 2', file: 'Sonic the Hedgehog 2 (World).gg' },
-        { name: 'Sonic Triple Trouble', file: 'Sonic the Hedgehog - Triple Trouble (World).gg' },
-        { name: 'Shinobi', file: 'Shinobi (World).gg' },
-        { name: 'Shinobi II', subtitle: 'The Silent Fury', file: 'Shinobi II - The Silent Fury (World).gg' },
-        { name: 'Columns', file: 'Columns (World).gg' },
-        { name: 'GG Shinobi', file: 'GG Shinobi, The (World).gg' },
-        { name: 'Wonder Boy', subtitle: "The Dragon's Trap", file: "Wonder Boy - The Dragon's Trap (USA, Europe).gg" },
-        { name: 'Land of Illusion', subtitle: 'Starring Mickey Mouse', file: 'Land of Illusion Starring Mickey Mouse (World).gg' },
-        { name: 'Castle of Illusion', subtitle: 'Starring Mickey Mouse', file: 'Castle of Illusion Starring Mickey Mouse (USA, Europe).gg' }
       ]
     };
 

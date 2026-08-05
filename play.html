@@ -8,7 +8,6 @@
   <title>RetroVerse - Jogando...</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body, html {
       width: 100%; height: 100%;
       background: #000;
@@ -18,18 +17,9 @@
       -webkit-user-select: none;
     }
 
-    /* ── EmulatorJS ocupa tela toda ── */
-    #game {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 1;
-    }
+    #game { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 1; }
 
-    /* ═══════════════════════════════════════════
-       LOADING SCREEN
-    ═══════════════════════════════════════════ */
+    /* LOADING */
     #rv-loading {
       position: fixed; inset: 0; z-index: 9999;
       background: #030604;
@@ -38,7 +28,6 @@
       transition: opacity 0.9s ease, visibility 0.9s ease;
     }
     #rv-loading.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-
     .rv-bg {
       position: absolute; inset: 0;
       background: radial-gradient(circle at 50% 40%, rgba(0,255,65,.13) 0%, transparent 65%), #030604;
@@ -49,7 +38,6 @@
       animation: scanPulse 4s linear infinite;
     }
     @keyframes scanPulse { 0%,100%{opacity:.5} 50%{opacity:1} }
-
     .rv-logo {
       position: relative; z-index: 1;
       width: 90px; height: 90px;
@@ -63,170 +51,144 @@
       0%,100%{ box-shadow: 0 0 20px rgba(0,255,65,.6),0 0 60px rgba(0,255,65,.2),inset 0 0 20px rgba(0,255,65,.08); }
       50%    { box-shadow: 0 0 35px rgba(0,255,65,.9),0 0 90px rgba(0,255,65,.35),inset 0 0 30px rgba(0,255,65,.15); }
     }
-    .rv-name {
-      position: relative; z-index: 1;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      font-size: 2.2rem; font-weight: 900; letter-spacing: 8px; color: #fff;
-      text-shadow: 0 0 20px rgba(0,255,65,.7), 0 0 40px rgba(0,255,65,.3);
-    }
-    .rv-slogan {
-      position: relative; z-index: 1;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      font-size: .78rem; font-weight: 600; letter-spacing: 5px; color: #00ff41;
-    }
-    .rv-bar-wrap {
-      position: relative; z-index: 1;
-      width: 220px; height: 3px; background: rgba(0,255,65,.1);
-      border-radius: 3px; overflow: hidden; margin-top: 10px;
-    }
-    .rv-bar {
-      height: 100%; width: 40%; background: #00ff41; border-radius: 3px;
-      box-shadow: 0 0 10px #00ff41;
-      animation: barSweep 1.6s ease-in-out infinite;
-    }
+    .rv-name { position: relative; z-index: 1; font-size: 2.2rem; font-weight: 900; letter-spacing: 8px; color: #fff; text-shadow: 0 0 20px rgba(0,255,65,.7); }
+    .rv-slogan { position: relative; z-index: 1; font-size: .78rem; font-weight: 600; letter-spacing: 5px; color: #00ff41; }
+    .rv-bar-wrap { position: relative; z-index: 1; width: 220px; height: 3px; background: rgba(0,255,65,.1); border-radius: 3px; overflow: hidden; margin-top: 10px; }
+    .rv-bar { height: 100%; width: 40%; background: #00ff41; border-radius: 3px; box-shadow: 0 0 10px #00ff41; animation: barSweep 1.6s ease-in-out infinite; }
     @keyframes barSweep { 0%{transform:translateX(-100%)} 100%{transform:translateX(350%)} }
-    .rv-msg {
-      position: relative; z-index: 1;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      font-size: .72rem; letter-spacing: 3px; color: rgba(0,255,65,.5);
-      animation: blink 1.4s step-end infinite;
-    }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+    .rv-msg { position: relative; z-index: 1; font-size: .72rem; letter-spacing: 3px; color: rgba(0,255,65,.5); }
 
-    /* ═══════════════════════════════════════════
-       BOTÃO FULLSCREEN (aparece após o jogo carregar)
-       Toque do usuário → único jeito de fazer
-       requestFullscreen funcionar no mobile
-    ═══════════════════════════════════════════ */
+    #rv-download-progress { position: relative; z-index: 2; display: none; flex-direction: column; align-items: center; gap: 10px; width: 280px; }
+    #rv-download-progress.visible { display: flex; }
+    .rv-dl-title { font-size: 0.7rem; letter-spacing: 3px; color: rgba(0,255,65,0.7); text-transform: uppercase; }
+    .rv-dl-bar-wrap { width: 100%; height: 4px; background: rgba(0,255,65,0.1); border-radius: 4px; overflow: hidden; }
+    .rv-dl-bar-fill { height: 100%; width: 0%; background: #00ff41; border-radius: 4px; box-shadow: 0 0 10px #00ff41; transition: width 0.3s ease; }
+    .rv-dl-info { font-size: 0.72rem; letter-spacing: 2px; color: rgba(255,255,255,0.5); }
+
     #rv-fs-btn {
-      position: fixed;
-      top: 10px; right: 10px;
-      z-index: 8000;
-      background: rgba(0,255,65,.12);
-      border: 1px solid rgba(0,255,65,.4);
-      border-radius: 8px;
-      width: 38px; height: 38px;
-      display: none;
-      align-items: center; justify-content: center;
+      position: fixed; top: 10px; right: 10px; z-index: 8000;
+      background: rgba(0,255,65,.12); border: 1px solid rgba(0,255,65,.4);
+      border-radius: 8px; width: 38px; height: 38px;
+      display: none; align-items: center; justify-content: center;
       cursor: pointer;
-      transition: background .2s;
     }
     #rv-fs-btn.visible { display: flex; }
-    #rv-fs-btn:active  { background: rgba(0,255,65,.3); }
     #rv-fs-btn svg { width: 18px; height: 18px; fill: #00ff41; }
 
     /* ═══════════════════════════════════════════
-       CONTROLES RETRO PREMIUM (overlay)
-       Construídos inteiramente em HTML/CSS.
-       Inputs enviados via EJS_emulator.gameManager.simulateInput()
+       OVERLAY SYSTEM
+       Container posicionado no bottom com a imagem
+       e zonas de toque transparentes por cima
     ═══════════════════════════════════════════ */
-    #rv-pad {
+    #rv-overlay {
       position: fixed;
-      inset: 0;
+      bottom: 0; left: 0;
       z-index: 5000;
-      pointer-events: none; /* o próprio pad captura os toques */
-      display: none; /* mostrado só em touch */
+      pointer-events: none;
+      display: none;
+      overflow: visible;
+      max-height: 100vh;
     }
-    #rv-pad.active { display: block; }
+    #rv-overlay.active { display: block; }
 
-    /* ── BASE DOS BOTÕES ── */
-    .rv-btn {
+    #rv-overlay img.rv-skin-img {
+      display: block;
+      width: 100%;
+      height: auto;
+      pointer-events: none;
+    }
+
+    /* Imagem animated (feedback de pressionar) */
+    #rv-overlay img.rv-anim-img {
       position: absolute;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 50%;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      font-weight: 900;
-      line-height: 1;
+      bottom: 0; left: 0;
+      width: 100%;
+      height: auto;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.06s ease;
+    }
+    #rv-overlay img.rv-anim-img.show { opacity: 1; }
+
+    /* Zonas de toque */
+    .rv-zone {
+      position: absolute;
       pointer-events: auto;
-      cursor: pointer;
       touch-action: none;
       user-select: none;
       -webkit-user-select: none;
-      transition: transform .07s ease, filter .07s ease, opacity .07s ease;
       -webkit-tap-highlight-color: transparent;
+      z-index: 10;
+      cursor: pointer;
     }
-    .rv-btn.pressed {
-      transform: scale(.82) !important;
-      filter: brightness(1.5) !important;
+    .rv-zone.pressed { opacity: 0.7; }
+
+    .rv-zone-dpad {
+      border-radius: 50%;
     }
 
-    /* ── SHOULDER PILLS ── */
-    .rv-shoulder {
-      position: absolute;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 14px;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      font-weight: 900; font-size: .75rem;
-      letter-spacing: 1px; text-transform: uppercase;
-      pointer-events: auto;
-      cursor: pointer;
-      touch-action: none;
+    /* ═══════════════════════════════════════════
+       CONTROLES CSS FALLBACK (landscape/arcade)
+    ═══════════════════════════════════════════ */
+    #rv-pad { position: fixed; inset: 0; z-index: 5000; pointer-events: none; display: none; }
+    #rv-pad.active { display: block; }
+    .rv-btn {
+      position: absolute; display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; font-weight: 900; line-height: 1;
+      pointer-events: auto; cursor: pointer; touch-action: none;
       user-select: none; -webkit-user-select: none;
       transition: transform .07s ease, filter .07s ease;
       -webkit-tap-highlight-color: transparent;
     }
-    .rv-shoulder.pressed {
-      transform: scale(.88) !important;
-      filter: brightness(1.5) !important;
+    .rv-btn.pressed { transform: scale(.82) !important; filter: brightness(1.5) !important; }
+    .rv-shoulder {
+      position: absolute; display: flex; align-items: center; justify-content: center;
+      border-radius: 14px; font-weight: 900; font-size: .75rem;
+      letter-spacing: 1px; text-transform: uppercase;
+      pointer-events: auto; cursor: pointer; touch-action: none;
+      user-select: none; -webkit-user-select: none;
+      transition: transform .07s ease, filter .07s ease;
+      -webkit-tap-highlight-color: transparent;
     }
-
-    /* ── META (Select/Start) ── */
+    .rv-shoulder.pressed { transform: scale(.88) !important; filter: brightness(1.5) !important; }
     .rv-meta {
-      position: absolute;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 20px;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      font-weight: 700; font-size: .55rem;
+      position: absolute; display: flex; align-items: center; justify-content: center;
+      border-radius: 20px; font-weight: 700; font-size: .55rem;
       letter-spacing: 1.5px; text-transform: uppercase;
-      pointer-events: auto; cursor: pointer;
-      touch-action: none;
+      pointer-events: auto; cursor: pointer; touch-action: none;
       user-select: none; -webkit-user-select: none;
       transition: transform .07s ease, filter .07s ease;
       -webkit-tap-highlight-color: transparent;
     }
     .rv-meta.pressed { transform: scale(.88) !important; filter: brightness(1.4) !important; }
-
-    /* ── DPAD ── */
-    #rv-dpad {
-      position: absolute;
-      pointer-events: auto;
-      touch-action: none;
-    }
-    .rv-dpad-arm {
-      position: absolute;
-      display: flex; align-items: center; justify-content: center;
-      pointer-events: none; /* tratado pelo dpad global */
-    }
-    .rv-dpad-arm svg { fill: currentColor; }
+    #rv-dpad { position: absolute; pointer-events: auto; touch-action: none; }
   </style>
 </head>
 <body>
 
-<!-- LOADING -->
 <div id="rv-loading">
   <div class="rv-bg"></div>
   <div class="rv-logo">RV</div>
   <div class="rv-name">RETROVERSE</div>
   <div class="rv-slogan">ENTER THE CLASSICS</div>
   <div class="rv-bar-wrap"><div class="rv-bar"></div></div>
-  <div class="rv-msg">Carregando emulador...</div>
+  <div class="rv-msg" id="rv-msg">Carregando emulador...</div>
+  <div id="rv-download-progress">
+    <div class="rv-dl-title">⬇ BAIXANDO JOGO</div>
+    <div class="rv-dl-bar-wrap"><div class="rv-dl-bar-fill" id="rv-dl-bar"></div></div>
+    <div class="rv-dl-info" id="rv-dl-info">0 MB / ? MB</div>
+  </div>
 </div>
 
-<!-- BOTÃO FULLSCREEN (ativado por toque real) -->
 <div id="rv-fs-btn" title="Tela cheia">
   <svg viewBox="0 0 24 24"><path d="M3 3h6v2H5v4H3V3zm12 0h6v6h-2V5h-4V3zM3 15h2v4h4v2H3v-6zm16 4h-4v2h6v-6h-2v4z"/></svg>
 </div>
 
-<!-- EMULADOR -->
 <div id="game"></div>
-
-<!-- OVERLAY DE CONTROLES RETRO -->
+<div id="rv-overlay"></div>
 <div id="rv-pad"></div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════
-   PARÂMETROS
-═══════════════════════════════════════════════════════════ */
 const params = new URLSearchParams(window.location.search);
 let core = params.get('core') || 'snes';
 const game = params.get('game');
@@ -234,719 +196,680 @@ if (core === 'mupen64plus' || core === 'mupen64plus_next') core = 'n64';
 
 const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 
-/* ═══════════════════════════════════════════════════════════
-   MAPA DE INPUT DO EMULATORJS
-   (índices do gameManager.simulateInput)
-═══════════════════════════════════════════════════════════ */
 const EJS_INPUT = {
   B:0, Y:1, SELECT:2, START:3,
   UP:4, DOWN:5, LEFT:6, RIGHT:7,
   A:8, X:9, L:10, R:11, L2:12, R2:13,
   L3:14, R3:15,
-  /* analógico esquerdo */
   LSTICK_RIGHT:16, LSTICK_LEFT:17, LSTICK_DOWN:18, LSTICK_UP:19,
-  /* analógico direito */
   RSTICK_RIGHT:20, RSTICK_LEFT:21, RSTICK_DOWN:22, RSTICK_UP:23,
 };
 
 /* ═══════════════════════════════════════════════════════════
-   DEFINIÇÃO DAS SKINS POR CONSOLE
-   Cada botão: { label, input, color, border, glow, size, bottom, right/left, top }
-   Posições em % para funcionar em qualquer resolução
+   OVERLAY CONFIG (coordenadas calibradas!)
+   aspect = h/w da imagem (todas são 1080x2220 = 2.056)
+   zones: coordenadas em % da imagem (x=0 esquerda, y=0 topo)
 ═══════════════════════════════════════════════════════════ */
-const SKINS = {
-
+const OVERLAYS = {
   snes: {
-    bg: '#1a1028',
-    barBg: 'rgba(10,5,20,0.82)',
-    diskBg: 'rgba(80,50,120,0.18)',
-    diskBorder: '#9966cc55',
-    face: [
-      { label:'Y', input:EJS_INPUT.Y, color:'#198840', border:'#22cc66', glow:'rgba(25,136,64,.85)'  }, // esq
-      { label:'X', input:EJS_INPUT.X, color:'#1a55bb', border:'#4488ff', glow:'rgba(26,85,187,.85)'  }, // cima
-      { label:'A', input:EJS_INPUT.A, color:'#bb191e', border:'#ff4455', glow:'rgba(187,25,30,.85)'  }, // dir
-      { label:'B', input:EJS_INPUT.B, color:'#bb8800', border:'#ffcc00', glow:'rgba(187,136,0,.85)'  }, // baixo
-    ],
-    shoulders: [
-      { label:'L', input:EJS_INPUT.L, color:'rgba(55,35,85,.96)', border:'#9966cc', glow:'rgba(120,60,200,.6)', side:'left',  row:0 },
-      { label:'R', input:EJS_INPUT.R, color:'rgba(55,35,85,.96)', border:'#9966cc', glow:'rgba(120,60,200,.6)', side:'right', row:0 },
-    ],
-    meta: [
-      { label:'SELECT', input:EJS_INPUT.SELECT, color:'rgba(40,25,65,.92)', border:'#7755aa', textColor:'#bb99ff' },
-      { label:'START',  input:EJS_INPUT.START,  color:'rgba(40,25,65,.92)', border:'#7755aa', textColor:'#bb99ff' },
-    ],
-    dpad: { color:'#3d2b60', border:'#9966cc' },
+    base: 'overlays/snes/snes_phone_portrait_purple.png',
+    animated: null,
+    aspect: 2.056,
+    zones: {
+      dpad:   { type:'dpad', x:23.24, y:75.94, w:39, h:18.5 },
+      Y:      { type:'btn', input:EJS_INPUT.Y, x:57.13, y:76.08, w:13.5, h:6.5 },
+      X:      { type:'btn', input:EJS_INPUT.X, x:71.57, y:69.34, w:14, h:7 },
+      B:      { type:'btn', input:EJS_INPUT.B, x:71.94, y:82.94, w:13.5, h:6.5 },
+      A:      { type:'btn', input:EJS_INPUT.A, x:85.83, y:75.85, w:13.5, h:6.5 },
+      L:      { type:'btn', input:EJS_INPUT.L, x:14.72, y:60.35, w:27, h:4 },
+      R:      { type:'btn', input:EJS_INPUT.R, x:85.28, y:60.76, w:28, h:4 },
+      SELECT: { type:'btn', input:EJS_INPUT.SELECT, x:41.57, y:90.08, w:8, h:3 },
+      START:  { type:'btn', input:EJS_INPUT.START, x:57.69, y:89.99, w:8, h:3 },
+    }
   },
-
-  pcsx_rearmed: {
-    bg: '#0d0d18',
-    barBg: 'rgba(8,8,18,0.82)',
-    diskBg: 'rgba(40,40,80,0.18)',
-    diskBorder: '#6666aa55',
-    analog: true,
-    face: [
-      { label:'□', input:EJS_INPUT.Y, color:'rgba(170,20,145,.95)', border:'#ff55ee', glow:'rgba(200,20,170,.85)', fontSize:22 },
-      { label:'△', input:EJS_INPUT.X, color:'rgba(15,145,72,.95)',  border:'#22ee77', glow:'rgba(15,170,80,.85)',  fontSize:24 },
-      { label:'○', input:EJS_INPUT.A, color:'rgba(185,20,42,.95)',  border:'#ff4466', glow:'rgba(200,20,50,.85)',  fontSize:26 },
-      { label:'✕', input:EJS_INPUT.B, color:'rgba(20,55,175,.95)',  border:'#4488ff', glow:'rgba(20,60,200,.85)',  fontSize:24 },
-    ],
-    shoulders: [
-      { label:'L1', input:EJS_INPUT.L,  color:'rgba(30,30,58,.97)', border:'#6666aa', glow:'rgba(80,80,160,.6)',  side:'left',  row:0 },
-      { label:'R1', input:EJS_INPUT.R,  color:'rgba(30,30,58,.97)', border:'#6666aa', glow:'rgba(80,80,160,.6)',  side:'right', row:0 },
-      { label:'L2', input:EJS_INPUT.L2, color:'rgba(20,20,44,.95)', border:'#555588', glow:'rgba(60,60,120,.5)',  side:'left',  row:1 },
-      { label:'R2', input:EJS_INPUT.R2, color:'rgba(20,20,44,.95)', border:'#555588', glow:'rgba(60,60,120,.5)',  side:'right', row:1 },
-    ],
-    meta: [
-      { label:'SELECT', input:EJS_INPUT.SELECT, color:'rgba(24,24,44,.92)', border:'#555588', textColor:'#9999cc' },
-      { label:'START',  input:EJS_INPUT.START,  color:'rgba(24,24,44,.92)', border:'#555588', textColor:'#9999cc' },
-    ],
-    dpad: { color:'#222240', border:'#555580' },
-  },
-
-  n64: {
-    bg: '#080814',
-    barBg: 'rgba(5,5,15,0.82)',
-    diskBg: 'rgba(30,30,60,0.18)',
-    diskBorder: '#55558855',
-    analog: true,
-    face: [
-      { label:'B',  input:EJS_INPUT.B,  color:'rgba(15,155,58,.95)',  border:'#22dd66', glow:'rgba(15,170,60,.85)'  },
-      { label:'C▲', input:EJS_INPUT.X,  color:'rgba(185,145,0,.95)',  border:'#ffdd00', glow:'rgba(200,160,0,.85)',  fontSize:13 },
-      { label:'A',  input:EJS_INPUT.A,  color:'rgba(15,75,185,.95)',  border:'#4488ff', glow:'rgba(15,80,200,.85)'  },
-      { label:'C▼', input:EJS_INPUT.Y,  color:'rgba(185,145,0,.95)',  border:'#ffdd00', glow:'rgba(200,160,0,.85)',  fontSize:13 },
-    ],
-    shoulders: [
-      { label:'L', input:EJS_INPUT.L,  color:'rgba(25,25,48,.97)',  border:'#555588', glow:'rgba(60,60,130,.6)',  side:'left',  row:0 },
-      { label:'R', input:EJS_INPUT.R,  color:'rgba(25,25,48,.97)',  border:'#555588', glow:'rgba(60,60,130,.6)',  side:'right', row:0 },
-      { label:'Z', input:EJS_INPUT.L2, color:'rgba(80,10,135,.97)', border:'#aa55ff', glow:'rgba(120,30,200,.7)', side:'left',  row:1 },
-    ],
-    meta: [
-      { label:'START', input:EJS_INPUT.START, color:'rgba(20,20,42,.92)', border:'#555588', textColor:'#9999cc' },
-    ],
-    dpad: { color:'#1e1e34', border:'#44446a' },
-  },
-
-  segaMD: {
-    bg: '#060606',
-    barBg: 'rgba(5,5,5,0.85)',
-    diskBg: 'rgba(30,30,30,0.18)',
-    diskBorder: '#33333355',
-    face: [
-      { label:'A', input:EJS_INPUT.Y, color:'rgba(185,15,15,.95)', border:'#ff3333', glow:'rgba(200,15,15,.85)' },
-      { label:'X', input:EJS_INPUT.X, color:'rgba(105,10,10,.92)', border:'#cc2222', glow:'rgba(150,10,10,.6)'  },
-      { label:'C', input:EJS_INPUT.A, color:'rgba(15,62,185,.95)', border:'#3366ff', glow:'rgba(15,70,200,.85)' },
-      { label:'B', input:EJS_INPUT.B, color:'rgba(175,135,0,.95)', border:'#ffcc00', glow:'rgba(190,150,0,.85)' },
-    ],
-    shoulders: [],
-    meta: [
-      { label:'MODE',  input:EJS_INPUT.SELECT, color:'rgba(14,14,14,.92)', border:'#444', textColor:'#888' },
-      { label:'START', input:EJS_INPUT.START,  color:'rgba(14,14,14,.92)', border:'#444', textColor:'#888' },
-    ],
-    dpad: { color:'#181818', border:'#444444' },
-  },
-
   gba: {
-    bg: '#100820',
-    barBg: 'rgba(8,4,16,0.82)',
-    diskBg: 'rgba(50,25,80,0.18)',
-    diskBorder: '#9966dd55',
-    face: [
-      { label:'Y', input:EJS_INPUT.Y, color:'rgba(82,22,135,.92)',  border:'#9944cc', glow:'rgba(100,30,160,.6)' },
-      { label:'X', input:EJS_INPUT.X, color:'rgba(62,15,105,.88)',  border:'#7733aa', glow:'rgba(80,20,130,.5)'  },
-      { label:'A', input:EJS_INPUT.A, color:'rgba(165,72,10,.95)',  border:'#ff7722', glow:'rgba(180,80,10,.85)' },
-      { label:'B', input:EJS_INPUT.B, color:'rgba(185,20,38,.95)',  border:'#ff3344', glow:'rgba(200,20,40,.85)' },
-    ],
-    shoulders: [
-      { label:'L', input:EJS_INPUT.L, color:'rgba(38,22,68,.97)', border:'#9966dd', glow:'rgba(110,50,210,.6)', side:'left',  row:0 },
-      { label:'R', input:EJS_INPUT.R, color:'rgba(38,22,68,.97)', border:'#9966dd', glow:'rgba(110,50,210,.6)', side:'right', row:0 },
-    ],
-    meta: [
-      { label:'SELECT', input:EJS_INPUT.SELECT, color:'rgba(18,10,38,.92)', border:'#553388', textColor:'#aa77dd' },
-      { label:'START',  input:EJS_INPUT.START,  color:'rgba(18,10,38,.92)', border:'#553388', textColor:'#aa77dd' },
-    ],
-    dpad: { color:'#1e1442', border:'#4433aa' },
+    base: 'overlays/gba/gba_phone_portrait_yellow.png',
+    animated: 'overlays/gba/gba_phone_portrait_yellow_animated.png',
+    animButtons: {
+      A:     'overlays/gba/gba_portrait_yellow_animated_a.png',
+      B:     'overlays/gba/gba_portrait_yellow_animated_b.png',
+      UP:    'overlays/gba/gba_portrait_yellow_animated_up.png',
+      DOWN:  'overlays/gba/gba_portrait_yellow_animated_down.png',
+      LEFT:  'overlays/gba/gba_portrait_yellow_animated_left.png',
+      RIGHT: 'overlays/gba/gba_portrait_yellow_animated_right.png',
+      L:     'overlays/gba/gba_portrait_yellow_animated_l.png',
+      R:     'overlays/gba/gba_portrait_yellow_animated_r.png',
+    },
+    aspect: 2.056,
+    zones: {
+      dpad:   { type:'dpad', x:23.06, y:75.31, w:38.5, h:18.5 },
+      A:      { type:'btn', input:EJS_INPUT.A, x:84.91, y:71.87, w:17.5, h:8.5 },
+      B:      { type:'btn', input:EJS_INPUT.B, x:65.46, y:79.1, w:17.5, h:8.5 },
+      L:      { type:'btn', input:EJS_INPUT.L, x:15.46, y:60.4, w:31, h:4 },
+      R:      { type:'btn', input:EJS_INPUT.R, x:84.72, y:60.49, w:29.5, h:4 },
+      SELECT: { type:'btn', input:EJS_INPUT.SELECT, x:41.94, y:87.87, w:6.5, h:3 },
+      START:  { type:'btn', input:EJS_INPUT.START, x:58.06, y:87.87, w:6, h:3 },
+    }
   },
-
   gbc: {
-    bg: '#050f08',
-    barBg: 'rgba(4,10,6,0.82)',
-    diskBg: 'rgba(15,50,25,0.18)',
-    diskBorder: '#1f443055',
-    face: [
-      { label:'',  input:EJS_INPUT.Y, color:'rgba(10,82,32,.80)',   border:'#114422', glow:'rgba(10,80,30,.4)'  },
-      { label:'',  input:EJS_INPUT.X, color:'rgba(8,62,22,.75)',    border:'#0d3318', glow:'rgba(8,60,22,.3)'   },
-      { label:'A', input:EJS_INPUT.A, color:'rgba(10,42,165,.95)',  border:'#3355ff', glow:'rgba(10,50,180,.85)'},
-      { label:'B', input:EJS_INPUT.B, color:'rgba(175,15,28,.95)',  border:'#ff2233', glow:'rgba(190,15,30,.85)'},
-    ],
-    shoulders: [],
-    meta: [
-      { label:'SELECT', input:EJS_INPUT.SELECT, color:'rgba(8,18,10,.92)', border:'#1a5535', textColor:'#44aa66' },
-      { label:'START',  input:EJS_INPUT.START,  color:'rgba(8,18,10,.92)', border:'#1a5535', textColor:'#44aa66' },
-    ],
-    dpad: { color:'#122018', border:'#1f4430' },
+    base: 'overlays/gbc/gbc_phone_portrait_yellow.png',
+    animated: 'overlays/gbc/gbc_phone_portrait_animated.png',
+    animButtons: {
+      A:     'overlays/gbc/gbc_phone_portrait_animated_blue_a.png',
+      B:     'overlays/gbc/gbc_phone_portrait_animated_blue_b.png',
+      UP:    'overlays/gbc/gbc_phone_portrait_animated_blue_up.png',
+      DOWN:  'overlays/gbc/gbc_phone_portrait_animated_blue_down.png',
+      LEFT:  'overlays/gbc/gbc_phone_portrait_animated_blue_left.png',
+      RIGHT: 'overlays/gbc/gbc_phone_portrait_animated_blue_right.png',
+    },
+    aspect: 2.056,
+    zones: {
+      dpad:   { type:'dpad', x:23.06, y:75.04, w:39, h:19 },
+      A:      { type:'btn', input:EJS_INPUT.A, x:84.17, y:71.24, w:18.5, h:9 },
+      B:      { type:'btn', input:EJS_INPUT.B, x:64.72, y:79.46, w:18.5, h:9 },
+      SELECT: { type:'btn', input:EJS_INPUT.SELECT, x:39.91, y:88.59, w:9.5, h:2.5 },
+      START:  { type:'btn', input:EJS_INPUT.START, x:59.17, y:88.5, w:10, h:2.5 },
+    }
   },
-
   nes: {
-    bg: '#080404',
-    barBg: 'rgba(6,4,4,0.85)',
-    diskBg: 'rgba(40,15,15,0.18)',
-    diskBorder: '#3a202055',
-    face: [
-      { label:'',  input:EJS_INPUT.Y, color:'rgba(82,8,8,.72)',    border:'#551010', glow:'rgba(80,8,8,.3)'     },
-      { label:'',  input:EJS_INPUT.X, color:'rgba(62,6,6,.65)',    border:'#440c0c', glow:'rgba(60,6,6,.2)'     },
-      { label:'A', input:EJS_INPUT.A, color:'rgba(195,20,20,.95)', border:'#ff3333', glow:'rgba(210,20,20,.85)' },
-      { label:'B', input:EJS_INPUT.B, color:'rgba(155,10,10,.95)', border:'#dd2222', glow:'rgba(170,10,10,.85)' },
-    ],
-    shoulders: [],
-    meta: [
-      { label:'SELECT', input:EJS_INPUT.SELECT, color:'rgba(16,8,8,.92)', border:'#4a2a2a', textColor:'#aa5555' },
-      { label:'START',  input:EJS_INPUT.START,  color:'rgba(16,8,8,.92)', border:'#4a2a2a', textColor:'#aa5555' },
-    ],
-    dpad: { color:'#181010', border:'#3a2020' },
+    base: 'overlays/nes/nes_phone_portrait_beige.png',
+    animated: null,
+    aspect: 2.056,
+    zones: {
+      dpad:   { type:'dpad', x:24.72, y:76.93, w:30.5, h:14.5 },
+      A:      { type:'btn', input:EJS_INPUT.A, x:81.94, y:77.02, w:12.5, h:6 },
+      B:      { type:'btn', input:EJS_INPUT.B, x:61.02, y:77.02, w:12, h:6 },
+      SELECT: { type:'btn', input:EJS_INPUT.SELECT, x:38.61, y:89.76, w:11, h:2.5 },
+      START:  { type:'btn', input:EJS_INPUT.START, x:59.17, y:89.76, w:5.5, h:2.5 },
+    }
   },
-
-  fbneo: {
-    bg: '#000a00',
-    barBg: 'rgba(0,8,0,0.85)',
-    diskBg: 'rgba(0,30,0,0.22)',
-    diskBorder: '#00ff4133',
+  n64: {
+    base: 'overlays/n64/n64_phone_portrait_green.png',
+    animated: null,
+    aspect: 2.056,
     analog: true,
-    face: [
-      { label:'X', input:EJS_INPUT.Y, color:'rgba(0,145,42,.95)',  border:'#00ff41', glow:'rgba(0,180,50,.85)'  },
-      { label:'Y', input:EJS_INPUT.L, color:'rgba(125,78,0,.92)',  border:'#ffaa00', glow:'rgba(150,90,0,.75)'  },
-      { label:'B', input:EJS_INPUT.A, color:'rgba(175,145,0,.95)', border:'#ffee00', glow:'rgba(200,160,0,.85)' },
-      { label:'A', input:EJS_INPUT.B, color:'rgba(185,10,10,.95)', border:'#ff2222', glow:'rgba(200,10,10,.85)' },
-    ],
-    shoulders: [],
-    meta: [
-      { label:'SELECT', input:EJS_INPUT.SELECT, color:'rgba(0,14,0,.92)', border:'#004400', textColor:'#00ee44' },
-      { label:'START',  input:EJS_INPUT.START,  color:'rgba(0,14,0,.92)', border:'#004400', textColor:'#00ee44' },
-    ],
-    dpad: { color:'#001800', border:'#00ff41' },
+    zones: {
+      dpad:    { type:'dpad', x:23.24, y:84.25, w:36.5, h:17.5 },
+      A:       { type:'btn', input:EJS_INPUT.A, x:85.28, y:69.07, w:17.5, h:8.5 },
+      B:       { type:'btn', input:EJS_INPUT.B, x:62.13, y:65.28, w:17, h:8 },
+      Z:       { type:'btn', input:EJS_INPUT.L2, x:79.91, y:58.5, w:18.5, h:8.5 },
+      C_UP:    { type:'btn', input:EJS_INPUT.X, x:73.61, y:78.83, w:10.5, h:5 },
+      C_DOWN:  { type:'btn', input:EJS_INPUT.Y, x:73.61, y:89.76, w:10.5, h:5 },
+      C_LEFT:  { type:'btn', input:EJS_INPUT.L, x:61.57, y:84.25, w:10.5, h:5 },
+      C_RIGHT: { type:'btn', input:EJS_INPUT.R, x:85.28, y:84.25, w:11, h:5 },
+      L:       { type:'btn', input:EJS_INPUT.L, x:13.8, y:51.45, w:28, h:3.5 },
+      R:       { type:'btn', input:EJS_INPUT.R, x:85.83, y:51.18, w:27.5, h:3.5 },
+      START:   { type:'btn', input:EJS_INPUT.START, x:49.72, y:75.67, w:10, h:5 },
+      STICK:   { type:'analog', x:30, y:65, w:25, h:12 },
+    }
+  },
+  pcsx_rearmed: {
+    base: 'overlays/psx/psx_phone_portrait_beige.png',
+    animated: null,
+    aspect: 2.056,
+    analog: true,
+    zones: {
+      dpad:     { type:'dpad', x:23.24, y:63.74, w:36.5, h:17.5 },
+      CIRCLE:   { type:'btn', input:EJS_INPUT.A, x:87.69, y:63.92, w:14, h:6.5 },
+      CROSS:    { type:'btn', input:EJS_INPUT.B, x:73.61, y:69.98, w:15, h:7 },
+      SQUARE:   { type:'btn', input:EJS_INPUT.Y, x:59.17, y:63.74, w:14, h:6.5 },
+      TRIANGLE: { type:'btn', input:EJS_INPUT.X, x:73.61, y:58.05, w:14.5, h:7 },
+      L1:       { type:'btn', input:EJS_INPUT.L, x:11.02, y:49.65, w:17.5, h:4 },
+      R1:       { type:'btn', input:EJS_INPUT.R, x:89.35, y:49.92, w:18, h:4 },
+      L2:       { type:'btn', input:EJS_INPUT.L2, x:32.13, y:49.83, w:18, h:4 },
+      R2:       { type:'btn', input:EJS_INPUT.R2, x:67.69, y:49.92, w:18, h:4 },
+      SELECT:   { type:'btn', input:EJS_INPUT.SELECT, x:41.57, y:75.85, w:10, h:2.5 },
+      START:    { type:'btn', input:EJS_INPUT.START, x:56.94, y:75.94, w:10, h:3 },
+      STICK_L:  { type:'analog', x:30, y:82, w:22, h:10 },
+      STICK_R:  { type:'analog', x:70, y:82, w:22, h:10 },
+    }
+  },
+  segaMD: {
+    base: 'overlays/sega/saturn_portrait_black.png',
+    animated: null,
+    aspect: 2.056,
+    zones: {
+      dpad:   { type:'dpad', x:23.61, y:77.29, w:34, h:16.5 },
+      A:      { type:'btn', input:EJS_INPUT.B, x:63.8, y:83.26, w:12.5, h:6 },
+      B:      { type:'btn', input:EJS_INPUT.A, x:75.83, y:78.02, w:12, h:6 },
+      C:      { type:'btn', input:EJS_INPUT.Y, x:89.35, y:73.32, w:12.5, h:6 },
+      X:      { type:'btn', input:EJS_INPUT.X, x:54.72, y:77.02, w:12, h:6 },
+      Y:      { type:'btn', input:EJS_INPUT.L, x:67.5, y:70.97, w:11.5, h:5.5 },
+      Z:      { type:'btn', input:EJS_INPUT.R, x:81.02, y:66.63, w:11.5, h:5.5 },
+      L:      { type:'btn', input:EJS_INPUT.L, x:15.83, y:56.06, w:22, h:4.5 },
+      R:      { type:'btn', input:EJS_INPUT.R, x:84.35, y:56.06, w:22.5, h:4.5 },
+      START:  { type:'btn', input:EJS_INPUT.START, x:46.57, y:93.83, w:12.5, h:3 },
+    }
+  },
+  segaCD: {
+    base: 'overlays/sega/saturn_portrait_black.png',
+    animated: null,
+    aspect: 2.056,
+    zones: {
+      dpad:   { type:'dpad', x:23.61, y:77.29, w:34, h:16.5 },
+      A:      { type:'btn', input:EJS_INPUT.B, x:63.8, y:83.26, w:12.5, h:6 },
+      B:      { type:'btn', input:EJS_INPUT.A, x:75.83, y:78.02, w:12, h:6 },
+      C:      { type:'btn', input:EJS_INPUT.Y, x:89.35, y:73.32, w:12.5, h:6 },
+      X:      { type:'btn', input:EJS_INPUT.X, x:54.72, y:77.02, w:12, h:6 },
+      Y:      { type:'btn', input:EJS_INPUT.L, x:67.5, y:70.97, w:11.5, h:5.5 },
+      Z:      { type:'btn', input:EJS_INPUT.R, x:81.02, y:66.63, w:11.5, h:5.5 },
+      L:      { type:'btn', input:EJS_INPUT.L, x:15.83, y:56.06, w:22, h:4.5 },
+      R:      { type:'btn', input:EJS_INPUT.R, x:84.35, y:56.06, w:22.5, h:4.5 },
+      START:  { type:'btn', input:EJS_INPUT.START, x:46.57, y:93.83, w:12.5, h:3 },
+    }
+  },
+  segaGG: {
+    base: 'overlays/sega/saturn_portrait_black.png',
+    animated: null,
+    aspect: 2.056,
+    zones: {
+      dpad:   { type:'dpad', x:23.61, y:77.29, w:34, h:16.5 },
+      A:      { type:'btn', input:EJS_INPUT.B, x:63.8, y:83.26, w:12.5, h:6 },
+      B:      { type:'btn', input:EJS_INPUT.A, x:75.83, y:78.02, w:12, h:6 },
+      START:  { type:'btn', input:EJS_INPUT.START, x:46.57, y:93.83, w:12.5, h:3 },
+    }
+  },
+  nds: {
+    base: 'overlays/gba/gba_phone_portrait_yellow.png',
+    animated: 'overlays/gba/gba_phone_portrait_yellow_animated.png',
+    animButtons: {
+      A:     'overlays/gba/gba_portrait_yellow_animated_a.png',
+      B:     'overlays/gba/gba_portrait_yellow_animated_b.png',
+      UP:    'overlays/gba/gba_portrait_yellow_animated_up.png',
+      DOWN:  'overlays/gba/gba_portrait_yellow_animated_down.png',
+      LEFT:  'overlays/gba/gba_portrait_yellow_animated_left.png',
+      RIGHT: 'overlays/gba/gba_portrait_yellow_animated_right.png',
+      L:     'overlays/gba/gba_portrait_yellow_animated_l.png',
+      R:     'overlays/gba/gba_portrait_yellow_animated_r.png',
+    },
+    aspect: 2.056,
+    zones: {
+      dpad:   { type:'dpad', x:23.06, y:75.31, w:38.5, h:18.5 },
+      A:      { type:'btn', input:EJS_INPUT.A, x:84.91, y:71.87, w:17.5, h:8.5 },
+      B:      { type:'btn', input:EJS_INPUT.B, x:65.46, y:79.1, w:17.5, h:8.5 },
+      X:      { type:'btn', input:EJS_INPUT.X, x:84.91, y:55, w:17.5, h:8.5 },
+      Y:      { type:'btn', input:EJS_INPUT.Y, x:65.46, y:62, w:17.5, h:8.5 },
+      L:      { type:'btn', input:EJS_INPUT.L, x:15.46, y:60.4, w:31, h:4 },
+      R:      { type:'btn', input:EJS_INPUT.R, x:84.72, y:60.49, w:29.5, h:4 },
+      SELECT: { type:'btn', input:EJS_INPUT.SELECT, x:41.94, y:87.87, w:6.5, h:3 },
+      START:  { type:'btn', input:EJS_INPUT.START, x:58.06, y:87.87, w:6, h:3 },
+    }
   },
 };
 
 /* ═══════════════════════════════════════════════════════════
-   EMULATORJS CONFIG  (sem EJS_VirtualGamepadSettings)
-   → desativamos os controles nativos para não conflitar
+   SKINS CSS (fallback para landscape/arcade)
 ═══════════════════════════════════════════════════════════ */
-EJS_player          = '#game';
-EJS_core            = core;
-EJS_gameUrl         = 'roms/' + game;
-EJS_pathtodata      = 'https://cdn.emulatorjs.org/stable/data/';
-EJS_startOnLoaded   = true;
-EJS_fullscreenOnLoaded = false; // controlamos nós mesmos
-
-if (core === 'fbneo' || core === 'mame2003' || core === 'fbalpha2012') {
-  EJS_biosUrl = 'roms/arcade/neogeo.zip';
-}
+const SKINS = {
+  snes: { barBg:'rgba(10,5,20,0.82)', diskBg:'rgba(80,50,120,0.18)', diskBorder:'#9966cc55',
+    face:[{label:'Y',input:EJS_INPUT.Y,color:'#198840',border:'#22cc66',glow:'rgba(25,136,64,.85)'},{label:'X',input:EJS_INPUT.X,color:'#1a55bb',border:'#4488ff',glow:'rgba(26,85,187,.85)'},{label:'A',input:EJS_INPUT.A,color:'#bb191e',border:'#ff4455',glow:'rgba(187,25,30,.85)'},{label:'B',input:EJS_INPUT.B,color:'#bb8800',border:'#ffcc00',glow:'rgba(187,136,0,.85)'}],
+    shoulders:[{label:'L',input:EJS_INPUT.L,color:'rgba(55,35,85,.96)',border:'#9966cc',glow:'rgba(120,60,200,.6)',side:'left',row:0},{label:'R',input:EJS_INPUT.R,color:'rgba(55,35,85,.96)',border:'#9966cc',glow:'rgba(120,60,200,.6)',side:'right',row:0}],
+    meta:[{label:'SELECT',input:EJS_INPUT.SELECT,color:'rgba(40,25,65,.92)',border:'#7755aa',textColor:'#bb99ff'},{label:'START',input:EJS_INPUT.START,color:'rgba(40,25,65,.92)',border:'#7755aa',textColor:'#bb99ff'}],
+    dpad:{color:'#3d2b60',border:'#9966cc'} },
+  pcsx_rearmed: { barBg:'rgba(8,8,18,0.82)', diskBg:'rgba(40,40,80,0.18)', diskBorder:'#6666aa55', analog:true,
+    face:[{label:'□',input:EJS_INPUT.Y,color:'rgba(170,20,145,.95)',border:'#ff55ee',glow:'rgba(200,20,170,.85)',fontSize:22},{label:'△',input:EJS_INPUT.X,color:'rgba(15,145,72,.95)',border:'#22ee77',glow:'rgba(15,170,80,.85)',fontSize:24},{label:'○',input:EJS_INPUT.A,color:'rgba(185,20,42,.95)',border:'#ff4466',glow:'rgba(200,20,50,.85)',fontSize:26},{label:'✕',input:EJS_INPUT.B,color:'rgba(20,55,175,.95)',border:'#4488ff',glow:'rgba(20,60,200,.85)',fontSize:24}],
+    shoulders:[{label:'L1',input:EJS_INPUT.L,color:'rgba(30,30,58,.97)',border:'#6666aa',glow:'rgba(80,80,160,.6)',side:'left',row:0},{label:'R1',input:EJS_INPUT.R,color:'rgba(30,30,58,.97)',border:'#6666aa',glow:'rgba(80,80,160,.6)',side:'right',row:0},{label:'L2',input:EJS_INPUT.L2,color:'rgba(20,20,44,.95)',border:'#555588',glow:'rgba(60,60,120,.5)',side:'left',row:1},{label:'R2',input:EJS_INPUT.R2,color:'rgba(20,20,44,.95)',border:'#555588',glow:'rgba(60,60,120,.5)',side:'right',row:1}],
+    meta:[{label:'SELECT',input:EJS_INPUT.SELECT,color:'rgba(24,24,44,.92)',border:'#555588',textColor:'#9999cc'},{label:'START',input:EJS_INPUT.START,color:'rgba(24,24,44,.92)',border:'#555588',textColor:'#9999cc'}],
+    dpad:{color:'#222240',border:'#555580'} },
+  n64: { barBg:'rgba(5,5,15,0.82)', diskBg:'rgba(30,30,60,0.18)', diskBorder:'#55558855', analog:true,
+    face:[{label:'B',input:EJS_INPUT.B,color:'rgba(15,155,58,.95)',border:'#22dd66',glow:'rgba(15,170,60,.85)'},{label:'C▲',input:EJS_INPUT.X,color:'rgba(185,145,0,.95)',border:'#ffdd00',glow:'rgba(200,160,0,.85)',fontSize:13},{label:'A',input:EJS_INPUT.A,color:'rgba(15,75,185,.95)',border:'#4488ff',glow:'rgba(15,80,200,.85)'},{label:'C▼',input:EJS_INPUT.Y,color:'rgba(185,145,0,.95)',border:'#ffdd00',glow:'rgba(200,160,0,.85)',fontSize:13}],
+    shoulders:[{label:'L',input:EJS_INPUT.L,color:'rgba(25,25,48,.97)',border:'#555588',glow:'rgba(60,60,130,.6)',side:'left',row:0},{label:'R',input:EJS_INPUT.R,color:'rgba(25,25,48,.97)',border:'#555588',glow:'rgba(60,60,130,.6)',side:'right',row:0},{label:'Z',input:EJS_INPUT.L2,color:'rgba(80,10,135,.97)',border:'#aa55ff',glow:'rgba(120,30,200,.7)',side:'left',row:1}],
+    meta:[{label:'START',input:EJS_INPUT.START,color:'rgba(20,20,42,.92)',border:'#555588',textColor:'#9999cc'}],
+    dpad:{color:'#1e1e34',border:'#44446a'} },
+  segaMD: { barBg:'rgba(5,5,5,0.85)', diskBg:'rgba(30,30,30,0.18)', diskBorder:'#33333355',
+    face:[{label:'A',input:EJS_INPUT.Y,color:'rgba(185,15,15,.95)',border:'#ff3333',glow:'rgba(200,15,15,.85)'},{label:'X',input:EJS_INPUT.X,color:'rgba(105,10,10,.92)',border:'#cc2222',glow:'rgba(150,10,10,.6)'},{label:'C',input:EJS_INPUT.A,color:'rgba(15,62,185,.95)',border:'#3366ff',glow:'rgba(15,70,200,.85)'},{label:'B',input:EJS_INPUT.B,color:'rgba(175,135,0,.95)',border:'#ffcc00',glow:'rgba(190,150,0,.85)'}],
+    shoulders:[],meta:[{label:'MODE',input:EJS_INPUT.SELECT,color:'rgba(14,14,14,.92)',border:'#444',textColor:'#888'},{label:'START',input:EJS_INPUT.START,color:'rgba(14,14,14,.92)',border:'#444',textColor:'#888'}],
+    dpad:{color:'#181818',border:'#444444'} },
+  gba: { barBg:'rgba(8,4,16,0.82)', diskBg:'rgba(50,25,80,0.18)', diskBorder:'#9966dd55',
+    face:[{label:'Y',input:EJS_INPUT.Y,color:'rgba(82,22,135,.92)',border:'#9944cc',glow:'rgba(100,30,160,.6)'},{label:'X',input:EJS_INPUT.X,color:'rgba(62,15,105,.88)',border:'#7733aa',glow:'rgba(80,20,130,.5)'},{label:'A',input:EJS_INPUT.A,color:'rgba(165,72,10,.95)',border:'#ff7722',glow:'rgba(180,80,10,.85)'},{label:'B',input:EJS_INPUT.B,color:'rgba(185,20,38,.95)',border:'#ff3344',glow:'rgba(200,20,40,.85)'}],
+    shoulders:[{label:'L',input:EJS_INPUT.L,color:'rgba(38,22,68,.97)',border:'#9966dd',glow:'rgba(110,50,210,.6)',side:'left',row:0},{label:'R',input:EJS_INPUT.R,color:'rgba(38,22,68,.97)',border:'#9966dd',glow:'rgba(110,50,210,.6)',side:'right',row:0}],
+    meta:[{label:'SELECT',input:EJS_INPUT.SELECT,color:'rgba(18,10,38,.92)',border:'#553388',textColor:'#aa77dd'},{label:'START',input:EJS_INPUT.START,color:'rgba(18,10,38,.92)',border:'#553388',textColor:'#aa77dd'}],
+    dpad:{color:'#1e1442',border:'#4433aa'} },
+  gbc: { barBg:'rgba(4,10,6,0.82)', diskBg:'rgba(15,50,25,0.18)', diskBorder:'#1f443055',
+    face:[{label:'',input:EJS_INPUT.Y,color:'rgba(10,82,32,.80)',border:'#114422',glow:'rgba(10,80,30,.4)'},{label:'',input:EJS_INPUT.X,color:'rgba(8,62,22,.75)',border:'#0d3318',glow:'rgba(8,60,22,.3)'},{label:'A',input:EJS_INPUT.A,color:'rgba(10,42,165,.95)',border:'#3355ff',glow:'rgba(10,50,180,.85)'},{label:'B',input:EJS_INPUT.B,color:'rgba(175,15,28,.95)',border:'#ff2233',glow:'rgba(190,15,30,.85)'}],
+    shoulders:[],meta:[{label:'SELECT',input:EJS_INPUT.SELECT,color:'rgba(8,18,10,.92)',border:'#1a5535',textColor:'#44aa66'},{label:'START',input:EJS_INPUT.START,color:'rgba(8,18,10,.92)',border:'#1a5535',textColor:'#44aa66'}],
+    dpad:{color:'#122018',border:'#1f4430'} },
+  nes: { barBg:'rgba(6,4,4,0.85)', diskBg:'rgba(40,15,15,0.18)', diskBorder:'#3a202055',
+    face:[{label:'',input:EJS_INPUT.Y,color:'rgba(82,8,8,.72)',border:'#551010',glow:'rgba(80,8,8,.3)'},{label:'',input:EJS_INPUT.X,color:'rgba(62,6,6,.65)',border:'#440c0c',glow:'rgba(60,6,6,.2)'},{label:'A',input:EJS_INPUT.A,color:'rgba(195,20,20,.95)',border:'#ff3333',glow:'rgba(210,20,20,.85)'},{label:'B',input:EJS_INPUT.B,color:'rgba(155,10,10,.95)',border:'#dd2222',glow:'rgba(170,10,10,.85)'}],
+    shoulders:[],meta:[{label:'SELECT',input:EJS_INPUT.SELECT,color:'rgba(16,8,8,.92)',border:'#4a2a2a',textColor:'#aa5555'},{label:'START',input:EJS_INPUT.START,color:'rgba(16,8,8,.92)',border:'#4a2a2a',textColor:'#aa5555'}],
+    dpad:{color:'#181010',border:'#3a2020'} },
+  fbneo: { barBg:'rgba(0,8,0,0.85)', diskBg:'rgba(0,30,0,0.22)', diskBorder:'#00ff4133', analog:true,
+    face:[{label:'X',input:EJS_INPUT.Y,color:'rgba(0,145,42,.95)',border:'#00ff41',glow:'rgba(0,180,50,.85)'},{label:'Y',input:EJS_INPUT.L,color:'rgba(125,78,0,.92)',border:'#ffaa00',glow:'rgba(150,90,0,.75)'},{label:'B',input:EJS_INPUT.A,color:'rgba(175,145,0,.95)',border:'#ffee00',glow:'rgba(200,160,0,.85)'},{label:'A',input:EJS_INPUT.B,color:'rgba(185,10,10,.95)',border:'#ff2222',glow:'rgba(200,10,10,.85)'}],
+    shoulders:[],meta:[{label:'SELECT',input:EJS_INPUT.SELECT,color:'rgba(0,14,0,.92)',border:'#004400',textColor:'#00ee44'},{label:'START',input:EJS_INPUT.START,color:'rgba(0,14,0,.92)',border:'#004400',textColor:'#00ee44'}],
+    dpad:{color:'#001800',border:'#00ff41'} },
+  nds: { barBg:'rgba(8,4,16,0.82)', diskBg:'rgba(50,25,80,0.18)', diskBorder:'#9966dd55',
+    face:[{label:'Y',input:EJS_INPUT.Y,color:'rgba(82,22,135,.92)',border:'#9944cc',glow:'rgba(100,30,160,.6)'},{label:'X',input:EJS_INPUT.X,color:'rgba(62,15,105,.88)',border:'#7733aa',glow:'rgba(80,20,130,.5)'},{label:'A',input:EJS_INPUT.A,color:'rgba(165,72,10,.95)',border:'#ff7722',glow:'rgba(180,80,10,.85)'},{label:'B',input:EJS_INPUT.B,color:'rgba(185,20,38,.95)',border:'#ff3344',glow:'rgba(200,20,40,.85)'}],
+    shoulders:[{label:'L',input:EJS_INPUT.L,color:'rgba(38,22,68,.97)',border:'#9966dd',glow:'rgba(110,50,210,.6)',side:'left',row:0},{label:'R',input:EJS_INPUT.R,color:'rgba(38,22,68,.97)',border:'#9966dd',glow:'rgba(110,50,210,.6)',side:'right',row:0}],
+    meta:[{label:'SELECT',input:EJS_INPUT.SELECT,color:'rgba(18,10,38,.92)',border:'#553388',textColor:'#aa77dd'},{label:'START',input:EJS_INPUT.START,color:'rgba(18,10,38,.92)',border:'#553388',textColor:'#aa77dd'}],
+    dpad:{color:'#1e1442',border:'#4433aa'} },
+  segaCD: { barBg:'rgba(5,5,5,0.85)', diskBg:'rgba(30,30,30,0.18)', diskBorder:'#33333355',
+    face:[{label:'A',input:EJS_INPUT.Y,color:'rgba(185,15,15,.95)',border:'#ff3333',glow:'rgba(200,15,15,.85)'},{label:'X',input:EJS_INPUT.X,color:'rgba(105,10,10,.92)',border:'#cc2222',glow:'rgba(150,10,10,.6)'},{label:'C',input:EJS_INPUT.A,color:'rgba(15,62,185,.95)',border:'#3366ff',glow:'rgba(15,70,200,.85)'},{label:'B',input:EJS_INPUT.B,color:'rgba(175,135,0,.95)',border:'#ffcc00',glow:'rgba(190,150,0,.85)'}],
+    shoulders:[],meta:[{label:'MODE',input:EJS_INPUT.SELECT,color:'rgba(14,14,14,.92)',border:'#444',textColor:'#888'},{label:'START',input:EJS_INPUT.START,color:'rgba(14,14,14,.92)',border:'#444',textColor:'#888'}],
+    dpad:{color:'#181818',border:'#444444'} },
+  segaGG: { barBg:'rgba(5,5,5,0.85)', diskBg:'rgba(30,30,30,0.18)', diskBorder:'#33333355',
+    face:[{label:'',input:EJS_INPUT.Y,color:'rgba(82,8,8,.72)',border:'#551010',glow:'rgba(80,8,8,.3)'},{label:'',input:EJS_INPUT.X,color:'rgba(62,6,6,.65)',border:'#440c0c',glow:'rgba(60,6,6,.2)'},{label:'2',input:EJS_INPUT.A,color:'rgba(15,62,185,.95)',border:'#3366ff',glow:'rgba(15,70,200,.85)'},{label:'1',input:EJS_INPUT.B,color:'rgba(185,15,15,.95)',border:'#ff3333',glow:'rgba(200,15,15,.85)'}],
+    shoulders:[],meta:[{label:'START',input:EJS_INPUT.START,color:'rgba(14,14,14,.92)',border:'#444',textColor:'#888'}],
+    dpad:{color:'#181818',border:'#444444'} },
+};
 
 /* ═══════════════════════════════════════════════════════════
-   ESCONDE O GAMEPAD NATIVO DO EMULATORJS IMEDIATAMENTE
-   Usamos MutationObserver para capturar e ocultar assim
-   que o EmulatorJS cria os elementos no DOM.
-   A injeção de CSS com !important garante mesmo se o
-   EmulatorJS tentar recriar os elementos depois.
+   EMULATORJS
 ═══════════════════════════════════════════════════════════ */
-(function hideNativeGamepad() {
-  // CSS injetado imediatamente — bloqueia qualquer gamepad nativo
-  const style = document.createElement('style');
-  style.id = 'rv-hide-native-pad';
-  style.textContent = `
-    .ejs_virtualGamepad,
-    .ejs-virtualGamepad,
-    [class*="virtualGamepad"],
-    [class*="virtual_gamepad"],
-    [class*="gamepad_container"],
-    [class*="touch_controls"],
-    [class*="ejs_gamepad"],
-    [class*="ejs-gamepad"],
-    [id*="virtualGamepad"],
-    [id*="gamepad"],
-    .ejs_gamepad_button,
-    .ejs_gamepad_dpad,
-    .ejs_gamepad_select,
-    .ejs_gamepad_start,
-    [class*="b_left"], [class*="b_right"],
-    [class*="b_fast"], [class*="b_slow"],
-    [class*="b_menu"],
-    [class*="nipple"], [class*="zone"],
-    [class*="joystick"], [class*="stick"],
-    .back, .front {
-      display: none !important;
-      visibility: hidden !important;
-      pointer-events: none !important;
-      opacity: 0 !important;
-    }
-  `;
-  document.head.appendChild(style);
+const ROMS_BASE = 'https://retroverse-roms.mdsoltec.workers.dev/';
 
-  // MutationObserver como segunda camada de proteção
+async function preloadGame(gamePath) {
+  // Codifica cada segmento do path para lidar com apóstrofos e caracteres especiais
+  const encodedPath = gamePath.split('/').map(seg => 
+    encodeURIComponent(seg).replace(/'/g, '%27')
+  ).join('/');
+  const url = ROMS_BASE + encodedPath;
+  const msgEl = document.getElementById('rv-msg');
+  const dlWrap = document.getElementById('rv-download-progress');
+  const dlBar = document.getElementById('rv-dl-bar');
+  const dlInfo = document.getElementById('rv-dl-info');
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Erro');
+    const total = parseInt(response.headers.get('Content-Length') || '0');
+    const reader = response.body.getReader();
+    const chunks = [];
+    let received = 0;
+    if (total > 0) { msgEl.style.display = 'none'; dlWrap.classList.add('visible'); }
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value); received += value.length;
+      if (total > 0) {
+        dlBar.style.width = Math.round((received/total)*100) + '%';
+        dlInfo.textContent = `${(received/1048576).toFixed(1)} MB / ${(total/1048576).toFixed(1)} MB`;
+      }
+    }
+    dlWrap.classList.remove('visible'); msgEl.style.display = ''; msgEl.textContent = 'Iniciando emulador...';
+    const fn = gamePath.split('/').pop();
+    const mt = fn.endsWith('.zip') ? 'application/zip' : 'application/octet-stream';
+    if (fn.endsWith('.zip')) return URL.createObjectURL(new File(chunks, fn, {type:mt}));
+    return URL.createObjectURL(new Blob(chunks, {type:mt}));
+  } catch(e) { msgEl.textContent = 'Erro ao baixar.'; throw e; }
+}
+
+EJS_player = '#game'; EJS_core = core;
+EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+EJS_startOnLoaded = true; EJS_fullscreenOnLoaded = false;
+
+const isArcade = game.endsWith('.zip');
+
+function onGameReady() {
+  const ld = document.getElementById('rv-loading');
+  if (ld) ld.classList.add('hidden');
+  document.getElementById('rv-fs-btn').classList.add('visible');
+  if (isTouch) initControls();
+}
+
+if (isArcade) {
+  EJS_gameUrl = ROMS_BASE + game; EJS_biosUrl = ROMS_BASE + 'arcade/neogeo.zip';
+  EJS_onGameStart = onGameReady; setTimeout(onGameReady, 14000);
+  const s = document.createElement('script'); s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js'; document.body.appendChild(s);
+} else {
+  preloadGame(game).then(blobUrl => {
+    EJS_gameUrl = blobUrl; EJS_onGameStart = onGameReady; setTimeout(onGameReady, 14000);
+    const s = document.createElement('script'); s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js'; document.body.appendChild(s);
+  }).catch(() => { document.getElementById('rv-msg').textContent = 'Erro ao carregar.'; });
+}
+
+/* Hide native gamepad */
+(function(){
+  const st = document.createElement('style');
+  st.textContent = `.ejs_virtualGamepad,.ejs-virtualGamepad,[class*="virtualGamepad"],[class*="gamepad_container"],[class*="touch_controls"],[class*="ejs_gamepad"],[class*="ejs-gamepad"],[id*="virtualGamepad"],.ejs_gamepad_button,.ejs_gamepad_dpad,[class*="b_left"],[class*="b_right"],[class*="b_fast"],[class*="b_slow"],[class*="b_menu"],[class*="nipple"],[class*="joystick"],[class*="stick"],.back,.front{display:none!important;visibility:hidden!important;pointer-events:none!important;opacity:0!important;}`;
+  document.head.appendChild(st);
   if (isTouch) {
-    const observer = new MutationObserver(mutations => {
-      mutations.forEach(m => {
-        m.addedNodes.forEach(node => {
-          if (!(node instanceof HTMLElement)) return;
-          const cls = (node.className || '') + (node.id || '');
-          // Detecta elementos do gamepad nativo e oculta
-          if (/gamepad|virtualGamepad|nipple|joystick|b_left|b_right|b_fast|b_slow|b_menu|touch_control/i.test(cls)) {
-            node.style.cssText = 'display:none!important;visibility:hidden!important;pointer-events:none!important;opacity:0!important;';
-          }
-        });
-      });
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+    new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => {
+      if (!(n instanceof HTMLElement)) return;
+      if (/gamepad|virtualGamepad|nipple|joystick|b_left|b_right|b_fast|b_slow|b_menu|touch_control/i.test((n.className||'')+(n.id||''))
+          && !n.classList.contains('rv-zone') && !n.classList.contains('rv-zone-dpad'))
+        n.style.cssText='display:none!important;visibility:hidden!important;pointer-events:none!important;opacity:0!important;';
+    }))).observe(document.body, {childList:true, subtree:true});
   }
 }());
 
-/* ═══════════════════════════════════════════════════════════
-   ENVIO DE INPUT
-═══════════════════════════════════════════════════════════ */
-function sendInput(inputId, value) {
-  try {
-    if (window.EJS_emulator && EJS_emulator.gameManager) {
-      EJS_emulator.gameManager.simulateInput(0, inputId, value);
-    }
-  } catch(e) {}
+function sendInput(id, val) {
+  try { if (window.EJS_emulator?.gameManager) EJS_emulator.gameManager.simulateInput(0, id, val); } catch(e){}
 }
 
 /* ═══════════════════════════════════════════════════════════
-   CONSTRUÇÃO DO CONTROLE RETRO
-   Referência visual: Super Retro 16
-   ─ Barra de controles sólida na base da tela
-   ─ D-Pad/Analógico à esquerda num disco
-   ─ Losango de botões à direita
-   ─ L / R como abas no topo
-   ─ SELECT / START / MENU centralizados
+   INIT CONTROLS
+   Portrait + overlay disponível → sistema de imagem calibrado
+   Landscape ou sem overlay → controles CSS
+═══════════════════════════════════════════════════════════ */
+function initControls() {
+  const W = window.innerWidth, H = window.innerHeight;
+  const isPortrait = H > W;
+  const overlay = OVERLAYS[core];
+
+  document.getElementById('rv-overlay').classList.remove('active');
+  document.getElementById('rv-overlay').innerHTML = '';
+  document.getElementById('rv-pad').classList.remove('active');
+  document.getElementById('rv-pad').innerHTML = '';
+
+  if (isPortrait && overlay && overlay.base) {
+    buildOverlay(overlay);
+  } else {
+    buildPad(SKINS[core] || SKINS['snes']);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BUILD OVERLAY (sistema calibrado com zonas de toque)
+═══════════════════════════════════════════════════════════ */
+function buildOverlay(cfg) {
+  const wrap = document.getElementById('rv-overlay');
+  wrap.innerHTML = '';
+
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const containerH = Math.round(W * cfg.aspect);
+  
+  // Modo debug: adiciona ?debug=1 na URL para ver as zonas
+  const DEBUG = new URLSearchParams(window.location.search).has('debug');
+
+  // Seta o tamanho do container (limita à altura da tela)
+  const actualH = Math.min(containerH, H);
+  Object.assign(wrap.style, {
+    width: W + 'px',
+    height: actualH + 'px',
+  });
+
+  // Imagem base
+  const baseImg = document.createElement('img');
+  baseImg.className = 'rv-skin-img';
+  baseImg.src = cfg.base;
+  baseImg.draggable = false;
+  Object.assign(baseImg.style, {
+    width: W + 'px',
+    height: containerH + 'px',
+    position: 'absolute',
+    bottom: '0',
+    left: '0',
+  });
+  wrap.appendChild(baseImg);
+
+  // Imagem animada
+  let animImg = null;
+  if (cfg.animated) {
+    animImg = document.createElement('img');
+    animImg.className = 'rv-anim-img';
+    animImg.src = cfg.animated;
+    animImg.draggable = false;
+    Object.assign(animImg.style, {
+      width: W + 'px',
+      height: containerH + 'px',
+      position: 'absolute',
+      bottom: '0',
+      left: '0',
+    });
+    wrap.appendChild(animImg);
+  }
+
+  // Pré-carrega animações de botões
+  if (cfg.animButtons) {
+    for (const src of Object.values(cfg.animButtons)) { const i = new Image(); i.src = src; }
+  }
+
+  function showAnim(src) {
+    if (!animImg) return;
+    if (src) { animImg.src = src; animImg.classList.add('show'); }
+    else { animImg.classList.remove('show'); }
+  }
+
+  // Helper: calcula posição em px a partir de % da imagem
+  // As coordenadas são % da imagem inteira (que pode ser maior que o container visível)
+  // Precisamos converter para posição dentro do container
+  const offsetY = containerH - actualH; // Quanto da imagem está cortada no topo
+  const px = (pct, dim) => {
+    if (dim === 'x') return (pct / 100) * W;
+    // Para Y: converte % da imagem para px dentro do container
+    return (pct / 100) * containerH - offsetY;
+  };
+
+  if (DEBUG) {
+    console.log('Overlay debug:', { W, H, containerH, actualH, offsetY });
+  }
+
+  // Cria zonas de toque
+  for (const [name, zone] of Object.entries(cfg.zones)) {
+    if (zone.type === 'dpad') {
+      const el = document.createElement('div');
+      el.className = 'rv-zone rv-zone-dpad';
+      const zw = px(zone.w, 'x'), zh = px(zone.h, 'y');
+      Object.assign(el.style, {
+        left: (px(zone.x, 'x') - zw/2) + 'px',
+        top: (px(zone.y, 'y') - zh/2) + 'px',
+        width: zw + 'px', height: zh + 'px',
+      });
+      
+      if (DEBUG) {
+        el.style.border = '2px solid lime';
+        el.style.background = 'rgba(0,255,0,0.2)';
+        el.textContent = 'DPAD';
+        el.style.color = 'lime';
+        el.style.fontSize = '10px';
+        el.style.fontWeight = 'bold';
+        el.style.display = 'flex';
+        el.style.alignItems = 'center';
+        el.style.justifyContent = 'center';
+      }
+
+      const st = {up:0,down:0,left:0,right:0};
+      const ID = {up:EJS_INPUT.UP,down:EJS_INPUT.DOWN,left:EJS_INPUT.LEFT,right:EJS_INPUT.RIGHT};
+      function upd(ns) { for (const d in st) if (ns[d]!==st[d]) { sendInput(ID[d],ns[d]); st[d]=ns[d]; }
+        if (cfg.animButtons) { let s=null; if(ns.up)s=cfg.animButtons.UP; else if(ns.down)s=cfg.animButtons.DOWN; else if(ns.left)s=cfg.animButtons.LEFT; else if(ns.right)s=cfg.animButtons.RIGHT; showAnim(s); }
+      }
+      function getDir(px2,py2) {
+        const r=el.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
+        const dx=px2-cx, dy=py2-cy, a=Math.atan2(dy,dx), d=Math.sqrt(dx*dx+dy*dy);
+        if (d < r.width*0.08) return {up:0,down:0,left:0,right:0};
+        if (a>-Math.PI/4&&a<=Math.PI/4) return {up:0,down:0,left:0,right:1};
+        if (a>Math.PI/4&&a<=3*Math.PI/4) return {up:0,down:1,left:0,right:0};
+        if (a>-3*Math.PI/4&&a<=-Math.PI/4) return {up:1,down:0,left:0,right:0};
+        return {up:0,down:0,left:1,right:0};
+      }
+      const clr = () => upd({up:0,down:0,left:0,right:0});
+      el.addEventListener('touchstart', e=>{e.preventDefault();e.stopPropagation();upd(getDir(e.touches[0].clientX,e.touches[0].clientY));},{passive:false});
+      el.addEventListener('touchmove', e=>{e.preventDefault();e.stopPropagation();upd(getDir(e.touches[0].clientX,e.touches[0].clientY));},{passive:false});
+      el.addEventListener('touchend', e=>{e.preventDefault();e.stopPropagation();clr();},{passive:false});
+      el.addEventListener('touchcancel', e=>{e.preventDefault();e.stopPropagation();clr();},{passive:false});
+      wrap.appendChild(el);
+
+    } else if (zone.type === 'analog') {
+      // Zona de analógico (placeholder — mostra imagem do stick se disponível)
+      const el = document.createElement('div');
+      el.className = 'rv-zone';
+      const zw = px(zone.w, 'x'), zh = px(zone.h, 'y');
+      Object.assign(el.style, {
+        left: (px(zone.x, 'x') - zw/2) + 'px',
+        top: (px(zone.y, 'y') - zh/2) + 'px',
+        width: zw + 'px', height: zh + 'px',
+        borderRadius: '50%',
+      });
+
+      // Analog stick logic
+      const R2 = zw / 2;
+      const MAX = R2 * 0.6;
+      const THRESH = 0.40, AV = 0x7fff;
+      const sent = {up:0,down:0,left:0,right:0};
+      const DM = {up:EJS_INPUT.UP,down:EJS_INPUT.DOWN,left:EJS_INPUT.LEFT,right:EJS_INPUT.RIGHT};
+      function sDir(d,v){if(sent[d]===v)return;sent[d]=v;sendInput(DM[d],v);}
+      function sAn(nx,ny){
+        sendInput(EJS_INPUT.LSTICK_RIGHT,nx>0?Math.round(nx*AV):0);
+        sendInput(EJS_INPUT.LSTICK_LEFT,nx<0?Math.round(-nx*AV):0);
+        sendInput(EJS_INPUT.LSTICK_DOWN,ny>0?Math.round(ny*AV):0);
+        sendInput(EJS_INPUT.LSTICK_UP,ny<0?Math.round(-ny*AV):0);
+      }
+      function relAll(){sDir('up',0);sDir('down',0);sDir('left',0);sDir('right',0);sAn(0,0);}
+
+      let active=false, ox=0, oy=0;
+      function onS(e){e.preventDefault();e.stopPropagation();const t=e.touches?e.touches[0]:e;const r=el.getBoundingClientRect();active=true;ox=r.left+R2;oy=r.top+R2;mv(t.clientX-ox,t.clientY-oy);}
+      function onM(e){if(!active)return;e.preventDefault();const t=e.touches?e.touches[0]:e;mv(t.clientX-ox,t.clientY-oy);}
+      function onE(e){e.preventDefault();e.stopPropagation();active=false;relAll();}
+      function mv(dx,dy){
+        const dist=Math.sqrt(dx*dx+dy*dy),cl=Math.min(dist,MAX),ang=Math.atan2(dy,dx);
+        const cx2=Math.cos(ang)*cl,cy2=Math.sin(ang)*cl;
+        const nx=cx2/MAX,ny=cy2/MAX;
+        sAn(nx,ny);
+        sDir('right',nx>THRESH?1:0);sDir('left',nx<-THRESH?1:0);
+        sDir('down',ny>THRESH?1:0);sDir('up',ny<-THRESH?1:0);
+      }
+      el.addEventListener('touchstart',onS,{passive:false});
+      el.addEventListener('touchmove',onM,{passive:false});
+      el.addEventListener('touchend',onE,{passive:false});
+      el.addEventListener('touchcancel',onE,{passive:false});
+      wrap.appendChild(el);
+
+    } else if (zone.type === 'btn') {
+      const el = document.createElement('div');
+      el.className = 'rv-zone';
+      const zw = px(zone.w, 'x'), zh = px(zone.h, 'y');
+      Object.assign(el.style, {
+        left: (px(zone.x, 'x') - zw/2) + 'px',
+        top: (px(zone.y, 'y') - zh/2) + 'px',
+        width: zw + 'px', height: zh + 'px',
+        borderRadius: '30%',
+      });
+
+      if (DEBUG) {
+        el.style.border = '2px solid red';
+        el.style.background = 'rgba(255,0,0,0.2)';
+        el.textContent = name;
+        el.style.color = 'red';
+        el.style.fontSize = '9px';
+        el.style.fontWeight = 'bold';
+        el.style.display = 'flex';
+        el.style.alignItems = 'center';
+        el.style.justifyContent = 'center';
+      }
+
+      const inputId = zone.input;
+      const btnName = name;
+
+      function press() {
+        el.classList.add('pressed');
+        sendInput(inputId, 1);
+        if (cfg.animButtons?.[btnName]) showAnim(cfg.animButtons[btnName]);
+      }
+      function release() {
+        el.classList.remove('pressed');
+        sendInput(inputId, 0);
+        showAnim(null);
+      }
+
+      el.addEventListener('touchstart', e=>{e.preventDefault();e.stopPropagation();press();},{passive:false});
+      el.addEventListener('touchend', e=>{e.preventDefault();e.stopPropagation();release();},{passive:false});
+      el.addEventListener('touchcancel', e=>{e.preventDefault();e.stopPropagation();release();},{passive:false});
+      el.addEventListener('mousedown', e=>{e.preventDefault();e.stopPropagation();press();});
+      el.addEventListener('mouseup', e=>{e.preventDefault();e.stopPropagation();release();});
+      wrap.appendChild(el);
+    }
+  }
+
+  wrap.classList.add('active');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BUILD PAD (CSS fallback para landscape)
 ═══════════════════════════════════════════════════════════ */
 function buildPad(skin) {
   const pad = document.getElementById('rv-pad');
   pad.innerHTML = '';
-
-  const W  = window.innerWidth;
-  const H  = window.innerHeight;
-  const LS = W > H;
-
-  /* ─────────────────────────────────────────────
-     BARRA DE CONTROLES
-     Portrait  : faixa fixa na base (~42% da altura, máx 260px)
-     Landscape : colunas laterais fixas (~24% da largura, máx 180px)
-  ───────────────────────────────────────────── */
-  const BAR_H = LS ? H : Math.round(Math.min(H * 0.42, 260));
+  const W = window.innerWidth, H = window.innerHeight, LS = W > H;
+  const BAR_H = LS ? H : Math.round(Math.min(H*0.42,260));
   const BAR_Y = H - BAR_H;
-  const COL_W = LS ? Math.round(Math.min(W * 0.24, 180)) : Math.round(W * 0.50);
+  const COL_W = LS ? Math.round(Math.min(W*0.24,180)) : Math.round(W*0.50);
+  const MAR=8, REF=LS?COL_W:BAR_H;
+  const DS=Math.round(Math.min(REF*0.72,LS?COL_W-16:160));
+  const BS=Math.round(Math.min(REF*0.28,LS?(COL_W-DS)*0.9:62));
+  const GAP=Math.round(BS*0.10);
+  const SW=Math.round(Math.min(COL_W*0.90,LS?COL_W-2*MAR:88));
+  const SH=Math.round(Math.min(REF*0.14,34));
+  const MW=Math.round(Math.min(LS?COL_W-2*MAR:W*0.14,72));
+  const MH=Math.round(Math.min(REF*0.12,28));
 
-  /* ── Tamanhos — todas as const primeiro, sem dependência de ordem ── */
-  const MAR  = 8;
-  const REF  = LS ? COL_W : BAR_H;
-  const DS   = Math.round(Math.min(REF * 0.72, LS ? COL_W - 16 : 160));
-  const BS   = Math.round(Math.min(REF * 0.28, LS ? (COL_W - DS) * 0.9 : 62));
-  const GAP  = Math.round(BS * 0.10);
-  const SW   = Math.round(Math.min(COL_W * 0.90, LS ? COL_W - 2*MAR : 88));
-  const SH   = Math.round(Math.min(REF * 0.14, 34));
-  const MW   = Math.round(Math.min(LS ? COL_W - 2*MAR : W * 0.14, 72));
-  const MH   = Math.round(Math.min(REF * 0.12, 28));
+  if(LS){[0,W-COL_W].forEach(x=>{const d=document.createElement('div');Object.assign(d.style,{position:'absolute',left:x+'px',top:'0',width:COL_W+'px',height:H+'px',background:skin.barBg,zIndex:'1',pointerEvents:'none'});pad.appendChild(d);});}
+  else{const d=document.createElement('div');Object.assign(d.style,{position:'absolute',left:'0',top:BAR_Y+'px',width:W+'px',height:BAR_H+'px',background:skin.barBg,zIndex:'1',pointerEvents:'none'});pad.appendChild(d);}
 
-  /* Fundo da barra / colunas — depois das const para ter MAR disponível */
-  if (LS) {
-    [0, W - COL_W].forEach(x => {
-      const d = document.createElement('div');
-      Object.assign(d.style, {
-        position:'absolute', left:x+'px', top:'0',
-        width:COL_W+'px', height:H+'px',
-        background: skin.barBg || 'rgba(0,0,0,0.55)',
-        zIndex:'1', pointerEvents:'none',
-      });
-      pad.appendChild(d);
-    });
-  } else {
-    const d = document.createElement('div');
-    Object.assign(d.style, {
-      position:'absolute', left:'0', top:BAR_Y+'px',
-      width:W+'px', height:BAR_H+'px',
-      background: skin.barBg || 'rgba(0,0,0,0.55)',
-      zIndex:'1', pointerEvents:'none',
-    });
-    pad.appendChild(d);
-  }
+  const diskCX=LS?Math.round(COL_W/2):Math.round(W*0.25);
+  const diskCY=LS?Math.round(H*0.58):Math.round(BAR_Y+BAR_H*0.52);
+  const faceCX=LS?Math.round(W-COL_W/2):Math.round(W*0.75);
+  const faceCY=diskCY, shY=LS?MAR:BAR_Y+MAR;
+  const metaCY=LS?Math.round(H/2-MH/2):Math.round(BAR_Y+BAR_H*0.12);
+  const OFF=BS+GAP;
+  const FPOS=[{dx:-OFF,dy:0},{dx:0,dy:-OFF},{dx:OFF,dy:0},{dx:0,dy:OFF}];
 
-  /* ── Centro do disco esquerdo ── */
-  const diskCX = LS ? Math.round(COL_W / 2)       : Math.round(W * 0.25);
-  const diskCY = LS
-    ? Math.round(H * 0.58)   // landscape: levemente abaixo do centro
-    : Math.round(BAR_Y + BAR_H * 0.52);
+  function mkEl(c,s){const e=document.createElement('div');e.className=c;Object.assign(e.style,{position:'absolute',zIndex:'5'},s);return e;}
+  function makeBtn(f,cx,cy,sz){sz=Math.max(sz,34);const e=mkEl('rv-btn',{width:sz+'px',height:sz+'px',left:(cx-sz/2)+'px',top:(cy-sz/2)+'px',fontSize:(f.fontSize||Math.round(sz*0.42))+'px',color:'#fff',background:f.color,border:`2.5px solid ${f.border}`,boxShadow:`0 0 18px ${f.glow||f.border+'99'}, 0 4px 14px rgba(0,0,0,.75)`,opacity:'.97'});e.textContent=f.label;bindBtn(e,f.input);return e;}
+  function makeShoulder(sh,x,y){const lx=LS&&sh.side==='right'?W-MAR-SW:(LS?MAR:x);const e=mkEl('rv-shoulder',{width:SW+'px',height:SH+'px',left:(LS?lx:x)+'px',top:y+'px',fontSize:Math.round(SH*0.52)+'px',color:'#fff',background:sh.color,border:`1.5px solid ${sh.border}`,boxShadow:`0 0 12px ${sh.glow}`,opacity:'.95',borderRadius:sh.side==='right'?'10px 4px 4px 10px':'4px 10px 10px 4px'});e.textContent=sh.label;bindBtn(e,sh.input);return e;}
+  function makeMeta(m,cx,cy,w,h){const e=mkEl('rv-meta',{width:w+'px',height:h+'px',left:(cx-w/2)+'px',top:(cy-h/2)+'px',fontSize:Math.round(h*0.5)+'px',color:m.textColor||'rgba(255,255,255,0.7)',background:m.color,border:`1px solid ${m.border}`,borderRadius:'20px',opacity:'.92'});e.textContent=m.label;bindBtn(e,m.input);return e;}
+  function bindBtn(e,id){e.addEventListener('touchstart',ev=>{ev.preventDefault();e.classList.add('pressed');sendInput(id,1);},{passive:false});e.addEventListener('touchend',ev=>{ev.preventDefault();e.classList.remove('pressed');sendInput(id,0);},{passive:false});e.addEventListener('touchcancel',ev=>{ev.preventDefault();e.classList.remove('pressed');sendInput(id,0);},{passive:false});e.addEventListener('mousedown',()=>{e.classList.add('pressed');sendInput(id,1);});e.addEventListener('mouseup',()=>{e.classList.remove('pressed');sendInput(id,0);});}
 
-  /* ── Centro do losango direito ── */
-  const faceCX = LS ? Math.round(W - COL_W / 2)   : Math.round(W * 0.75);
-  const faceCY = diskCY;
-
-  /* ── Shoulders ── */
-  const shY = LS ? MAR : BAR_Y + MAR;
-
-  /* ── Meta: entre o disco e o losango ── */
-  const metaCY = LS
-    ? Math.round(H / 2 - MH / 2)
-    : Math.round(BAR_Y + BAR_H * 0.12);
-
-  /* ── Losango offsets ── */
-  const OFF  = BS + GAP;
-  const FPOS = [
-    { dx: -OFF, dy:    0 }, // esq
-    { dx:    0, dy: -OFF }, // cima
-    { dx:  OFF, dy:    0 }, // dir
-    { dx:    0, dy:  OFF }, // baixo
-  ];
-
-  /* ─────────────────────────────────────────────
-     FÁBRICA
-  ───────────────────────────────────────────── */
-  function mkEl(cls, styles) {
-    const e = document.createElement('div');
-    e.className = cls;
-    Object.assign(e.style, { position:'absolute', zIndex:'5' }, styles);
-    return e;
-  }
-
-  /* Botão de face — círculo com glow */
-  function makeBtn(f, cx, cy, size) {
-    const sz  = Math.max(size, 34);
-    const fsz = f.fontSize || Math.round(sz * 0.42);
-    const e   = mkEl('rv-btn', {
-      width: sz+'px', height: sz+'px',
-      left:  (cx - sz/2)+'px', top: (cy - sz/2)+'px',
-      fontSize: fsz+'px',
-      color: '#fff',
-      background: f.color,
-      border: `2.5px solid ${f.border}`,
-      boxShadow: `0 0 18px ${f.glow||f.border+'99'}, 0 4px 14px rgba(0,0,0,.75), inset 0 1px 4px rgba(255,255,255,.15)`,
-      opacity: '.97',
-    });
-    e.textContent = f.label;
-    bindBtn(e, f.input);
-    return e;
-  }
-
-  /* Shoulder — aba com cantos arredondados num lado */
-  function makeShoulder(sh, x, y) {
-    // Em landscape: shoulder ocupa a largura total da coluna (encostado na borda)
-    const w = LS ? SW : SW;
-    const lx = LS && sh.side === 'right' ? W - MAR - w : (LS ? MAR : x);
-    const e = mkEl('rv-shoulder', {
-      width:  w+'px', height: SH+'px',
-      left: (LS ? lx : x)+'px', top: y+'px',
-      fontSize: Math.round(SH * 0.52)+'px',
-      color: '#fff',
-      background: sh.color,
-      border: `1.5px solid ${sh.border}`,
-      boxShadow: `0 0 12px ${sh.glow}, 0 3px 8px rgba(0,0,0,.7)`,
-      opacity: '.95',
-      borderRadius: sh.side === 'right' ? '10px 4px 4px 10px' : '4px 10px 10px 4px',
-    });
-    e.textContent = sh.label;
-    bindBtn(e, sh.input);
-    return e;
-  }
-
-  /* Meta (Select/Start/Menu) — pílula */
-  function makeMeta(m, cx, cy, w, h) {
-    const e = mkEl('rv-meta', {
-      width: w+'px', height: h+'px',
-      left: (cx - w/2)+'px', top: (cy - h/2)+'px',
-      fontSize: Math.round(h * 0.50)+'px',
-      color: m.textColor || 'rgba(255,255,255,0.7)',
-      background: m.color,
-      border: `1px solid ${m.border}`,
-      borderRadius: '20px',
-      opacity: '.92',
-    });
-    e.textContent = m.label;
-    bindBtn(e, m.input);
-    return e;
-  }
-
-  /* ─────────────────────────────────────────────
-     BIND TOQUE
-  ───────────────────────────────────────────── */
-  function bindBtn(e, id) {
-    e.addEventListener('touchstart',  ev=>{ev.preventDefault();e.classList.add('pressed');   sendInput(id,1);},{passive:false});
-    e.addEventListener('touchend',    ev=>{ev.preventDefault();e.classList.remove('pressed');sendInput(id,0);},{passive:false});
-    e.addEventListener('touchcancel', ev=>{ev.preventDefault();e.classList.remove('pressed');sendInput(id,0);},{passive:false});
-    e.addEventListener('mousedown', ()=>{e.classList.add('pressed');   sendInput(id,1);});
-    e.addEventListener('mouseup',   ()=>{e.classList.remove('pressed');sendInput(id,0);});
-  }
-
-  /* ─────────────────────────────────────────────
-     D-PAD DIGITAL
-     Disco branco ao redor, cruz no centro
-  ───────────────────────────────────────────── */
-  function makeDpad(color, border, cx, cy, size) {
-    const wrap = mkEl('', {
-      width: size+'px', height: size+'px',
-      left: (cx - size/2)+'px', top: (cy - size/2)+'px',
-      touchAction:'none', pointerEvents:'auto', zIndex:'6',
-      borderRadius: '50%',
-      background: skin.diskBg || 'rgba(255,255,255,0.07)',
-      border: `2px solid ${skin.diskBorder || border+'44'}`,
-      boxShadow: `0 4px 20px rgba(0,0,0,.5)`,
-    });
-    wrap.id = 'rv-dpad';
-
-    const inner = Math.round(size * 0.75);
-    const offset = Math.round((size - inner) / 2);
-
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('viewBox','0 0 90 90');
-    svg.setAttribute('width', inner);
-    svg.setAttribute('height', inner);
-    svg.style.cssText = `position:absolute;top:${offset}px;left:${offset}px;pointer-events:none;`;
-    svg.innerHTML = `<g filter="drop-shadow(0 2px 8px rgba(0,0,0,.9))">
-      <rect x="27" y="5"  width="36" height="80" rx="10" fill="${color}" stroke="${border}" stroke-width="2.5"/>
-      <rect x="5"  y="27" width="80" height="36" rx="10" fill="${color}" stroke="${border}" stroke-width="2.5"/>
-      <rect x="27" y="27" width="36" height="36" rx="5"  fill="${color}"/>
-      <polygon points="45,11 54,26 36,26" fill="${border}" opacity=".95"/>
-      <polygon points="45,79 54,64 36,64" fill="${border}" opacity=".95"/>
-      <polygon points="11,45 26,54 26,36" fill="${border}" opacity=".95"/>
-      <polygon points="79,45 64,54 64,36" fill="${border}" opacity=".95"/>
-    </g>`;
+  function makeDpad(color,border,cx,cy,size){
+    const wrap=mkEl('',{width:size+'px',height:size+'px',left:(cx-size/2)+'px',top:(cy-size/2)+'px',touchAction:'none',pointerEvents:'auto',zIndex:'6',borderRadius:'50%',background:skin.diskBg,border:`2px solid ${skin.diskBorder||border+'44'}`,boxShadow:'0 4px 20px rgba(0,0,0,.5)'});wrap.id='rv-dpad';
+    const inner=Math.round(size*0.75),offset=Math.round((size-inner)/2);
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 90 90');svg.setAttribute('width',inner);svg.setAttribute('height',inner);svg.style.cssText=`position:absolute;top:${offset}px;left:${offset}px;pointer-events:none;`;
+    svg.innerHTML=`<g filter="drop-shadow(0 2px 8px rgba(0,0,0,.9))"><rect x="27" y="5" width="36" height="80" rx="10" fill="${color}" stroke="${border}" stroke-width="2.5"/><rect x="5" y="27" width="80" height="36" rx="10" fill="${color}" stroke="${border}" stroke-width="2.5"/><rect x="27" y="27" width="36" height="36" rx="5" fill="${color}"/><polygon points="45,11 54,26 36,26" fill="${border}" opacity=".95"/><polygon points="45,79 54,64 36,64" fill="${border}" opacity=".95"/><polygon points="11,45 26,54 26,36" fill="${border}" opacity=".95"/><polygon points="79,45 64,54 64,36" fill="${border}" opacity=".95"/></g>`;
     wrap.appendChild(svg);
-
-    const DIRS=[
-      {up:1,left:1},{up:1},{up:1,right:1},
-      {left:1},     {},    {right:1},
-      {down:1,left:1},{down:1},{down:1,right:1}
-    ];
-    DIRS.forEach((d,i)=>{
-      const z=document.createElement('div');
-      z.style.cssText=`position:absolute;left:${(i%3)*33.34}%;top:${Math.floor(i/3)*33.34}%;width:33.34%;height:33.34%;pointer-events:none;`;
-      Object.assign(z.dataset,{up:d.up?'1':'0',down:d.down?'1':'0',left:d.left?'1':'0',right:d.right?'1':'0'});
-      wrap.appendChild(z);
-    });
-
-    const st={up:0,down:0,left:0,right:0};
-    const ID={up:EJS_INPUT.UP,down:EJS_INPUT.DOWN,left:EJS_INPUT.LEFT,right:EJS_INPUT.RIGHT};
+    const DIRS=[{up:1,left:1},{up:1},{up:1,right:1},{left:1},{},{right:1},{down:1,left:1},{down:1},{down:1,right:1}];
+    const st={up:0,down:0,left:0,right:0};const ID={up:EJS_INPUT.UP,down:EJS_INPUT.DOWN,left:EJS_INPUT.LEFT,right:EJS_INPUT.RIGHT};
     function upd(ns){for(const d in st)if(ns[d]!==st[d]){sendInput(ID[d],ns[d]);st[d]=ns[d];}}
-    function fp(px,py){
-      const r=wrap.getBoundingClientRect(),s3=r.width/3;
-      const i=Math.max(0,Math.min(8,Math.floor((py-r.top)/s3)*3+Math.floor((px-r.left)/s3)));
-      const d=DIRS[i];return{up:d.up?1:0,down:d.down?1:0,left:d.left?1:0,right:d.right?1:0};
-    }
+    function fp(px2,py2){const r=wrap.getBoundingClientRect(),s3=r.width/3;const i=Math.max(0,Math.min(8,Math.floor((py2-r.top)/s3)*3+Math.floor((px2-r.left)/s3)));const d=DIRS[i];return{up:d.up?1:0,down:d.down?1:0,left:d.left?1:0,right:d.right?1:0};}
     const clr=()=>upd({up:0,down:0,left:0,right:0});
-    wrap.addEventListener('touchstart', e=>{e.preventDefault();upd(fp(e.touches[0].clientX,e.touches[0].clientY));},{passive:false});
-    wrap.addEventListener('touchmove',  e=>{e.preventDefault();upd(fp(e.touches[0].clientX,e.touches[0].clientY));},{passive:false});
-    wrap.addEventListener('touchend',   e=>{e.preventDefault();clr();},{passive:false});
+    wrap.addEventListener('touchstart',e=>{e.preventDefault();upd(fp(e.touches[0].clientX,e.touches[0].clientY));},{passive:false});
+    wrap.addEventListener('touchmove',e=>{e.preventDefault();upd(fp(e.touches[0].clientX,e.touches[0].clientY));},{passive:false});
+    wrap.addEventListener('touchend',e=>{e.preventDefault();clr();},{passive:false});
     wrap.addEventListener('touchcancel',e=>{e.preventDefault();clr();},{passive:false});
     return wrap;
   }
 
-  /* ─────────────────────────────────────────────
-     JOYSTICK ANALÓGICO
-     Mesmo disco mas com knob móvel
-  ───────────────────────────────────────────── */
-  function makeAnalog(color, border, cx, cy, size) {
-    const wrap = mkEl('', {
-      width: size+'px', height: size+'px',
-      left: (cx - size/2)+'px', top: (cy - size/2)+'px',
-      touchAction:'none', pointerEvents:'auto', zIndex:'6',
-      borderRadius:'50%',
-      background: skin.diskBg || 'rgba(255,255,255,0.07)',
-      border: `2px solid ${skin.diskBorder || border+'44'}`,
-      boxShadow: '0 4px 20px rgba(0,0,0,.5)',
-    });
-
-    const R   = size / 2;
-    const KR  = Math.round(R * 0.42);
-    const MAX = R - KR - 6;
-
-    // Anel interno
-    const inner = mkEl('', {
-      position:'absolute',
-      width: Math.round(size*0.75)+'px', height: Math.round(size*0.75)+'px',
-      left: Math.round(size*0.125)+'px', top: Math.round(size*0.125)+'px',
-      borderRadius:'50%',
-      background:`radial-gradient(circle at 38% 35%, ${color}cc, ${color}77)`,
-      border:`2px solid ${border}55`,
-      pointerEvents:'none',
-    });
-
-    // Marcadores de direção
-    const mk=document.createElementNS('http://www.w3.org/2000/svg','svg');
-    mk.setAttribute('viewBox','0 0 100 100');
-    Object.assign(mk.style,{position:'absolute',inset:'0',width:'100%',height:'100%',pointerEvents:'none',opacity:'.6'});
-    mk.innerHTML=`
-      <polygon points="50,6 58,20 42,20"  fill="${border}"/>
-      <polygon points="50,94 58,80 42,80" fill="${border}"/>
-      <polygon points="6,50 20,58 20,42"  fill="${border}"/>
-      <polygon points="94,50 80,58 80,42" fill="${border}"/>`;
-    inner.appendChild(mk);
+  function makeAnalog(color,border,cx,cy,size){
+    const wrap=mkEl('',{width:size+'px',height:size+'px',left:(cx-size/2)+'px',top:(cy-size/2)+'px',touchAction:'none',pointerEvents:'auto',zIndex:'6',borderRadius:'50%',background:skin.diskBg,border:`2px solid ${skin.diskBorder||border+'44'}`,boxShadow:'0 4px 20px rgba(0,0,0,.5)'});
+    const R=size/2,KR=Math.round(R*0.42),MAX=R-KR-6;
+    const inner=mkEl('',{position:'absolute',width:Math.round(size*0.75)+'px',height:Math.round(size*0.75)+'px',left:Math.round(size*0.125)+'px',top:Math.round(size*0.125)+'px',borderRadius:'50%',background:`radial-gradient(circle at 38% 35%, ${color}cc, ${color}77)`,border:`2px solid ${border}55`,pointerEvents:'none'});
     wrap.appendChild(inner);
-
-    // Knob
-    const knob = mkEl('', {
-      position:'absolute',
-      width: KR*2+'px', height: KR*2+'px',
-      borderRadius:'50%',
-      left:(R-KR)+'px', top:(R-KR)+'px',
-      background:`radial-gradient(circle at 35% 30%, rgba(255,255,255,.28), ${border}cc)`,
-      border:`2.5px solid ${border}`,
-      boxShadow:`0 0 18px ${border}bb, 0 4px 16px rgba(0,0,0,.8), inset 0 1px 6px rgba(255,255,255,.22)`,
-      transition:'none', pointerEvents:'none',
-    });
+    const knob=mkEl('',{position:'absolute',width:KR*2+'px',height:KR*2+'px',borderRadius:'50%',left:(R-KR)+'px',top:(R-KR)+'px',background:`radial-gradient(circle at 35% 30%, rgba(255,255,255,.28), ${border}cc)`,border:`2.5px solid ${border}`,boxShadow:`0 0 18px ${border}bb, 0 4px 16px rgba(0,0,0,.8)`,transition:'none',pointerEvents:'none'});
     wrap.appendChild(knob);
-
-    let active=false, ox=0, oy=0;
-    const THRESH=0.40, AV=0x7fff;
-    const sent={up:0,down:0,left:0,right:0};
-    const DM={up:EJS_INPUT.UP,down:EJS_INPUT.DOWN,left:EJS_INPUT.LEFT,right:EJS_INPUT.RIGHT};
-    function sDir(d,v){if(sent[d]===v)return;sent[d]=v;sendInput(DM[d],v);}
-    function sAn(nx,ny){
-      sendInput(EJS_INPUT.LSTICK_RIGHT,nx>0?Math.round(nx*AV):0);
-      sendInput(EJS_INPUT.LSTICK_LEFT, nx<0?Math.round(-nx*AV):0);
-      sendInput(EJS_INPUT.LSTICK_DOWN, ny>0?Math.round(ny*AV):0);
-      sendInput(EJS_INPUT.LSTICK_UP,   ny<0?Math.round(-ny*AV):0);
-    }
-    function relAll(){sDir('up',0);sDir('down',0);sDir('left',0);sDir('right',0);sAn(0,0);}
-    function mv(dx,dy){
-      const dist=Math.sqrt(dx*dx+dy*dy),cl=Math.min(dist,MAX),ang=Math.atan2(dy,dx);
-      const cx2=Math.cos(ang)*cl,cy2=Math.sin(ang)*cl;
-      knob.style.transform=`translate(${cx2}px,${cy2}px)`;
-      const nx=cx2/MAX,ny=cy2/MAX;
-      sAn(nx,ny);
-      sDir('right',nx>THRESH?1:0);sDir('left',nx<-THRESH?1:0);
-      sDir('down',ny>THRESH?1:0);sDir('up',ny<-THRESH?1:0);
-    }
-    function onS(e){e.preventDefault();const t=e.touches?e.touches[0]:e;const r=wrap.getBoundingClientRect();active=true;ox=r.left+R;oy=r.top+R;mv(t.clientX-ox,t.clientY-oy);}
-    function onM(e){if(!active)return;e.preventDefault();const t=e.touches?e.touches[0]:e;mv(t.clientX-ox,t.clientY-oy);}
-    function onE(e){e.preventDefault();active=false;knob.style.transition='transform .13s cubic-bezier(.25,.8,.25,1)';knob.style.transform='translate(0,0)';setTimeout(()=>{knob.style.transition='none';},140);relAll();}
-    wrap.addEventListener('touchstart', onS,{passive:false});
-    wrap.addEventListener('touchmove',  onM,{passive:false});
-    wrap.addEventListener('touchend',   onE,{passive:false});
-    wrap.addEventListener('touchcancel',onE,{passive:false});
-    wrap.addEventListener('mousedown',  onS);
-    window.addEventListener('mousemove',e=>{if(active)onM(e);});
-    window.addEventListener('mouseup',  e=>{if(active)onE(e);});
+    let active2=false,ox2=0,oy2=0;const THRESH=0.40,AV=0x7fff;
+    const sent2={up:0,down:0,left:0,right:0};const DM2={up:EJS_INPUT.UP,down:EJS_INPUT.DOWN,left:EJS_INPUT.LEFT,right:EJS_INPUT.RIGHT};
+    function sD(d,v){if(sent2[d]===v)return;sent2[d]=v;sendInput(DM2[d],v);}
+    function sA(nx,ny){sendInput(EJS_INPUT.LSTICK_RIGHT,nx>0?Math.round(nx*AV):0);sendInput(EJS_INPUT.LSTICK_LEFT,nx<0?Math.round(-nx*AV):0);sendInput(EJS_INPUT.LSTICK_DOWN,ny>0?Math.round(ny*AV):0);sendInput(EJS_INPUT.LSTICK_UP,ny<0?Math.round(-ny*AV):0);}
+    function rel(){sD('up',0);sD('down',0);sD('left',0);sD('right',0);sA(0,0);}
+    function mv2(dx,dy){const dist=Math.sqrt(dx*dx+dy*dy),cl=Math.min(dist,MAX),ang=Math.atan2(dy,dx);knob.style.transform=`translate(${Math.cos(ang)*cl}px,${Math.sin(ang)*cl}px)`;const nx=Math.cos(ang)*cl/MAX,ny=Math.sin(ang)*cl/MAX;sA(nx,ny);sD('right',nx>THRESH?1:0);sD('left',nx<-THRESH?1:0);sD('down',ny>THRESH?1:0);sD('up',ny<-THRESH?1:0);}
+    wrap.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0],r=wrap.getBoundingClientRect();active2=true;ox2=r.left+R;oy2=r.top+R;mv2(t.clientX-ox2,t.clientY-oy2);},{passive:false});
+    wrap.addEventListener('touchmove',e=>{if(!active2)return;e.preventDefault();const t=e.touches[0];mv2(t.clientX-ox2,t.clientY-oy2);},{passive:false});
+    wrap.addEventListener('touchend',e=>{e.preventDefault();active2=false;knob.style.transition='transform .13s ease';knob.style.transform='translate(0,0)';setTimeout(()=>{knob.style.transition='none';},140);rel();},{passive:false});
+    wrap.addEventListener('touchcancel',e=>{e.preventDefault();active2=false;knob.style.transform='translate(0,0)';rel();},{passive:false});
     return wrap;
   }
 
-  /* ─────────────────────────────────────────────
-     MONTA O PAD
-  ───────────────────────────────────────────── */
   const s = skin;
-
-  // 1. D-Pad ou Analógico — disco esquerdo
-  if (s.analog) {
-    pad.appendChild(makeAnalog(s.dpad.color, s.dpad.border, diskCX, diskCY, DS));
-  } else {
-    pad.appendChild(makeDpad(s.dpad.color, s.dpad.border, diskCX, diskCY, DS));
-  }
-
-  // 2. Botões de face — losango direito
-  s.face.forEach((f, i) => {
-    const pos = FPOS[i % 4];
-    pad.appendChild(makeBtn(f,
-      Math.round(faceCX + pos.dx),
-      Math.round(faceCY + pos.dy),
-      BS
-    ));
-  });
-
-  // 3. Shoulders — abas no topo
-  s.shoulders.forEach(sh => {
-    const isR = sh.side === 'right';
-    const row = sh.row || 0;
-    const x   = isR ? W - MAR - SW : MAR;
-    const y   = shY + row * (SH + 4);
-    pad.appendChild(makeShoulder(sh, x, y));
-  });
-
-  // 4. Meta (Select / Start)
-  // PORTRAIT  → centro horizontal na barra, lado a lado
-  // LANDSCAPE → SELECT embaixo do L (esquerda) | START embaixo do R (direita)
-  //             Centro da tela LIVRE para o jogo
-  if (LS) {
-    // Calcula Y: abaixo do último shoulder da coluna
-    const lastShRow = Math.max(0, ...s.shoulders.map(sh => sh.row || 0));
-    const metaShY   = shY + (lastShRow + 1) * (SH + 4) + 4;
-
-    s.meta.forEach((m, i) => {
-      const isRight = i === s.meta.length - 1; // último = START → direita
-      const x = isRight ? W - MAR - MW : MAR;
-      pad.appendChild(makeMeta(m, x + MW/2, metaShY + MH/2, MW, MH));
-    });
-  } else {
-    // Portrait: centro horizontal, topo da barra
-    const metaGap    = Math.round(MW * 0.15);
-    const metaTotalW = s.meta.length * MW + (s.meta.length - 1) * metaGap;
-    const metaStartX = Math.round(W / 2 - metaTotalW / 2);
-    s.meta.forEach((m, i) => {
-      const cx2 = metaStartX + i * (MW + metaGap) + MW / 2;
-      pad.appendChild(makeMeta(m, cx2, metaCY + MH / 2, MW, MH));
-    });
-  }
-
+  if(s.analog) pad.appendChild(makeAnalog(s.dpad.color,s.dpad.border,diskCX,diskCY,DS));
+  else pad.appendChild(makeDpad(s.dpad.color,s.dpad.border,diskCX,diskCY,DS));
+  s.face.forEach((f,i)=>{const p=FPOS[i%4];pad.appendChild(makeBtn(f,Math.round(faceCX+p.dx),Math.round(faceCY+p.dy),BS));});
+  s.shoulders.forEach(sh=>{pad.appendChild(makeShoulder(sh,sh.side==='right'?W-MAR-SW:MAR,shY+(sh.row||0)*(SH+4)));});
+  if(LS){const lastR=Math.max(0,...s.shoulders.map(sh=>sh.row||0));const my=shY+(lastR+1)*(SH+4)+4;s.meta.forEach((m,i)=>{pad.appendChild(makeMeta(m,(i===s.meta.length-1?W-MAR-MW:MAR)+MW/2,my+MH/2,MW,MH));});}
+  else{const g=Math.round(MW*0.15),tw=s.meta.length*MW+(s.meta.length-1)*g,sx=Math.round(W/2-tw/2);s.meta.forEach((m,i)=>{pad.appendChild(makeMeta(m,sx+i*(MW+g)+MW/2,metaCY+MH/2,MW,MH));});}
   pad.classList.add('active');
 }
 
-/* ═══════════════════════════════════════════════════════════
-   FULLSCREEN  — apenas via gesto do usuário
-═══════════════════════════════════════════════════════════ */
-function requestFS() {
-  const el = document.documentElement;
-  (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen)?.call(el);
-  /* iOS Safari: não suporta fullscreen API — usamos meta viewport trick */
-  document.querySelector('meta[name=viewport]').content =
-    'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
-  document.getElementById('rv-fs-btn').style.display = 'none';
-}
+/* Fullscreen */
+function requestFS(){const el=document.documentElement;(el.requestFullscreen||el.webkitRequestFullscreen)?.call(el);document.getElementById('rv-fs-btn').style.display='none';}
+document.getElementById('rv-fs-btn').addEventListener('click',requestFS);
+document.getElementById('rv-fs-btn').addEventListener('touchend',e=>{e.preventDefault();requestFS();},{passive:false});
 
-document.getElementById('rv-fs-btn').addEventListener('click', requestFS);
-document.getElementById('rv-fs-btn').addEventListener('touchend', e => { e.preventDefault(); requestFS(); }, {passive:false});
-
-/* Reconstrói pad na mudança de orientação */
-window.addEventListener('orientationchange', () => {
-  setTimeout(() => {
-    const skin = SKINS[core] || SKINS['snes'];
-    if (isTouch && document.getElementById('rv-pad').classList.contains('active')) {
-      buildPad(skin);
-    }
-  }, 350);
-});
-window.addEventListener('resize', () => {
-  const skin = SKINS[core] || SKINS['snes'];
-  if (isTouch && document.getElementById('rv-pad').classList.contains('active')) {
-    buildPad(skin);
+/* Resize/orientation */
+window.addEventListener('orientationchange',()=>{setTimeout(()=>{if(isTouch)initControls();},350);});
+window.addEventListener('resize',()=>{
+  if(isTouch){
+    const has=document.getElementById('rv-overlay').classList.contains('active')||document.getElementById('rv-pad').classList.contains('active');
+    if(has) initControls();
   }
 });
-
-/* ═══════════════════════════════════════════════════════════
-   CALLBACK DO EMULATORJS
-═══════════════════════════════════════════════════════════ */
-EJS_onGameStart = function () {
-  /* Esconde loading */
-  const loading = document.getElementById('rv-loading');
-  if (loading) loading.classList.add('hidden');
-
-  /* Mostra botão de fullscreen */
-  document.getElementById('rv-fs-btn').classList.add('visible');
-
-  /* Monta controles apenas em touch */
-  if (isTouch) {
-    const skin = SKINS[core] || SKINS['snes'];
-    buildPad(skin);
-  }
-};
-
-/* Fallback 14s */
-setTimeout(() => {
-  const loading = document.getElementById('rv-loading');
-  if (loading) loading.classList.add('hidden');
-  document.getElementById('rv-fs-btn').classList.add('visible');
-  if (isTouch) {
-    const skin = SKINS[core] || SKINS['snes'];
-    buildPad(skin);
-  }
-}, 14000);
 </script>
-
-<script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25b4f371bfb1719',t:'MTc4NTgyMjg4Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a262070c2e0c4468',t:'MTc4NTg5MzMzMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RetroVerse - Calibração de Overlays</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #111;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    .toolbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(0,0,0,0.95);
+      padding: 10px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      border-bottom: 1px solid #333;
+    }
+
+    .toolbar select, .toolbar button {
+      background: #222;
+      color: #fff;
+      border: 1px solid #555;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .toolbar button:hover { background: #333; }
+    .toolbar button.active { background: #00aa44; border-color: #00ff41; }
+
+    .toolbar .info {
+      font-size: 0.75rem;
+      color: #aaa;
+      margin-left: auto;
+    }
+
+    #canvas-wrap {
+      position: relative;
+      margin: 80px auto 40px;
+      max-width: 540px;
+      width: 90%;
+    }
+
+    #skin-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 2px solid #333;
+      border-radius: 8px;
+    }
+
+    /* Marcadores de botão */
+    .marker {
+      position: absolute;
+      border: 2px solid #00ff41;
+      border-radius: 50%;
+      background: rgba(0,255,65,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: move;
+      font-size: 10px;
+      font-weight: bold;
+      color: #00ff41;
+      text-shadow: 0 0 4px #000;
+      pointer-events: auto;
+      z-index: 10;
+      transition: border-color 0.15s;
+    }
+    .marker:hover { border-color: #fff; }
+    .marker.selected {
+      border-color: #ff0;
+      background: rgba(255,255,0,0.2);
+      color: #ff0;
+      box-shadow: 0 0 12px rgba(255,255,0,0.5);
+    }
+
+    .marker.dpad-marker {
+      border-radius: 50%;
+      border-color: #00aaff;
+      background: rgba(0,170,255,0.1);
+      color: #00aaff;
+    }
+    .marker.dpad-marker.selected {
+      border-color: #ff0;
+      color: #ff0;
+    }
+
+    /* Output JSON */
+    #output {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      max-height: 40vh;
+      overflow: auto;
+      background: rgba(0,0,0,0.95);
+      border-top: 1px solid #333;
+      padding: 12px 16px;
+      font-family: monospace;
+      font-size: 0.72rem;
+      color: #00ff41;
+      white-space: pre-wrap;
+      z-index: 100;
+      display: none;
+    }
+    #output.visible { display: block; }
+
+    .btn-row {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .btn-add {
+      font-size: 0.7rem !important;
+      padding: 4px 8px !important;
+    }
+    .btn-add.placed {
+      background: #1a4a2a;
+      border-color: #00ff41;
+    }
+  </style>
+</head>
+<body>
+
+<div class="toolbar">
+  <select id="console-select">
+    <option value="snes">SNES</option>
+    <option value="gba">GBA</option>
+    <option value="gbc">GBC</option>
+    <option value="nes">NES</option>
+    <option value="n64">N64</option>
+    <option value="psx">PSX</option>
+    <option value="sega">SEGA</option>
+  </select>
+
+  <div class="btn-row" id="btn-row"></div>
+
+  <button id="btn-export" onclick="exportJSON()">📋 Exportar JSON</button>
+  <button id="btn-clear" onclick="clearAll()">🗑 Limpar</button>
+  <button id="btn-toggle-output" onclick="toggleOutput()">👁 Ver JSON</button>
+
+  <div class="info" id="info-text">Clique na imagem para posicionar o botão selecionado</div>
+</div>
+
+<div id="canvas-wrap">
+  <img id="skin-img" src="" alt="Skin">
+</div>
+
+<div id="output"></div>
+
+<script>
+const SKIN_IMAGES = {
+  snes: 'overlays/snes/snes_phone_portrait_purple.png',
+  gba: 'overlays/gba/gba_phone_portrait_yellow.png',
+  gbc: 'overlays/gbc/gbc_phone_portrait_yellow.png',
+  nes: 'overlays/nes/nes_phone_portrait_beige.png',
+  n64: 'overlays/n64/n64_phone_portrait_green.png',
+  psx: 'overlays/psx/psx_phone_portrait_beige.png',
+  sega: 'overlays/sega/saturn_portrait_black.png',
+};
+
+const CONSOLE_BUTTONS = {
+  snes: ['DPAD', 'A', 'B', 'X', 'Y', 'L', 'R', 'SELECT', 'START'],
+  gba: ['DPAD', 'A', 'B', 'L', 'R', 'SELECT', 'START'],
+  gbc: ['DPAD', 'A', 'B', 'SELECT', 'START'],
+  nes: ['DPAD', 'A', 'B', 'SELECT', 'START'],
+  n64: ['DPAD', 'A', 'B', 'C_UP', 'C_DOWN', 'C_LEFT', 'C_RIGHT', 'L', 'R', 'Z', 'START'],
+  psx: ['DPAD', 'CIRCLE', 'CROSS', 'SQUARE', 'TRIANGLE', 'L1', 'R1', 'L2', 'R2', 'SELECT', 'START'],
+  sega: ['DPAD', 'A', 'B', 'C', 'X', 'Y', 'Z', 'L', 'R', 'START'],
+};
+
+let currentConsole = 'snes';
+let currentButton = null;
+let markers = {}; // { consoleName: { buttonName: { x, y, w, h } } }
+let selectedButton = null;
+
+const img = document.getElementById('skin-img');
+const wrap = document.getElementById('canvas-wrap');
+const select = document.getElementById('console-select');
+const btnRow = document.getElementById('btn-row');
+const infoText = document.getElementById('info-text');
+
+// Initialize markers storage
+for (const c of Object.keys(SKIN_IMAGES)) {
+  markers[c] = {};
+}
+
+function loadConsole(name) {
+  currentConsole = name;
+  img.src = SKIN_IMAGES[name];
+  renderButtons();
+  renderMarkers();
+}
+
+function renderButtons() {
+  btnRow.innerHTML = '';
+  const buttons = CONSOLE_BUTTONS[currentConsole] || [];
+  buttons.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-add' + (markers[currentConsole][name] ? ' placed' : '');
+    btn.textContent = name;
+    btn.onclick = () => selectBtn(name);
+
+    if (currentButton === name) {
+      btn.classList.add('active');
+    }
+
+    // Right click to delete
+    btn.oncontextmenu = (e) => {
+      e.preventDefault();
+      delete markers[currentConsole][name];
+      renderButtons();
+      renderMarkers();
+      updateOutput();
+    };
+
+    btnRow.appendChild(btn);
+  });
+}
+
+function selectBtn(name) {
+  currentButton = (currentButton === name) ? null : name;
+  renderButtons();
+  infoText.textContent = currentButton
+    ? `Clique na imagem para posicionar: ${currentButton}`
+    : 'Selecione um botão acima';
+}
+
+// Click on image to place marker
+img.addEventListener('click', (e) => {
+  if (!currentButton) return;
+
+  const rect = img.getBoundingClientRect();
+  const x = ((e.clientX - rect.left) / rect.width) * 100;
+  const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+  const isDpad = currentButton === 'DPAD';
+  const isShoulder = ['L', 'R', 'L1', 'R1', 'L2', 'R2', 'Z'].includes(currentButton);
+  const isMeta = ['SELECT', 'START', 'MODE'].includes(currentButton);
+
+  // Default sizes (% of image)
+  let w, h;
+  if (isDpad) {
+    w = 20; h = 12;
+  } else if (isShoulder) {
+    w = 18; h = 4;
+  } else if (isMeta) {
+    w = 10; h = 3;
+  } else {
+    w = 8; h = 5;
+  }
+
+  markers[currentConsole][currentButton] = {
+    x: Math.round(x * 100) / 100,
+    y: Math.round(y * 100) / 100,
+    w: w,
+    h: h,
+  };
+
+  renderButtons();
+  renderMarkers();
+  updateOutput();
+});
+
+function renderMarkers() {
+  // Remove old markers
+  wrap.querySelectorAll('.marker').forEach(m => m.remove());
+
+  const consoleMarkers = markers[currentConsole] || {};
+  const imgRect = img.getBoundingClientRect();
+  const wrapRect = wrap.getBoundingClientRect();
+
+  for (const [name, data] of Object.entries(consoleMarkers)) {
+    const marker = document.createElement('div');
+    const isDpad = name === 'DPAD';
+    marker.className = 'marker' + (isDpad ? ' dpad-marker' : '');
+    marker.textContent = name;
+
+    // Position relative to wrapper (which contains the image)
+    const imgOffsetX = img.offsetLeft;
+    const imgOffsetY = img.offsetTop;
+    const imgW = img.offsetWidth;
+    const imgH = img.offsetHeight;
+
+    const px = imgOffsetX + (data.x / 100) * imgW - (data.w / 100) * imgW / 2;
+    const py = imgOffsetY + (data.y / 100) * imgH - (data.h / 100) * imgH / 2;
+    const pw = (data.w / 100) * imgW;
+    const ph = (data.h / 100) * imgH;
+
+    Object.assign(marker.style, {
+      left: px + 'px',
+      top: py + 'px',
+      width: pw + 'px',
+      height: ph + 'px',
+      fontSize: Math.max(8, Math.min(12, ph * 0.4)) + 'px',
+    });
+
+    // Click to select (for resizing)
+    marker.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectMarker(name);
+    });
+
+    // Drag to move
+    let dragging = false;
+    marker.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      dragging = true;
+      e.stopPropagation();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const rect2 = img.getBoundingClientRect();
+      const nx = ((e.clientX - rect2.left) / rect2.width) * 100;
+      const ny = ((e.clientY - rect2.top) / rect2.height) * 100;
+      data.x = Math.round(Math.max(0, Math.min(100, nx)) * 100) / 100;
+      data.y = Math.round(Math.max(0, Math.min(100, ny)) * 100) / 100;
+      renderMarkers();
+      updateOutput();
+    });
+
+    document.addEventListener('mouseup', () => { dragging = false; });
+
+    wrap.appendChild(marker);
+  }
+}
+
+function selectMarker(name) {
+  // Remove previous selection
+  wrap.querySelectorAll('.marker.selected').forEach(m => m.classList.remove('selected'));
+
+  if (selectedButton === name) {
+    selectedButton = null;
+    infoText.textContent = 'Selecione um botão acima';
+    return;
+  }
+
+  selectedButton = name;
+  currentButton = name;
+  renderButtons();
+
+  const markerEl = wrap.querySelector(`.marker`);
+  wrap.querySelectorAll('.marker').forEach(m => {
+    if (m.textContent === name) m.classList.add('selected');
+  });
+
+  const data = markers[currentConsole][name];
+  infoText.textContent = `${name}: X=${data.x}% Y=${data.y}% W=${data.w}% H=${data.h}% | Scroll para redimensionar`;
+}
+
+// Scroll to resize selected marker
+window.addEventListener('wheel', (e) => {
+  if (!selectedButton || !markers[currentConsole][selectedButton]) return;
+  e.preventDefault();
+
+  const data = markers[currentConsole][selectedButton];
+  const delta = e.deltaY > 0 ? -0.5 : 0.5;
+
+  if (e.shiftKey) {
+    data.h = Math.max(1, Math.round((data.h + delta) * 100) / 100);
+  } else {
+    data.w = Math.max(1, Math.round((data.w + delta) * 100) / 100);
+  }
+
+  renderMarkers();
+  updateOutput();
+  infoText.textContent = `${selectedButton}: X=${data.x}% Y=${data.y}% W=${data.w}% H=${data.h}% | Scroll=largura, Shift+Scroll=altura`;
+}, { passive: false });
+
+function exportJSON() {
+  const output = document.getElementById('output');
+  output.classList.add('visible');
+
+  let result = '';
+  for (const [consoleName, btns] of Object.entries(markers)) {
+    if (Object.keys(btns).length === 0) continue;
+
+    result += `\n// ${consoleName.toUpperCase()}\n`;
+    result += `zones: {\n`;
+    for (const [name, data] of Object.entries(btns)) {
+      const type = name === 'DPAD' ? 'dpad' : 'btn';
+      const input = getInputForButton(name, consoleName);
+      if (type === 'btn') {
+        result += `  ${name}: { type:'btn', input:${input}, x:${data.x}, y:${data.y}, w:${data.w}, h:${data.h} },\n`;
+      } else {
+        result += `  dpad: { type:'dpad', x:${data.x}, y:${data.y}, w:${data.w}, h:${data.h} },\n`;
+      }
+    }
+    result += `}\n`;
+  }
+
+  output.textContent = result;
+
+  // Also copy to clipboard
+  navigator.clipboard.writeText(result).catch(() => {});
+  infoText.textContent = '✅ JSON copiado para a área de transferência!';
+}
+
+function toggleOutput() {
+  document.getElementById('output').classList.toggle('visible');
+}
+
+function clearAll() {
+  if (confirm('Limpar todos os marcadores do console atual?')) {
+    markers[currentConsole] = {};
+    renderButtons();
+    renderMarkers();
+    updateOutput();
+  }
+}
+
+function updateOutput() {
+  const output = document.getElementById('output');
+  if (!output.classList.contains('visible')) return;
+  exportJSON();
+}
+
+function getInputForButton(name, console) {
+  const map = {
+    A: 'EJS_INPUT.A',
+    B: 'EJS_INPUT.B',
+    X: 'EJS_INPUT.X',
+    Y: 'EJS_INPUT.Y',
+    CIRCLE: 'EJS_INPUT.A',
+    CROSS: 'EJS_INPUT.B',
+    SQUARE: 'EJS_INPUT.Y',
+    TRIANGLE: 'EJS_INPUT.X',
+    L: 'EJS_INPUT.L',
+    R: 'EJS_INPUT.R',
+    L1: 'EJS_INPUT.L',
+    R1: 'EJS_INPUT.R',
+    L2: 'EJS_INPUT.L2',
+    R2: 'EJS_INPUT.R2',
+    Z: 'EJS_INPUT.L2',
+    SELECT: 'EJS_INPUT.SELECT',
+    START: 'EJS_INPUT.START',
+    C_UP: 'EJS_INPUT.X',
+    C_DOWN: 'EJS_INPUT.Y',
+    C_LEFT: 'EJS_INPUT.L',
+    C_RIGHT: 'EJS_INPUT.R',
+  };
+  return map[name] || 'EJS_INPUT.A';
+}
+
+// Re-render markers on window resize
+window.addEventListener('resize', renderMarkers);
+
+// Init
+select.addEventListener('change', () => loadConsole(select.value));
+loadConsole('snes');
+</script>
+
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f"}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a26205d3bd2b1719',t:'MTc4NTg5MzI4MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
