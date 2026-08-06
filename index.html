@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="assets/rv-icon.png">
   <link rel="apple-touch-icon" href="assets/rv-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#020503">
   <title>RetroVerse - Universo dos Games Clássicos</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/audio.js"></script>
 </head>
 <body>
 
@@ -14,7 +17,7 @@
   <div class="crt-overlay" aria-hidden="true"></div>
 
   <!-- NAVBAR -->
-  <header class="navbar">
+  <header class="navbar navbar-home">
     <div class="brand">
       <div class="brand-logo">RV</div>
       <div class="brand-text">
@@ -22,7 +25,18 @@
         <span class="brand-slogan">ENTER THE CLASSICS</span>
       </div>
     </div>
+    <a href="profile.html" class="profile-link" title="Perfil">
+      <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    </a>
   </header>
+
+  <!-- BARRA DE BUSCA GLOBAL (fixa abaixo da navbar) -->
+  <div class="global-search-bar">
+    <div class="global-search" id="global-search-wrap">
+      <input type="text" id="global-search" placeholder="BUSCAR EM TODOS OS CONSOLES...">
+      <div class="global-search-results" id="global-search-results"></div>
+    </div>
+  </div>
 
   <!-- HERO SECTION -->
   <section class="hero">
@@ -54,6 +68,7 @@
     <div class="hero-particles" aria-hidden="true">
       <span></span><span></span><span></span><span></span><span></span>
       <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
     </div>
   </section>
 
@@ -61,6 +76,32 @@
   <section class="consoles-section">
     <div class="section-header">
       <span class="section-tag">// ESCOLHA SEU UNIVERSO //</span>
+    </div>
+
+    <!-- CONTINUE JOGANDO (preenchido via JS) -->
+    <div class="user-section" id="continue-playing-section" style="display:none;">
+      <div class="user-section-header">
+        <span class="user-section-title"><span class="icon">▶</span> Continue Jogando</span>
+        <button class="user-section-clear" onclick="clearRecent()">Limpar</button>
+      </div>
+      <div class="user-games-row" id="continue-playing-row"></div>
+    </div>
+
+    <!-- FAVORITOS (preenchido via JS) -->
+    <div class="user-section" id="favorites-section" style="display:none;">
+      <div class="user-section-header">
+        <span class="user-section-title"><span class="icon">❤</span> Favoritos</span>
+        <button class="user-section-clear" onclick="clearFavorites()">Limpar</button>
+      </div>
+      <div class="user-games-row" id="favorites-row"></div>
+    </div>
+
+    <!-- GAMEPASS SEMANAL (preenchido via JS) -->
+    <div class="user-section" id="gamepass-section">
+      <div class="user-section-header">
+        <span class="user-section-title"><span class="icon">⭐</span> Gamepass da Semana</span>
+      </div>
+      <div class="user-games-row" id="gamepass-row"></div>
     </div>
 
     <!-- ════════════════════════════════════
@@ -252,5 +293,238 @@
     <p class="footer-sub">Todos os Mundos. Todos os Clássicos.</p>
   </footer>
 
-</body>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CATÁLOGO COMPLETO (para busca global)
+═══════════════════════════════════════════════════════════ */
+const CATALOG = {
+  snes:   { name: 'Super Nintendo', short: 'SNES', core: 'snes', games: [
+    {name:'Aladdin',file:'Aladdin (USA).sfc'},{name:'Chrono Trigger',file:'Chrono Trigger (USA).sfc'},{name:'Donkey Kong Country',file:'Donkey Kong Country (USA) (Rev 2).sfc'},{name:'Donkey Kong Country 2',subtitle:"Diddy's Kong Quest",file:"Donkey Kong Country 2.sfc"},{name:'Donkey Kong Country 3',file:"Donkey Kong Country 3.sfc"},{name:'The Legend of Zelda',subtitle:'A Link to the Past',file:'Legend of Zelda, The - A Link to the Past (USA).sfc'},{name:'Super Mario World',file:'Super Mario World (USA).sfc'},{name:'Super Mario Kart',file:'Super Mario Kart (USA).sfc'},{name:'Super Mario RPG',subtitle:'Legend of the Seven Stars',file:'Super Mario RPG.sfc'},{name:'Super Metroid',file:'Super Metroid (Japan, USA) (En,Ja).sfc'},{name:'Top Gear',file:'Top Gear (USA).sfc'},{name:'Top Gear 2',file:'Top Gear 2 (USA).sfc'},{name:'Top Gear 3000',file:'Top Gear 3000 (USA).sfc'},{name:'Ultimate Mortal Kombat 3',file:'Ultimate Mortal Kombat 3 (USA).sfc'}
+  ]},
+  nes:    { name: 'Nintendo Classic', short: 'NES', core: 'nes', games: [
+    {name:'Castlevania III',subtitle:"Dracula's Curse",file:'Castlevania III.nes'},{name:'Contra',file:'Contra (USA).nes'},{name:'Duck Hunt',file:'Duck Hunt (World).nes'},{name:'Mega Man 2',file:'Mega Man 2 (USA).nes'},{name:'Super Mario Bros',file:'Super Mario Bros (World).nes'},{name:'Super Mario Bros 3',file:'Super Mario Bros 3.nes'},{name:'Zelda II',subtitle:'Adventure of Link',file:'Zelda II.nes'}
+  ]},
+  gba:    { name: 'Game Boy Advance', short: 'GBA', core: 'gba', games: [
+    {name:'Castlevania',subtitle:'Aria of Sorrow',file:'Castlevania - Aria of Sorrow (USA).gba'},{name:'The Legend of Zelda',subtitle:'The Minish Cap',file:'Legend of Zelda, The - The Minish Cap (USA).gba'},{name:'Mario Kart',subtitle:'Super Circuit',file:'Mario Kart - Super Circuit (USA).gba'},{name:'Metroid Fusion',file:'Metroid Fusion (USA).gba'},{name:'Pokémon',subtitle:'Emerald Version',file:'Pokemon - Emerald Version (USA, Europe).gba'},{name:'Pokémon',subtitle:'FireRed Version',file:'Pokemon - FireRed Version (USA, Europe) (Rev 1).gba'},{name:'Pokémon',subtitle:'LeafGreen Version',file:'Pokemon - LeafGreen Version (USA, Europe) (Rev 1).gba'}
+  ]},
+  gbc:    { name: 'Game Boy Color', short: 'GBC', core: 'gbc', games: [
+    {name:'The Legend of Zelda',subtitle:"Link's Awakening DX",file:"Legend of Zelda, The - Link's Awakening DX.gbc"},{name:'Pokémon',subtitle:'Gold Version',file:'Pokemon - Gold Version.gbc'},{name:'Pokémon',subtitle:'Silver Version',file:'Pokemon - Silver Version.gbc'},{name:'Super Mario Bros. Deluxe',file:'Super Mario Bros. Deluxe.gbc'},{name:'Tetris DX',file:'Tetris DX.gbc'},{name:'Wario Land 3',file:'Wario Land 3.gbc'}
+  ]},
+  n64:    { name: 'Nintendo 64', short: 'N64', core: 'n64', games: [
+    {name:'Banjo-Kazooie',file:'Banjo-Kazooie (USA) (Rev 1).z64'},{name:'GoldenEye 007',file:'GoldenEye 007 (USA).z64'},{name:'The Legend of Zelda',subtitle:'Ocarina of Time',file:'Legend of Zelda, The - Ocarina of Time (USA) (Rev 2).z64'},{name:'Mario Kart 64',file:'Mario Kart 64 (USA).z64'},{name:'Super Mario 64',file:'Super Mario 64 (USA).z64'},{name:'Super Smash Bros.',file:'Super Smash Bros. (USA).z64'}
+  ]},
+  psx:    { name: 'PlayStation 1', short: 'PS1', core: 'pcsx_rearmed', games: [
+    {name:'Castlevania',subtitle:'Symphony of the Night',file:'Castlevania - Symphony of the Night (USA).chd'},{name:'Crash Bandicoot 3',subtitle:'Warped',file:'Crash Bandicoot - Warped (USA).chd'},{name:'Crash Team Racing',subtitle:'CTR',file:'Crash Team Racing (USA).chd'},{name:'Dino Crisis',file:'Dino Crisis (USA).chd'},{name:'Metal Gear Solid',subtitle:'Disc 1',file:'Metal Gear Solid (USA) (Disc 1).chd'},{name:'Resident Evil 3',subtitle:'Nemesis',file:'Resident Evil 3 - Nemesis (USA).chd'},{name:'Tekken 3',file:'Tekken 3 (USA).chd'}
+  ]},
+  sega:   { name: 'Mega Drive', short: 'SEGA', core: 'segaMD', games: [
+    {name:'Aladdin',file:'Aladdin (USA).md'},{name:'Altered Beast',file:'Altered Beast (USA, Europe).md'},{name:'Golden Axe II',file:'Golden Axe II (World).md'},{name:'Kid Chameleon',file:'Kid Chameleon (USA, Europe).md'},{name:'Shinobi III',subtitle:'Return of the Ninja Master',file:'Shinobi III.md'},{name:'Sonic & Knuckles + Sonic 2',file:'Sonic & Knuckles + Sonic 2.md'},{name:'Streets of Rage 2',file:'Streets of Rage 2 (USA).md'}
+  ]},
+  segacd: { name: 'Sega CD', short: 'MEGA CD', core: 'segaCD', games: [
+    {name:'Sonic CD',file:'Sonic CD (USA).chd'},{name:'Snatcher',file:'Snatcher (USA).chd'},{name:'Lunar',subtitle:'The Silver Star',file:'Lunar - The Silver Star (USA).chd'},{name:'Shining Force CD',file:'Shining Force CD (USA).chd'},{name:'Final Fight CD',file:'Final Fight CD (USA).chd'}
+  ]},
+  gamegear:{ name: 'Game Gear', short: 'GG', core: 'segaGG', games: [
+    {name:'Sonic the Hedgehog',file:'Sonic the Hedgehog (World).gg'},{name:'Sonic 2',file:'Sonic the Hedgehog 2 (World).gg'},{name:'Sonic Triple Trouble',file:'Sonic Triple Trouble.gg'},{name:'Shinobi',file:'Shinobi (World).gg'},{name:'Columns',file:'Columns (World).gg'}
+  ]},
+  nds:    { name: 'Nintendo DS', short: 'NDS', core: 'nds', games: [
+    {name:'New Super Mario Bros.',file:'New Super Mario Bros. (USA).nds'},{name:'Mario Kart DS',file:'Mario Kart DS (USA).nds'},{name:'Pokémon',subtitle:'Diamond Version',file:'Pokemon - Diamond Version (USA).nds'},{name:'Pokémon',subtitle:'Platinum Version',file:'Pokemon - Platinum Version (USA).nds'},{name:'Pokémon',subtitle:'HeartGold',file:'Pokemon - HeartGold Version (USA).nds'},{name:'The Legend of Zelda',subtitle:'Phantom Hourglass',file:'Zelda - Phantom Hourglass.nds'},{name:'Castlevania',subtitle:'Dawn of Sorrow',file:'Castlevania - Dawn of Sorrow (USA).nds'},{name:'Chrono Trigger',file:'Chrono Trigger (USA).nds'}
+  ]},
+  arcade: { name: 'Arcade', short: 'ARCADE', core: 'fbneo', games: [
+    {name:'The King of Fighters \'97',file:'kof97.zip'},{name:'The King of Fighters \'98',file:'kof98.zip'},{name:'Metal Slug',file:'mslug.zip'},{name:'Marvel vs. Capcom',file:'mvsc.zip'},{name:'Samurai Shodown II',file:'samsho2.zip'},{name:'Street Fighter Alpha 3',file:'sfa3.zip'}
+  ]}
+};
+
+/* ═══════════════════════════════════════════════════════════
+   CONTINUE JOGANDO (localStorage)
+═══════════════════════════════════════════════════════════ */
+function getRecent() {
+  try { return JSON.parse(localStorage.getItem('rv_recent') || '[]'); } catch { return []; }
+}
+
+function renderRecent() {
+  const recent = getRecent();
+  const section = document.getElementById('continue-playing-section');
+  const row = document.getElementById('continue-playing-row');
+  if (recent.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  row.innerHTML = '';
+  recent.forEach(item => {
+    const card = document.createElement('a');
+    card.className = 'user-game-card';
+    card.href = `play.html?core=${item.core}&game=${item.console}/${encodeURIComponent(item.file)}`;
+    const coverName = item.file.replace(/\.[^/.]+$/, '') + '.png';
+    card.innerHTML = `
+      <img class="user-game-cover" src="covers/${item.console}/${encodeURIComponent(coverName)}" onerror="this.outerHTML='<div class=\\'user-game-fallback\\'>RV</div>'">
+      <div class="user-game-info">
+        <div class="user-game-name">${item.name}${item.subtitle ? ' — ' + item.subtitle : ''}</div>
+        <div class="user-game-console">${item.consoleShort}</div>
+      </div>`;
+    row.appendChild(card);
+  });
+}
+
+function clearRecent() {
+  localStorage.removeItem('rv_recent');
+  renderRecent();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FAVORITOS (localStorage)
+═══════════════════════════════════════════════════════════ */
+function getFavorites() {
+  try { return JSON.parse(localStorage.getItem('rv_favorites') || '[]'); } catch { return []; }
+}
+
+function renderFavorites() {
+  const favs = getFavorites();
+  const section = document.getElementById('favorites-section');
+  const row = document.getElementById('favorites-row');
+  if (favs.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  row.innerHTML = '';
+  favs.forEach(item => {
+    const card = document.createElement('a');
+    card.className = 'user-game-card';
+    card.href = `play.html?core=${item.core}&game=${item.console}/${encodeURIComponent(item.file)}`;
+    const coverName = item.file.replace(/\.[^/.]+$/, '') + '.png';
+    card.innerHTML = `
+      <img class="user-game-cover" src="covers/${item.console}/${encodeURIComponent(coverName)}" onerror="this.outerHTML='<div class=\\'user-game-fallback\\'>RV</div>'">
+      <div class="user-game-info">
+        <div class="user-game-name">${item.name}${item.subtitle ? ' — ' + item.subtitle : ''}</div>
+        <div class="user-game-console">${item.consoleShort}</div>
+      </div>`;
+    row.appendChild(card);
+  });
+}
+
+function clearFavorites() {
+  localStorage.removeItem('rv_favorites');
+  renderFavorites();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BUSCA GLOBAL
+═══════════════════════════════════════════════════════════ */
+const searchInput = document.getElementById('global-search');
+const searchResults = document.getElementById('global-search-results');
+
+searchInput.addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  if (q.length < 2) { searchResults.classList.remove('visible'); return; }
+
+  let results = [];
+  for (const [consoleKey, cat] of Object.entries(CATALOG)) {
+    for (const game of cat.games) {
+      const nameMatch = game.name.toLowerCase().includes(q);
+      const subMatch = game.subtitle ? game.subtitle.toLowerCase().includes(q) : false;
+      if (nameMatch || subMatch) {
+        results.push({ ...game, console: consoleKey, consoleShort: cat.short, core: cat.core });
+      }
+    }
+  }
+
+  if (results.length === 0) {
+    searchResults.innerHTML = '<div class="gsr-empty">Nenhum jogo encontrado</div>';
+  } else {
+    searchResults.innerHTML = results.slice(0, 15).map(r => `
+      <a class="gsr-item" href="play.html?core=${r.core}&game=${r.console}/${encodeURIComponent(r.file)}">
+        <span class="gsr-item-console">${r.consoleShort}</span>
+        <span class="gsr-item-name">${r.name}</span>
+        ${r.subtitle ? `<span class="gsr-item-sub">${r.subtitle}</span>` : ''}
+      </a>
+    `).join('');
+  }
+  searchResults.classList.add('visible');
+});
+
+searchInput.addEventListener('focus', function() {
+  if (this.value.trim().length >= 2) searchResults.classList.add('visible');
+});
+
+document.addEventListener('click', function(e) {
+  if (!document.getElementById('global-search-wrap').contains(e.target)) {
+    searchResults.classList.remove('visible');
+  }
+});
+
+/* Init */
+renderRecent();
+renderFavorites();
+renderGamepass();
+
+/* Register Service Worker (PWA) */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+/* ═══ UI Sound Effects ═══ */
+document.addEventListener('click', (e) => {
+  if (e.target.closest('a, button, .card, .fav-btn, .filter-btn, .user-game-card, .game-card')) {
+    RV_AUDIO.uiClick();
+  }
+});
+
+document.addEventListener('mouseover', (e) => {
+  if (e.target.closest('.console-card, .game-card, .user-game-card, .btn-back, .filter-btn, .profile-link')) {
+    RV_AUDIO.uiHover();
+  }
+});
+
+/* Page load transition sound */
+window.addEventListener('load', () => {
+  setTimeout(() => RV_AUDIO.uiTransition(), 500);
+});
+
+/* ═══ GAMEPASS SEMANAL ═══ */
+function renderGamepass() {
+  const section = document.getElementById('gamepass-section');
+  const row = document.getElementById('gamepass-row');
+  if (!section || !row) return;
+
+  // Seleciona jogos baseado na semana do ano (rotação automática)
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  const weekNum = Math.floor((now - startOfYear) / (7 * 24 * 60 * 60 * 1000));
+
+  // Pool de jogos destaque de cada console
+  const highlights = [
+    { console: 'snes', core: 'snes', name: 'Chrono Trigger', subtitle: '', file: 'Chrono Trigger (USA).sfc', short: 'SNES' },
+    { console: 'psx', core: 'pcsx_rearmed', name: 'Castlevania', subtitle: 'Symphony of the Night', file: 'Castlevania - Symphony of the Night (USA).chd', short: 'PS1' },
+    { console: 'n64', core: 'n64', name: 'The Legend of Zelda', subtitle: 'Ocarina of Time', file: 'Legend of Zelda, The - Ocarina of Time (USA) (Rev 2).z64', short: 'N64' },
+    { console: 'gba', core: 'gba', name: 'Metroid Fusion', subtitle: '', file: 'Metroid Fusion (USA).gba', short: 'GBA' },
+    { console: 'nds', core: 'nds', name: 'Chrono Trigger', subtitle: '', file: 'Chrono Trigger (USA).nds', short: 'NDS' },
+    { console: 'snes', core: 'snes', name: 'Super Metroid', subtitle: '', file: 'Super Metroid (Japan, USA) (En,Ja).sfc', short: 'SNES' },
+    { console: 'psx', core: 'pcsx_rearmed', name: 'Metal Gear Solid', subtitle: '', file: 'Metal Gear Solid (USA) (Disc 1).chd', short: 'PS1' },
+    { console: 'sega', core: 'segaMD', name: 'Streets of Rage 2', subtitle: '', file: 'Streets of Rage 2 (USA).md', short: 'SEGA' },
+    { console: 'snes', core: 'snes', name: 'Super Mario World', subtitle: '', file: 'Super Mario World (USA).sfc', short: 'SNES' },
+    { console: 'gba', core: 'gba', name: 'Castlevania', subtitle: 'Aria of Sorrow', file: 'Castlevania - Aria of Sorrow (USA).gba', short: 'GBA' },
+    { console: 'arcade', core: 'fbneo', name: 'Metal Slug', subtitle: '', file: 'mslug.zip', short: 'ARCADE' },
+    { console: 'gbc', core: 'gbc', name: 'Pokémon', subtitle: 'Gold Version', file: 'Pokemon - Gold Version (USA, Europe) (SGB Enhanced) (GB Compatible).gbc', short: 'GBC' },
+  ];
+
+  // Pega 4 jogos baseados na semana
+  const start = (weekNum * 4) % highlights.length;
+  const picks = [];
+  for (let i = 0; i < 4; i++) {
+    picks.push(highlights[(start + i) % highlights.length]);
+  }
+
+  section.style.display = '';
+  row.innerHTML = '';
+  picks.forEach(item => {
+    const card = document.createElement('a');
+    card.className = 'user-game-card';
+    card.href = `play.html?core=${item.core}&game=${item.console}/${encodeURIComponent(item.file)}`;
+    const coverName = item.file.replace(/\.[^/.]+$/, '') + '.png';
+    card.innerHTML = `
+      <img class="user-game-cover" src="covers/${item.console}/${encodeURIComponent(coverName)}" onerror="this.outerHTML='<div class=\\'user-game-fallback\\'>RV</div>'">
+      <div class="user-game-info">
+        <div class="user-game-name">${item.name}${item.subtitle ? ' — ' + item.subtitle : ''}</div>
+        <div class="user-game-console">${item.short} ★</div>
+      </div>`;
+    row.appendChild(card);
+  });
+}
+</script>
+
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a267fb5aea1b167d',t:'MTc4NTk1NTc2Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

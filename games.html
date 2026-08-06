@@ -13,25 +13,29 @@
   <!-- EFEITO CRT SCANLINES -->
   <div class="crt-overlay" aria-hidden="true"></div>
 
-  <!-- NAVBAR REESTRUTURADA -->
+  <!-- NAVBAR -->
   <header class="navbar games-navbar">
-
-    <!-- LINHA 1: Botão voltar + Título central -->
-    <div class="games-navbar-row1">
-      <a href="index.html" class="btn-back">Consoles</a>
-      <div class="games-header-center">
-        <span class="games-header-brand">RETROVERSE</span>
-        <h1 id="console-title" class="console-header-title">Jogos</h1>
-        <span id="games-count" class="games-count-badge">0 JOGOS DISPONÍVEIS</span>
-      </div>
+    <a href="index.html" class="btn-back">Consoles</a>
+    <div class="games-header-center">
+      <span class="games-header-brand">RETROVERSE</span>
+      <h1 id="console-title" class="console-header-title">Jogos</h1>
+      <span class="games-count-badge" id="games-count">0 JOGOS DISPONÍVEIS</span>
     </div>
+    <div class="navbar-spacer"></div>
+  </header>
 
-    <!-- LINHA 2: Busca -->
+  <!-- BARRA DE BUSCA + FILTROS (fixa abaixo da navbar) -->
+  <div class="games-toolbar">
     <div class="search-box">
       <input type="text" id="game-search" placeholder="BUSCAR JOGO..." onkeyup="filterGames()">
     </div>
-
-  </header>
+    <div class="games-filters">
+      <button class="filter-btn active" data-sort="default" onclick="sortGames('default', this)">Padrão</button>
+      <button class="filter-btn" data-sort="az" onclick="sortGames('az', this)">A-Z</button>
+      <button class="filter-btn" data-sort="za" onclick="sortGames('za', this)">Z-A</button>
+      <button class="filter-btn filter-fav-btn" data-sort="fav" onclick="sortGames('fav', this)">❤ Favoritos</button>
+    </div>
+  </div>
 
   <!-- CONTAINER DA LISTA DE JOGOS -->
   <main class="grid-container games-grid" id="games-list"></main>
@@ -229,19 +233,72 @@
       'gamegear': [
         { name: 'Sonic the Hedgehog', file: 'Sonic the Hedgehog (World).gg' },
         { name: 'Sonic the Hedgehog 2', file: 'Sonic the Hedgehog 2 (World).gg' },
-        { name: 'Sonic Triple Trouble', file: 'Sonic the Hedgehog - Triple Trouble (World).gg' },
         { name: 'Shinobi', file: 'Shinobi (World).gg' },
         { name: 'Shinobi II', subtitle: 'The Silent Fury', file: 'Shinobi II - The Silent Fury (World).gg' },
         { name: 'Columns', file: 'Columns (World).gg' },
-        { name: 'GG Shinobi', file: 'GG Shinobi, The (World).gg' },
         { name: 'Wonder Boy', subtitle: "The Dragon's Trap", file: "Wonder Boy - The Dragon's Trap (USA, Europe).gg" },
         { name: 'Land of Illusion', subtitle: 'Starring Mickey Mouse', file: 'Land of Illusion Starring Mickey Mouse (World).gg' },
-        { name: 'Castle of Illusion', subtitle: 'Starring Mickey Mouse', file: 'Castle of Illusion Starring Mickey Mouse (USA, Europe).gg' }
       ]
     };
 
     const container = document.getElementById('games-list');
     const games = catalog[consoleType] || [];
+
+    // ═══ FAVORITOS (localStorage) ═══
+    function getFavorites() {
+      try { return JSON.parse(localStorage.getItem('rv_favorites') || '[]'); } catch { return []; }
+    }
+
+    function isFavorite(gameFile) {
+      return getFavorites().some(f => f.file === gameFile && f.console === consoleType);
+    }
+
+    function toggleFavorite(game) {
+      let favs = getFavorites();
+      const idx = favs.findIndex(f => f.file === game.file && f.console === consoleType);
+      if (idx >= 0) {
+        favs.splice(idx, 1);
+      } else {
+        const consoleShorts = {snes:'SNES',nes:'NES',gba:'GBA',gbc:'GBC',n64:'N64',psx:'PS1',sega:'SEGA',segacd:'MEGA CD',gamegear:'GG',nds:'NDS',arcade:'ARCADE'};
+        favs.unshift({
+          name: game.name,
+          subtitle: game.subtitle || '',
+          file: game.file,
+          core: currentConfig.core,
+          console: consoleType,
+          consoleShort: consoleShorts[consoleType] || consoleType.toUpperCase()
+        });
+      }
+      localStorage.setItem('rv_favorites', JSON.stringify(favs));
+      renderGames(getCurrentList());
+    }
+
+    // ═══ FILTROS / ORDENAÇÃO ═══
+    let currentSort = 'default';
+
+    function getCurrentList() {
+      const query = document.getElementById('game-search').value.trim().toLowerCase();
+      let list = games;
+      if (query) {
+        list = games.filter(g => g.name.toLowerCase().includes(query) || (g.subtitle && g.subtitle.toLowerCase().includes(query)));
+      }
+      if (currentSort === 'az') {
+        list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+      } else if (currentSort === 'za') {
+        list = [...list].sort((a, b) => b.name.localeCompare(a.name));
+      } else if (currentSort === 'fav') {
+        const favs = getFavorites();
+        list = list.filter(g => favs.some(f => f.file === g.file && f.console === consoleType));
+      }
+      return list;
+    }
+
+    function sortGames(sort, btn) {
+      currentSort = sort;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderGames(getCurrentList());
+    }
 
     // Atualiza badge de quantidade
     function updateCountBadge(count) {
@@ -259,6 +316,7 @@
         updateCountBadge(0);
         return;
       }
+      updateCountBadge(list.length);
 
       list.forEach(game => {
         const card = document.createElement('a');
@@ -268,6 +326,7 @@
         // Capa dentro do wrapper proporcional
         const coverWrap = document.createElement('div');
         coverWrap.className = 'game-cover-wrap';
+        coverWrap.style.position = 'relative';
 
         const coverUrl = getCover(game);
 
@@ -277,11 +336,9 @@
         img.className = 'game-cover-img';
         img.loading = 'lazy';
 
-        // Quando a imagem carrega, ativa o fundo blur
         img.onload = function() {
           coverWrap.style.setProperty('--cover-bg', `url('${coverUrl}')`);
           coverWrap.style.setProperty('--cover-loaded', '1');
-          // Ativa o ::before com a imagem borrada
           const style = coverWrap.querySelector('.cover-blur-bg');
           if (!style) {
             const bgEl = document.createElement('div');
@@ -300,11 +357,20 @@
 
         coverWrap.appendChild(img);
 
-        // Bloco de Informações da Direita
+        // Botão de favorito
+        const favBtn = document.createElement('button');
+        favBtn.className = 'fav-btn' + (isFavorite(game.file) ? ' active' : '');
+        favBtn.innerHTML = '<span class="heart">♥</span>';
+        favBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleFavorite(game);
+        });
+        coverWrap.appendChild(favBtn);
+
+        // Bloco de Informações
         const gameInfo = document.createElement('div');
         gameInfo.className = 'game-info';
-
-        // Sempre renderiza o subtítulo — vazio reserva o espaço visual
         gameInfo.innerHTML = `
           <h3>${game.name}</h3>
           <span class="game-subtitle">${game.subtitle || ''}</span>
@@ -317,18 +383,11 @@
     }
 
     function filterGames() {
-      const query = document.getElementById('game-search').value.trim().toLowerCase();
-      const filtered = games.filter(game => {
-        const nameMatch = game.name.toLowerCase().includes(query);
-        const subtitleMatch = game.subtitle ? game.subtitle.toLowerCase().includes(query) : false;
-        return nameMatch || subtitleMatch;
-      });
-      updateCountBadge(filtered.length);
-      renderGames(filtered);
+      renderGames(getCurrentList());
     }
 
     renderGames(games);
   </script>
 
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a25f8b080a9bc134',t:'MTc4NTg2NzI4MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="assets/rv-icon.png">
+  <title>RetroVerse - Perfil</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .profile-wrap {
+      max-width: 900px;
+      margin: 100px auto 60px;
+      padding: 0 24px;
+    }
+
+    .profile-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .profile-avatar {
+      width: 80px; height: 80px;
+      border: 2.5px solid var(--green-neon);
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--green-neon);
+      letter-spacing: 2px;
+      box-shadow: 0 0 20px var(--green-glow);
+      margin-bottom: 16px;
+    }
+
+    .profile-name {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: var(--text);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .profile-subtitle {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: rgba(8,14,10,0.6);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 20px 16px;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--green-neon);
+      transform: translateY(-2px);
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--green-neon);
+      text-shadow: 0 0 12px var(--green-glow);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-family: var(--font-body);
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* Achievements */
+    .achievements-section {
+      margin-bottom: 40px;
+    }
+
+    .achievements-title {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--text);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .achievements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 12px;
+    }
+
+    .achievement-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(8,14,10,0.5);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 14px 16px;
+      transition: all 0.2s;
+    }
+
+    .achievement-card.unlocked {
+      border-color: rgba(255,215,0,0.3);
+      background: rgba(255,215,0,0.04);
+    }
+
+    .achievement-card.locked {
+      opacity: 0.4;
+    }
+
+    .achievement-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .achievement-card.unlocked .achievement-icon {
+      background: rgba(255,215,0,0.15);
+      border: 1px solid rgba(255,215,0,0.3);
+    }
+
+    .achievement-card.locked .achievement-icon {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .achievement-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .achievement-name {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .achievement-card.unlocked .achievement-name {
+      color: #FFD700;
+    }
+
+    .achievement-desc {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .achievement-date {
+      font-family: var(--font-body);
+      font-size: 0.55rem;
+      color: var(--text-muted);
+      opacity: 0.6;
+      margin-top: 2px;
+    }
+
+    /* Consoles jogados */
+    .consoles-played {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+
+    .console-badge-tag {
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+
+    .console-badge-tag.played {
+      background: rgba(0,255,65,0.08);
+      border: 1px solid rgba(0,255,65,0.3);
+      color: var(--green-neon);
+    }
+
+    .console-badge-tag.not-played {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .reset-btn {
+      display: block;
+      margin: 40px auto 0;
+      background: none;
+      border: 1px solid rgba(255,68,68,0.3);
+      color: #ff4444;
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 8px 24px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .reset-btn:hover {
+      background: rgba(255,68,68,0.08);
+      border-color: rgba(255,68,68,0.5);
+    }
+
+    @media (max-width: 600px) {
+      .profile-wrap { margin-top: 90px; padding: 0 14px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .achievements-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="crt-overlay" aria-hidden="true"></div>
+
+  <header class="navbar">
+    <a href="index.html" class="brand">
+      <div class="brand-logo">RV</div>
+      <div class="brand-text">
+        <span class="brand-name">RETROVERSE</span>
+        <span class="brand-slogan">ENTER THE CLASSICS</span>
+      </div>
+    </a>
+  </header>
+
+  <div class="profile-wrap">
+    <div class="profile-header">
+      <div class="profile-avatar">RV</div>
+      <div class="profile-name">JOGADOR</div>
+      <div class="profile-subtitle" id="profile-joined">Membro do RetroVerse</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <!-- Consoles Jogados -->
+    <div class="achievements-section">
+      <div class="achievements-title">🎮 Consoles Explorados</div>
+      <div class="consoles-played" id="consoles-played"></div>
+    </div>
+
+    <!-- Achievements -->
+    <div class="achievements-section">
+      <div class="achievements-title">🏆 Conquistas <span id="achievement-count" style="font-size:0.7rem;color:var(--text-muted);font-weight:400;"></span></div>
+      <div class="achievements-grid" id="achievements-grid"></div>
+    </div>
+
+    <button class="reset-btn" onclick="resetProfile()">Resetar Dados</button>
+  </div>
+
+  <footer class="rv-footer">
+    <div class="footer-brand">RV</div>
+    <p class="footer-copy">RETROVERSE &mdash; ENTER THE CLASSICS</p>
+  </footer>
+
+<script>
+const ALL_ACHIEVEMENTS = [
+  { id: 'first_game', name: 'Primeira Aventura', desc: 'Abra seu primeiro jogo', icon: '🎮' },
+  { id: 'five_games', name: 'Explorador', desc: 'Jogue 5 jogos diferentes', icon: '🗺️' },
+  { id: 'ten_games', name: 'Veterano', desc: 'Jogue 10 jogos diferentes', icon: '⭐' },
+  { id: 'twenty_games', name: 'Lenda Retro', desc: 'Jogue 20 jogos diferentes', icon: '👑' },
+  { id: 'three_consoles', name: 'Multiverso', desc: 'Jogue em 3 consoles diferentes', icon: '🌀' },
+  { id: 'all_consoles', name: 'Mestre dos Mundos', desc: 'Jogue em todos os consoles', icon: '🏆' },
+  { id: 'first_fav', name: 'Favorito!', desc: 'Favorite seu primeiro jogo', icon: '❤️' },
+  { id: 'five_favs', name: 'Curador', desc: 'Favorite 5 jogos', icon: '📚' },
+  { id: 'ten_sessions', name: 'Dedicado', desc: 'Abra 10 sessões de jogo', icon: '💪' },
+  { id: 'fifty_sessions', name: 'Hardcore', desc: 'Abra 50 sessões de jogo', icon: '🔥' },
+  { id: 'first_screenshot', name: 'Fotógrafo', desc: 'Tire seu primeiro screenshot', icon: '📸' },
+  { id: 'ten_screenshots', name: 'Galeria', desc: 'Tire 10 screenshots', icon: '🖼️' },
+];
+
+const ALL_CONSOLES = {
+  snes: 'SNES', nes: 'NES', gba: 'GBA', gbc: 'GBC', n64: 'N64',
+  psx: 'PS1', sega: 'SEGA', segacd: 'MEGA CD', gamegear: 'GG', nds: 'NDS', arcade: 'ARCADE'
+};
+
+function getLS(key, fallback) {
+  try { const v = JSON.parse(localStorage.getItem(key)); return v !== null ? v : fallback; }
+  catch { return fallback; }
+}
+
+// Stats
+const playedGames = getLS('rv_played_games', []);
+const sessions = getLS('rv_sessions', 0);
+const consolesPlayed = getLS('rv_consoles_played', []);
+const favorites = getLS('rv_favorites', []);
+const screenshots = getLS('rv_screenshots', 0);
+const achievements = getLS('rv_achievements', {});
+const recent = getLS('rv_recent', []);
+
+// Render stats
+const statsGrid = document.getElementById('stats-grid');
+const stats = [
+  { value: playedGames.length, label: 'Jogos Jogados' },
+  { value: sessions, label: 'Sessões' },
+  { value: consolesPlayed.length, label: 'Consoles' },
+  { value: favorites.length, label: 'Favoritos' },
+  { value: screenshots, label: 'Screenshots' },
+  { value: Object.keys(achievements).length, label: 'Conquistas' },
+];
+stats.forEach(s => {
+  statsGrid.innerHTML += `
+    <div class="stat-card">
+      <div class="stat-value">${s.value}</div>
+      <div class="stat-label">${s.label}</div>
+    </div>`;
+});
+
+// Render consoles
+const consolesDiv = document.getElementById('consoles-played');
+for (const [key, name] of Object.entries(ALL_CONSOLES)) {
+  const played = consolesPlayed.includes(key);
+  consolesDiv.innerHTML += `<span class="console-badge-tag ${played ? 'played' : 'not-played'}">${name}</span>`;
+}
+
+// Render achievements
+const achievementsGrid = document.getElementById('achievements-grid');
+const achievementCount = document.getElementById('achievement-count');
+const unlocked = Object.keys(achievements).length;
+achievementCount.textContent = `(${unlocked}/${ALL_ACHIEVEMENTS.length})`;
+
+ALL_ACHIEVEMENTS.forEach(a => {
+  const data = achievements[a.id];
+  const isUnlocked = !!data;
+  const dateStr = data ? new Date(data.date).toLocaleDateString('pt-BR') : '';
+  achievementsGrid.innerHTML += `
+    <div class="achievement-card ${isUnlocked ? 'unlocked' : 'locked'}">
+      <div class="achievement-icon">${a.icon}</div>
+      <div class="achievement-info">
+        <div class="achievement-name">${a.name}</div>
+        <div class="achievement-desc">${a.desc}</div>
+        ${dateStr ? `<div class="achievement-date">Desbloqueado em ${dateStr}</div>` : ''}
+      </div>
+    </div>`;
+});
+
+function resetProfile() {
+  if (confirm('Tem certeza? Todos os dados de conquistas, recentes e favoritos serão apagados.')) {
+    ['rv_recent', 'rv_favorites', 'rv_achievements', 'rv_played_games', 'rv_sessions', 'rv_consoles_played', 'rv_screenshots'].forEach(k => localStorage.removeItem(k));
+    location.reload();
+  }
+}
+</script>
+
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a267eb0cfb7f1719',t:'MTc4NTk1NTA5OQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

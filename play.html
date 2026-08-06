@@ -6,6 +6,8 @@
   <link rel="icon" type="image/png" href="assets/rv-icon.png">
   <link rel="apple-touch-icon" href="assets/rv-icon.png">
   <title>RetroVerse - Jogando...</title>
+  <script src="js/audio.js"></script>
+  <script src="js/overlay-parser.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body, html {
@@ -19,7 +21,7 @@
 
     #game { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 1; }
 
-    /* LOADING */
+    /* LOADING (personalizado por console) */
     #rv-loading {
       position: fixed; inset: 0; z-index: 9999;
       background: #030604;
@@ -30,33 +32,40 @@
     #rv-loading.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
     .rv-bg {
       position: absolute; inset: 0;
-      background: radial-gradient(circle at 50% 40%, rgba(0,255,65,.13) 0%, transparent 65%), #030604;
+      background: radial-gradient(circle at 50% 40%, var(--rv-glow, rgba(0,255,65,.13)) 0%, transparent 65%), #030604;
     }
     .rv-bg::before {
       content: ''; position: absolute; inset: 0;
-      background-image: repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,65,.03) 3px,rgba(0,255,65,.03) 4px);
+      background-image: repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.02) 3px,rgba(255,255,255,.02) 4px);
       animation: scanPulse 4s linear infinite;
     }
     @keyframes scanPulse { 0%,100%{opacity:.5} 50%{opacity:1} }
     .rv-logo {
       position: relative; z-index: 1;
       width: 90px; height: 90px;
-      border: 2.5px solid #00ff41; border-radius: 16px;
+      border: 2.5px solid var(--rv-color, #00ff41); border-radius: 16px;
       display: flex; align-items: center; justify-content: center;
       font-family: 'Segoe UI', Arial, sans-serif;
-      font-size: 2.2rem; font-weight: 900; color: #00ff41; letter-spacing: 2px;
+      font-size: 2.2rem; font-weight: 900; color: var(--rv-color, #00ff41); letter-spacing: 2px;
       animation: logoPulse 2s ease-in-out infinite;
     }
     @keyframes logoPulse {
-      0%,100%{ box-shadow: 0 0 20px rgba(0,255,65,.6),0 0 60px rgba(0,255,65,.2),inset 0 0 20px rgba(0,255,65,.08); }
-      50%    { box-shadow: 0 0 35px rgba(0,255,65,.9),0 0 90px rgba(0,255,65,.35),inset 0 0 30px rgba(0,255,65,.15); }
+      0%,100%{ box-shadow: 0 0 20px var(--rv-glow, rgba(0,255,65,.6)), 0 0 60px var(--rv-glow, rgba(0,255,65,.2)), inset 0 0 20px var(--rv-glow, rgba(0,255,65,.08)); }
+      50%    { box-shadow: 0 0 35px var(--rv-glow, rgba(0,255,65,.9)), 0 0 90px var(--rv-glow, rgba(0,255,65,.35)), inset 0 0 30px var(--rv-glow, rgba(0,255,65,.15)); }
+    }
+    .rv-console-title {
+      position: relative; z-index: 1;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 1.4rem; font-weight: 900; letter-spacing: 4px;
+      color: #fff;
+      text-shadow: 0 0 16px var(--rv-glow, rgba(0,255,65,.7));
     }
     .rv-name { position: relative; z-index: 1; font-size: 2.2rem; font-weight: 900; letter-spacing: 8px; color: #fff; text-shadow: 0 0 20px rgba(0,255,65,.7); }
-    .rv-slogan { position: relative; z-index: 1; font-size: .78rem; font-weight: 600; letter-spacing: 5px; color: #00ff41; }
-    .rv-bar-wrap { position: relative; z-index: 1; width: 220px; height: 3px; background: rgba(0,255,65,.1); border-radius: 3px; overflow: hidden; margin-top: 10px; }
-    .rv-bar { height: 100%; width: 40%; background: #00ff41; border-radius: 3px; box-shadow: 0 0 10px #00ff41; animation: barSweep 1.6s ease-in-out infinite; }
+    .rv-slogan { position: relative; z-index: 1; font-size: .78rem; font-weight: 600; letter-spacing: 5px; color: var(--rv-color, #00ff41); }
+    .rv-bar-wrap { position: relative; z-index: 1; width: 220px; height: 3px; background: rgba(255,255,255,.08); border-radius: 3px; overflow: hidden; margin-top: 10px; }
+    .rv-bar { height: 100%; width: 40%; background: var(--rv-color, #00ff41); border-radius: 3px; box-shadow: 0 0 10px var(--rv-color, #00ff41); animation: barSweep 1.6s ease-in-out infinite; }
     @keyframes barSweep { 0%{transform:translateX(-100%)} 100%{transform:translateX(350%)} }
-    .rv-msg { position: relative; z-index: 1; font-size: .72rem; letter-spacing: 3px; color: rgba(0,255,65,.5); }
+    .rv-msg { position: relative; z-index: 1; font-size: .72rem; letter-spacing: 3px; color: var(--rv-color, rgba(0,255,65,.5)); }
 
     #rv-download-progress { position: relative; z-index: 2; display: none; flex-direction: column; align-items: center; gap: 10px; width: 280px; }
     #rv-download-progress.visible { display: flex; }
@@ -74,6 +83,65 @@
     }
     #rv-fs-btn.visible { display: flex; }
     #rv-fs-btn svg { width: 18px; height: 18px; fill: #00ff41; }
+
+    /* ═══════════════════════════════════════════
+       FLOATING BUTTONS (screenshot, theater, menu)
+    ═══════════════════════════════════════════ */
+    .rv-float-btns {
+      position: fixed;
+      top: 10px; right: 56px;
+      z-index: 8000;
+      display: none;
+      gap: 8px;
+    }
+    .rv-float-btns.visible { display: flex; }
+
+    .rv-float-btn {
+      background: rgba(0,255,65,.12);
+      border: 1px solid rgba(0,255,65,.4);
+      border-radius: 8px;
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      position: relative;
+    }
+    .rv-float-btn:active { transform: scale(0.9); background: rgba(0,255,65,.3); }
+    .rv-float-btn svg { width: 18px; height: 18px; fill: #00ff41; pointer-events: none; }
+
+    /* Toast notification (screenshot salvo) */
+    .rv-toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(0,0,0,0.9);
+      border: 1px solid rgba(0,255,65,0.4);
+      border-radius: 10px;
+      padding: 10px 24px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 0.8rem;
+      color: #00ff41;
+      letter-spacing: 1px;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .rv-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ═══════════════════════════════════════════
+       THEATER MODE
+    ═══════════════════════════════════════════ */
+    body.theater-mode #rv-fs-btn,
+    body.theater-mode .rv-float-btns { opacity: 0.3; }
+    body.theater-mode #rv-fs-btn:hover,
+    body.theater-mode .rv-float-btns:hover { opacity: 1; }
 
     /* ═══════════════════════════════════════════
        OVERLAY SYSTEM
@@ -169,6 +237,7 @@
 <div id="rv-loading">
   <div class="rv-bg"></div>
   <div class="rv-logo">RV</div>
+  <div class="rv-console-title" id="rv-console-title"></div>
   <div class="rv-name">RETROVERSE</div>
   <div class="rv-slogan">ENTER THE CLASSICS</div>
   <div class="rv-bar-wrap"><div class="rv-bar"></div></div>
@@ -184,6 +253,19 @@
   <svg viewBox="0 0 24 24"><path d="M3 3h6v2H5v4H3V3zm12 0h6v6h-2V5h-4V3zM3 15h2v4h4v2H3v-6zm16 4h-4v2h6v-6h-2v4z"/></svg>
 </div>
 
+<!-- BOTÕES FLUTUANTES (screenshot + theater) -->
+<div class="rv-float-btns" id="rv-float-btns">
+  <div class="rv-float-btn" id="rv-screenshot-btn" title="Screenshot">
+    <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+  </div>
+  <div class="rv-float-btn" id="rv-theater-btn" title="Modo Theater">
+    <svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div class="rv-toast" id="rv-toast"></div>
+
 <div id="game"></div>
 <div id="rv-overlay"></div>
 <div id="rv-pad"></div>
@@ -195,6 +277,54 @@ const game = params.get('game');
 if (core === 'mupen64plus' || core === 'mupen64plus_next') core = 'n64';
 
 const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
+/* ═══ Cores temáticas para loading screen ═══ */
+const CONSOLE_THEMES = {
+  snes:         { name: 'Super Nintendo',     color: '#7B2D8E', glow: 'rgba(123,45,142,0.5)' },
+  nes:          { name: 'Nintendo Classic',   color: '#E4002B', glow: 'rgba(228,0,43,0.5)' },
+  gba:          { name: 'Game Boy Advance',   color: '#6B2FA0', glow: 'rgba(107,47,160,0.5)' },
+  gbc:          { name: 'Game Boy Color',     color: '#00A651', glow: 'rgba(0,166,81,0.5)' },
+  n64:          { name: 'Nintendo 64',        color: '#E4000F', glow: 'rgba(228,0,15,0.5)' },
+  pcsx_rearmed: { name: 'PlayStation 1',      color: '#1560BD', glow: 'rgba(21,96,189,0.5)' },
+  segaMD:       { name: 'Mega Drive',         color: '#003087', glow: 'rgba(0,48,135,0.5)' },
+  segaCD:       { name: 'Sega CD',            color: '#1A1AFF', glow: 'rgba(26,26,255,0.5)' },
+  segaGG:       { name: 'Game Gear',          color: '#CC0000', glow: 'rgba(204,0,0,0.5)' },
+  nds:          { name: 'Nintendo DS',        color: '#00BFFF', glow: 'rgba(0,191,255,0.5)' },
+  fbneo:        { name: 'Arcade',             color: '#00FF41', glow: 'rgba(0,255,65,0.5)' },
+};
+
+// Aplica cores temáticas na loading screen
+(function applyConsoleTheme() {
+  const theme = CONSOLE_THEMES[core] || { name: 'RetroVerse', color: '#00ff41', glow: 'rgba(0,255,65,0.5)' };
+  const loading = document.getElementById('rv-loading');
+  if (loading) {
+    loading.style.setProperty('--rv-color', theme.color);
+    loading.style.setProperty('--rv-glow', theme.glow);
+  }
+  const titleEl = document.getElementById('rv-console-title');
+  if (titleEl) titleEl.textContent = theme.name;
+
+  // Salvar no "Continue Jogando" (localStorage)
+  try {
+    const gameName = decodeURIComponent(game || '').split('/').pop().replace(/\.[^/.]+$/, '');
+    const consoleKey = (game || '').split('/')[0];
+    const consoleShorts = {snes:'SNES',nes:'NES',gba:'GBA',gbc:'GBC',n64:'N64',pcsx_rearmed:'PS1',segaMD:'SEGA',segaCD:'MEGA CD',segaGG:'GG',nds:'NDS',fbneo:'ARCADE'};
+    const entry = {
+      name: gameName.substring(0, 40),
+      subtitle: '',
+      file: decodeURIComponent(game || '').split('/').pop(),
+      core: core,
+      console: consoleKey,
+      consoleShort: consoleShorts[core] || core.toUpperCase(),
+      timestamp: Date.now()
+    };
+    let recent = JSON.parse(localStorage.getItem('rv_recent') || '[]');
+    recent = recent.filter(r => r.file !== entry.file || r.console !== entry.console);
+    recent.unshift(entry);
+    recent = recent.slice(0, 8);
+    localStorage.setItem('rv_recent', JSON.stringify(recent));
+  } catch(e) {}
+})();
 
 const EJS_INPUT = {
   B:0, Y:1, SELECT:2, START:3,
@@ -462,14 +592,41 @@ async function preloadGame(gamePath) {
   const encodedPath = gamePath.split('/').map(seg => 
     encodeURIComponent(seg).replace(/'/g, '%27')
   ).join('/');
-  const url = ROMS_BASE + encodedPath;
+
+  // Lista de fontes para tentar carregar a ROM:
+  // 1º Localmente na pasta roms/ do projeto (ex: roms/gamegear/Sonic...)
+  // 2º No servidor online CDN (ROMS_BASE + encodedPath)
+  const candidateUrls = [
+    `roms/${encodedPath}`,
+    `roms/${gamePath}`,
+    ROMS_BASE + encodedPath
+  ];
+
   const msgEl = document.getElementById('rv-msg');
   const dlWrap = document.getElementById('rv-download-progress');
   const dlBar = document.getElementById('rv-dl-bar');
   const dlInfo = document.getElementById('rv-dl-info');
+
+  let response = null;
+  for (const url of candidateUrls) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        response = res;
+        console.log('[RetroVerse] ROM carregada com sucesso de:', url);
+        break;
+      }
+    } catch(err) {
+      // Tenta a próxima fonte
+    }
+  }
+
+  if (!response) {
+    msgEl.textContent = 'Erro: ROM não encontrada em roms/ nem no servidor online.';
+    throw new Error('ROM não encontrada em nenhuma fonte.');
+  }
+
   try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Erro');
     const total = parseInt(response.headers.get('Content-Length') || '0');
     const reader = response.body.getReader();
     const chunks = [];
@@ -502,18 +659,44 @@ function onGameReady() {
   const ld = document.getElementById('rv-loading');
   if (ld) ld.classList.add('hidden');
   document.getElementById('rv-fs-btn').classList.add('visible');
-  if (isTouch) initControls();
+  document.getElementById('rv-float-btns').classList.add('visible');
+  initControls();
+
+  // Tocar som de boot do console
+  RV_AUDIO.playBoot(core);
+
+  // Tracking para conquistas
+  try {
+    const gameName = decodeURIComponent(game || '').split('/').pop().replace(/\.[^/.]+$/, '');
+    const consoleKey = (game || '').split('/')[0];
+    trackAchievements(consoleKey, gameName);
+  } catch(e) {}
 }
 
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => initControls(), 150);
+});
+
 if (isArcade) {
-  EJS_gameUrl = ROMS_BASE + game; EJS_biosUrl = ROMS_BASE + 'arcade/neogeo.zip';
-  EJS_onGameStart = onGameReady; setTimeout(onGameReady, 14000);
-  const s = document.createElement('script'); s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js'; document.body.appendChild(s);
+  preloadGame(game).then(blobUrl => {
+    EJS_gameUrl = blobUrl;
+    EJS_biosUrl = 'roms/arcade/neogeo.zip';
+    EJS_onGameStart = onGameReady; setTimeout(onGameReady, 14000);
+    const s = document.createElement('script'); s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js'; document.body.appendChild(s);
+  }).catch(() => {
+    EJS_gameUrl = ROMS_BASE + game;
+    EJS_biosUrl = ROMS_BASE + 'arcade/neogeo.zip';
+    EJS_onGameStart = onGameReady; setTimeout(onGameReady, 14000);
+    const s = document.createElement('script'); s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js'; document.body.appendChild(s);
+  });
 } else {
   preloadGame(game).then(blobUrl => {
     EJS_gameUrl = blobUrl; EJS_onGameStart = onGameReady; setTimeout(onGameReady, 14000);
     const s = document.createElement('script'); s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js'; document.body.appendChild(s);
-  }).catch(() => { document.getElementById('rv-msg').textContent = 'Erro ao carregar.'; });
+  }).catch(() => {
+    document.getElementById('rv-msg').textContent = 'Erro ao carregar.';
+    initControls(); // Mostra overlay mesmo em erro/teste sem ROM
+  });
 }
 
 /* Hide native gamepad */
@@ -540,16 +723,30 @@ function sendInput(id, val) {
    Portrait + overlay disponível → sistema de imagem calibrado
    Landscape ou sem overlay → controles CSS
 ═══════════════════════════════════════════════════════════ */
-function initControls() {
+async function initControls() {
   const W = window.innerWidth, H = window.innerHeight;
   const isPortrait = H > W;
+
+  const overlayWrap = document.getElementById('rv-overlay');
+  const padWrap = document.getElementById('rv-pad');
+
+  overlayWrap.classList.remove('active');
+  overlayWrap.innerHTML = '';
+  padWrap.classList.remove('active');
+  padWrap.innerHTML = '';
+
+  const DEBUG = new URLSearchParams(window.location.search).has('debug');
+
+  // 1º Tenta carregar arquivo .cfg automático do RetroArch (ex: overlays/n64/n64.cfg)
+  if (typeof window.loadRetroArchOverlay === 'function') {
+    const raEngine = await window.loadRetroArchOverlay(core, overlayWrap, { debug: DEBUG, isPortrait });
+    if (raEngine) {
+      overlayWrap.classList.add('active');
+      return;
+    }
+  }
+
   const overlay = OVERLAYS[core];
-
-  document.getElementById('rv-overlay').classList.remove('active');
-  document.getElementById('rv-overlay').innerHTML = '';
-  document.getElementById('rv-pad').classList.remove('active');
-  document.getElementById('rv-pad').innerHTML = '';
-
   if (isPortrait && overlay && overlay.base) {
     buildOverlay(overlay);
   } else {
@@ -857,6 +1054,127 @@ function buildPad(skin) {
   pad.classList.add('active');
 }
 
+/* ═══════════════════════════════════════════
+   SCREENSHOT
+═══════════════════════════════════════════ */
+function takeScreenshot() {
+  try {
+    const canvas = document.querySelector('#game canvas');
+    if (!canvas) { showToast('⚠️ Nenhum jogo ativo'); return; }
+    const dataUrl = canvas.toDataURL('image/png');
+    // Download
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = `retroverse_${core}_${Date.now()}.png`;
+    a.click();
+    // Salva nas conquistas
+    try {
+      let screenshots = JSON.parse(localStorage.getItem('rv_screenshots') || '0');
+      screenshots = (typeof screenshots === 'number' ? screenshots : 0) + 1;
+      localStorage.setItem('rv_screenshots', JSON.stringify(screenshots));
+      checkAchievements();
+    } catch(e) {}
+    showToast('📸 Screenshot salvo!');
+  } catch(e) {
+    showToast('⚠️ Erro ao capturar tela');
+  }
+}
+
+/* ═══════════════════════════════════════════
+   THEATER MODE
+═══════════════════════════════════════════ */
+let theaterMode = false;
+function toggleTheater() {
+  theaterMode = !theaterMode;
+  document.body.classList.toggle('theater-mode', theaterMode);
+  showToast(theaterMode ? '🎬 Modo Theater ativado' : '🎬 Modo Theater desativado');
+}
+
+/* ═══════════════════════════════════════════
+   TOAST NOTIFICATION
+═══════════════════════════════════════════ */
+let toastTimeout;
+function showToast(msg) {
+  const toast = document.getElementById('rv-toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+/* ═══════════════════════════════════════════
+   ACHIEVEMENTS (Conquistas)
+═══════════════════════════════════════════ */
+function trackAchievements(consoleKey, gameName) {
+  try {
+    // Jogos únicos jogados
+    let playedGames = JSON.parse(localStorage.getItem('rv_played_games') || '[]');
+    const gameId = consoleKey + '/' + gameName;
+    if (!playedGames.includes(gameId)) {
+      playedGames.push(gameId);
+      localStorage.setItem('rv_played_games', JSON.stringify(playedGames));
+    }
+    // Total de sessões
+    let sessions = JSON.parse(localStorage.getItem('rv_sessions') || '0');
+    sessions = (typeof sessions === 'number' ? sessions : 0) + 1;
+    localStorage.setItem('rv_sessions', JSON.stringify(sessions));
+    // Consoles únicos
+    let consoles = JSON.parse(localStorage.getItem('rv_consoles_played') || '[]');
+    if (!consoles.includes(consoleKey)) {
+      consoles.push(consoleKey);
+      localStorage.setItem('rv_consoles_played', JSON.stringify(consoles));
+    }
+    checkAchievements();
+  } catch(e) {}
+}
+
+function checkAchievements() {
+  try {
+    const achievements = JSON.parse(localStorage.getItem('rv_achievements') || '{}');
+    const playedGames = JSON.parse(localStorage.getItem('rv_played_games') || '[]');
+    const sessions = JSON.parse(localStorage.getItem('rv_sessions') || '0');
+    const consoles = JSON.parse(localStorage.getItem('rv_consoles_played') || '[]');
+    const favorites = JSON.parse(localStorage.getItem('rv_favorites') || '[]');
+    const screenshots = JSON.parse(localStorage.getItem('rv_screenshots') || '0');
+    let newAchievements = [];
+
+    const defs = [
+      { id: 'first_game', name: 'Primeira Aventura', desc: 'Abra seu primeiro jogo', check: () => sessions >= 1 },
+      { id: 'five_games', name: 'Explorador', desc: 'Jogue 5 jogos diferentes', check: () => playedGames.length >= 5 },
+      { id: 'ten_games', name: 'Veterano', desc: 'Jogue 10 jogos diferentes', check: () => playedGames.length >= 10 },
+      { id: 'twenty_games', name: 'Lenda Retro', desc: 'Jogue 20 jogos diferentes', check: () => playedGames.length >= 20 },
+      { id: 'three_consoles', name: 'Multiverso', desc: 'Jogue em 3 consoles diferentes', check: () => consoles.length >= 3 },
+      { id: 'all_consoles', name: 'Mestre dos Mundos', desc: 'Jogue em todos os consoles', check: () => consoles.length >= 11 },
+      { id: 'first_fav', name: 'Favorito!', desc: 'Favorite seu primeiro jogo', check: () => favorites.length >= 1 },
+      { id: 'five_favs', name: 'Curador', desc: 'Favorite 5 jogos', check: () => favorites.length >= 5 },
+      { id: 'ten_sessions', name: 'Dedicado', desc: 'Abra 10 sessões de jogo', check: () => sessions >= 10 },
+      { id: 'fifty_sessions', name: 'Hardcore', desc: 'Abra 50 sessões de jogo', check: () => sessions >= 50 },
+      { id: 'first_screenshot', name: 'Fotógrafo', desc: 'Tire seu primeiro screenshot', check: () => screenshots >= 1 },
+      { id: 'ten_screenshots', name: 'Galeria', desc: 'Tire 10 screenshots', check: () => screenshots >= 10 },
+    ];
+
+    for (const def of defs) {
+      if (!achievements[def.id] && def.check()) {
+        achievements[def.id] = { name: def.name, desc: def.desc, date: Date.now() };
+        newAchievements.push(def);
+      }
+    }
+
+    if (newAchievements.length > 0) {
+      localStorage.setItem('rv_achievements', JSON.stringify(achievements));
+      for (const a of newAchievements) {
+        showToast(`🏆 ${a.name}: ${a.desc}`);
+      }
+    }
+  } catch(e) {}
+}
+
+/* Bind buttons */
+document.getElementById('rv-screenshot-btn').addEventListener('click', takeScreenshot);
+document.getElementById('rv-screenshot-btn').addEventListener('touchend', e => { e.preventDefault(); takeScreenshot(); }, {passive:false});
+document.getElementById('rv-theater-btn').addEventListener('click', toggleTheater);
+document.getElementById('rv-theater-btn').addEventListener('touchend', e => { e.preventDefault(); toggleTheater(); }, {passive:false});
+
 /* Fullscreen */
 function requestFS(){const el=document.documentElement;(el.requestFullscreen||el.webkitRequestFullscreen)?.call(el);document.getElementById('rv-fs-btn').style.display='none';}
 document.getElementById('rv-fs-btn').addEventListener('click',requestFS);
@@ -871,5 +1189,5 @@ window.addEventListener('resize',()=>{
   }
 });
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a262070c2e0c4468',t:'MTc4NTg5MzMzMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a269eb58ecee21f9',t:'MTc4NTk3NjA4Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
