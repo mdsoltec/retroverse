@@ -12,6 +12,7 @@
   <script src="js/audio.js"></script>
 </head>
 <body>
+
   <!-- EFEITO CRT SCANLINES (discreto, não bloqueia cliques) -->
   <div class="crt-overlay" aria-hidden="true"></div>
 
@@ -63,7 +64,6 @@
           <span class="hero-stat-label">Diversão</span>
         </div>
       </div>
-      
     </div>
     <div class="hero-particles" aria-hidden="true">
       <span></span><span></span><span></span><span></span><span></span>
@@ -299,160 +299,37 @@
 ═══════════════════════════════════════════════════════════ */
 const CATALOG = {
   snes:   { name: 'Super Nintendo', short: 'SNES', core: 'snes', games: [
-    { name: 'Aladdin', file: 'Aladdin (USA).sfc' },
-    { name: 'Chrono Trigger', file: 'Chrono Trigger (USA).sfc' },
-    { name: 'D-Force', file: 'D-Force (USA).sfc' },
-    { name: 'Donkey Kong Classic', file: 'Donkey Kong Classic.smc' },
-    { name: 'Donkey Kong Country', file: 'Donkey Kong Country (USA) (Rev 2).sfc' },
-    { name: 'Donkey Kong Country 2', subtitle: "Diddy's Kong Quest", file: "Donkey Kong Country 2 - Diddy's Kong Quest (USA) (En,Fr) (Rev 1).sfc" },
-    { name: 'Donkey Kong Country 3', subtitle: "Dixie Kong's Double Trouble!", file: "Donkey Kong Country 3 - Dixie Kong's Double Trouble! (USA) (En,Fr).sfc" },
-    { name: 'The Flintstones', file: 'Flintstones, The (USA) (En,Fr,De,Es,It).sfc' },
-    { name: "Kirby's Dream Land 3", file: "Kirby's Dream Land 3 (U).smc" },
-    { name: 'The Legend of Zelda', subtitle: 'A Link to the Past', file: 'Legend of Zelda, The - A Link to the Past (USA).sfc' },
-    { name: 'The Lost Vikings 2', file: 'Lost Vikings 2 (USA).sfc' },
-    { name: 'The Lost Vikings', file: 'Lost Vikings, The (USA).sfc' },
-    { name: 'Mickey Mania', subtitle: 'The Timeless Adventures', file: 'Mickey Mania - The Timeless Adventures of Mickey Mouse (USA).sfc' },
-    { name: 'Mighty Morphin Power Rangers', subtitle: 'The Fighting Edition', file: 'Mighty Morphin Power Rangers - The Fighting Edition (USA).sfc' },
-    { name: 'Pilotwings', file: 'Pilotwings (USA).sfc' },
-    { name: "Road Runner's", subtitle: 'Death Valley Rally', file: "Road Runner's Death Valley Rally (USA).sfc" },
-    { name: 'Space Invaders', file: 'Space Invaders (USA).sfc' },
-    { name: 'Super Bomberman', file: 'Super Bomberman (USA).sfc' },
-    { name: 'Super Bomberman 4', file: 'Super Bomberman 4.smc' },
-    { name: 'Super Bomberman 5', subtitle: 'Gold Cartridge', file: 'Super Bomberman 5 Gold Cartridge (J) [!].smc' },
-    { name: 'Super Mario All-Stars', file: 'Super Mario All-Stars (USA) (Wii).sfc' },
-    { name: 'Super Mario Kart', file: 'Super Mario Kart (USA).sfc' },
-    { name: 'Super Mario RPG', subtitle: 'Legend of the Seven Stars', file: 'Super Mario RPG - Legend of the Seven Stars (USA).sfc' },
-    { name: 'Super Mario World', file: 'Super Mario World (USA).sfc' },
-    { name: 'Super Mario World 2', subtitle: "Yoshi's Island", file: "Super Mario World 2 - Yoshi's Island (USA) (Rev 1).sfc" },
-    { name: 'Super Metroid', file: 'Super Metroid (Japan, USA) (En,Ja).sfc' },
-    { name: 'Super Tennis', file: 'Super Tennis (USA).sfc' },
-    { name: 'Taz-Mania', file: 'Taz-Mania (USA).sfc' },
-    { name: 'Tiny Toon', subtitle: 'Buster Busts Loose!', file: 'Tiny Toon Adventures - Buster Busts Loose! (USA).sfc' },
-    { name: 'Tiny Toon', subtitle: 'Wild & Wacky Sports', file: 'Tiny Toon Adventures - Wild & Wacky Sports (Europe).sfc' },
-    { name: 'Top Gear', file: 'Top Gear (USA).sfc' },
-    { name: 'Top Gear 2', file: 'Top Gear 2 (USA).sfc' },
-    { name: 'Top Gear 3000', file: 'Top Gear 3000 (USA).sfc' },
-    { name: 'Ultimate Mortal Kombat 3', file: 'Ultimate Mortal Kombat 3 (USA).sfc' },
-    { name: 'Urban Strike', file: 'Urban Strike (USA).sfc' }
+    {name:'Aladdin',file:'Aladdin (USA).sfc'},{name:'Chrono Trigger',file:'Chrono Trigger (USA).sfc'},{name:'Donkey Kong Country',file:'Donkey Kong Country (USA) (Rev 2).sfc'},{name:'Donkey Kong Country 2',subtitle:"Diddy's Kong Quest",file:"Donkey Kong Country 2.sfc"},{name:'Donkey Kong Country 3',file:"Donkey Kong Country 3.sfc"},{name:'The Legend of Zelda',subtitle:'A Link to the Past',file:'Legend of Zelda, The - A Link to the Past (USA).sfc'},{name:'Super Mario World',file:'Super Mario World (USA).sfc'},{name:'Super Mario Kart',file:'Super Mario Kart (USA).sfc'},{name:'Super Mario RPG',subtitle:'Legend of the Seven Stars',file:'Super Mario RPG.sfc'},{name:'Super Metroid',file:'Super Metroid (Japan, USA) (En,Ja).sfc'},{name:'Top Gear',file:'Top Gear (USA).sfc'},{name:'Top Gear 2',file:'Top Gear 2 (USA).sfc'},{name:'Top Gear 3000',file:'Top Gear 3000 (USA).sfc'},{name:'Ultimate Mortal Kombat 3',file:'Ultimate Mortal Kombat 3 (USA).sfc'}
   ]},
   nes:    { name: 'Nintendo Classic', short: 'NES', core: 'nes', games: [
-    { name: 'Castlevania III', subtitle: "Dracula's Curse", file: "Castlevania III - Dracula's Curse (USA).nes" },
-    { name: 'Contra', file: 'Contra (USA).nes' },
-    { name: 'Duck Hunt', file: 'Duck Hunt (World).nes' },
-    { name: 'Mega Man 2', file: 'Mega Man 2 (USA).nes' },
-    { name: 'Super Mario Bros', file: 'Super Mario Bros (World).nes' },
-    { name: 'Super Mario Bros 2', subtitle: 'PT-BR', file: 'Super Mario Bros 2 (PT-BR).nes' },
-    { name: 'Super Mario Bros 3', subtitle: 'PT-BR', file: 'Super Mario Bros 3 (PT-BR).nes' },
-    { name: 'Zelda II', subtitle: 'The Adventure of Link', file: 'Zelda II - The Adventure of Link (USA).nes' }
+    {name:'Castlevania III',subtitle:"Dracula's Curse",file:'Castlevania III.nes'},{name:'Contra',file:'Contra (USA).nes'},{name:'Duck Hunt',file:'Duck Hunt (World).nes'},{name:'Mega Man 2',file:'Mega Man 2 (USA).nes'},{name:'Super Mario Bros',file:'Super Mario Bros (World).nes'},{name:'Super Mario Bros 3',file:'Super Mario Bros 3.nes'},{name:'Zelda II',subtitle:'Adventure of Link',file:'Zelda II.nes'}
   ]},
   gba:    { name: 'Game Boy Advance', short: 'GBA', core: 'gba', games: [
-    { name: 'Carros', subtitle: 'Disney / Pixar', file: 'Carros Disney.gba' },
-    { name: 'Castlevania', subtitle: 'Aria of Sorrow', file: 'Castlevania - Aria of Sorrow (USA).gba' },
-    { name: 'Pac-Man', subtitle: 'Classic NES Series', file: 'Classic NES Series - Pac-Man (USA, Europe).gba' },
-    { name: 'The Legend of Zelda', subtitle: 'The Minish Cap', file: 'Legend of Zelda, The - The Minish Cap (USA).gba' },
-    { name: 'Mario Kart', subtitle: 'Super Circuit', file: 'Mario Kart - Super Circuit (USA).gba' },
-    { name: 'Metroid Fusion', file: 'Metroid Fusion (USA).gba' },
-    { name: 'Pokémon', subtitle: 'Emerald Version', file: 'Pokemon - Emerald Version (USA, Europe).gba' },
-    { name: 'Pokémon', subtitle: 'FireRed Version', file: 'Pokemon - FireRed Version (USA, Europe) (Rev 1).gba' },
-    { name: 'Pokémon', subtitle: 'LeafGreen Version', file: 'Pokemon - LeafGreen Version (USA, Europe) (Rev 1).gba' }
+    {name:'Castlevania',subtitle:'Aria of Sorrow',file:'Castlevania - Aria of Sorrow (USA).gba'},{name:'The Legend of Zelda',subtitle:'The Minish Cap',file:'Legend of Zelda, The - The Minish Cap (USA).gba'},{name:'Mario Kart',subtitle:'Super Circuit',file:'Mario Kart - Super Circuit (USA).gba'},{name:'Metroid Fusion',file:'Metroid Fusion (USA).gba'},{name:'Pokémon',subtitle:'Emerald Version',file:'Pokemon - Emerald Version (USA, Europe).gba'},{name:'Pokémon',subtitle:'FireRed Version',file:'Pokemon - FireRed Version (USA, Europe) (Rev 1).gba'},{name:'Pokémon',subtitle:'LeafGreen Version',file:'Pokemon - LeafGreen Version (USA, Europe) (Rev 1).gba'}
   ]},
   gbc:    { name: 'Game Boy Color', short: 'GBC', core: 'gbc', games: [
-    { name: 'The Legend of Zelda', subtitle: "Link's Awakening DX", file: "Legend of Zelda, The - Link's Awakening DX (USA, Europe) (Rev 2) (SGB Enhanced) (GB Compatible).gbc" },
-    { name: 'Pokémon', subtitle: 'Gold Version', file: 'Pokemon - Gold Version (USA, Europe) (SGB Enhanced) (GB Compatible).gbc' },
-    { name: 'Pokémon', subtitle: 'Silver Version', file: 'Pokemon - Silver Version (USA, Europe) (SGB Enhanced) (GB Compatible).gbc' },
-    { name: 'Spider-Man', subtitle: 'PT-BR', file: 'Spider-Man (PT-BR).gbc' },
-    { name: 'Super Mario Bros. Deluxe', file: 'Super Mario Bros. Deluxe (USA, Europe) (Rev 2).gbc' },
-    { name: 'Tetris DX', file: 'Tetris DX (World) (SGB Enhanced) (GB Compatible).gbc' },
-    { name: 'Tom & Jerry', file: 'Tom & Jerry (USA).gbc' },
-    { name: 'Wario Land 3', file: 'Wario Land 3 (World) (En,Ja).gbc' },
-    { name: 'Wario Land II', file: 'Wario Land II (USA, Europe) (SGB Enhanced) (GB Compatible).gbc' }
+    {name:'The Legend of Zelda',subtitle:"Link's Awakening DX",file:"Legend of Zelda, The - Link's Awakening DX.gbc"},{name:'Pokémon',subtitle:'Gold Version',file:'Pokemon - Gold Version.gbc'},{name:'Pokémon',subtitle:'Silver Version',file:'Pokemon - Silver Version.gbc'},{name:'Super Mario Bros. Deluxe',file:'Super Mario Bros. Deluxe.gbc'},{name:'Tetris DX',file:'Tetris DX.gbc'},{name:'Wario Land 3',file:'Wario Land 3.gbc'}
   ]},
   n64:    { name: 'Nintendo 64', short: 'N64', core: 'n64', games: [
-    { name: 'Banjo-Kazooie', file: 'Banjo-Kazooie (USA) (Rev 1).z64' },
-    { name: 'GoldenEye 007', file: 'GoldenEye 007 (USA).z64' },
-    { name: 'The Legend of Zelda', subtitle: 'Ocarina of Time', file: 'Legend of Zelda, The - Ocarina of Time (USA) (Rev 2).z64' },
-    { name: 'Mario Kart 64', file: 'Mario Kart 64 (USA).z64' },
-    { name: 'Super Mario 64', file: 'Super Mario 64 (USA).z64' },
-    { name: 'Super Smash Bros.', file: 'Super Smash Bros. (USA).z64' }
+    {name:'Banjo-Kazooie',file:'Banjo-Kazooie (USA) (Rev 1).z64'},{name:'GoldenEye 007',file:'GoldenEye 007 (USA).z64'},{name:'The Legend of Zelda',subtitle:'Ocarina of Time',file:'Legend of Zelda, The - Ocarina of Time (USA) (Rev 2).z64'},{name:'Mario Kart 64',file:'Mario Kart 64 (USA).z64'},{name:'Super Mario 64',file:'Super Mario 64 (USA).z64'},{name:'Super Smash Bros.',file:'Super Smash Bros. (USA).z64'}
   ]},
   psx:    { name: 'PlayStation 1', short: 'PS1', core: 'pcsx_rearmed', games: [
-    { name: 'Castlevania', subtitle: 'Symphony of the Night', file: 'Castlevania - Symphony of the Night (USA).chd' },
-    { name: 'Crash Bandicoot 3', subtitle: 'Warped', file: 'Crash Bandicoot - Warped (USA).chd' },
-    { name: 'Crash Bandicoot 2', subtitle: 'Cortex Strikes Back', file: 'Crash Bandicoot 2 - Cortex Strikes Back (USA).chd' },
-    { name: 'Crash Team Racing', subtitle: 'CTR', file: 'Crash Team Racing (USA).chd' },
-    { name: 'Dino Crisis', file: 'Dino Crisis (USA).chd' },
-    { name: 'Gran Turismo 2', file: 'Gran Turismo 2 (USA).chd' },
-    { name: 'Metal Gear Solid', subtitle: 'Disc 1', file: 'Metal Gear Solid (USA) (Disc 1).chd' },
-    { name: 'Metal Slug X', file: 'Metal Slug X (USA).chd' },
-    { name: 'Resident Evil 3', subtitle: 'Nemesis', file: 'Resident Evil 3 - Nemesis (USA).chd' },
-    { name: 'Tekken', file: 'Tekken (USA).chd' },
-    { name: 'Tekken 3', file: 'Tekken 3 (USA).chd' },
-    { name: "Tony Hawk's", subtitle: 'Pro Skater 2', file: "Tony Hawk's Pro Skater 2 (USA).chd" }
+    {name:'Castlevania',subtitle:'Symphony of the Night',file:'Castlevania - Symphony of the Night (USA).chd'},{name:'Crash Bandicoot 3',subtitle:'Warped',file:'Crash Bandicoot - Warped (USA).chd'},{name:'Crash Team Racing',subtitle:'CTR',file:'Crash Team Racing (USA).chd'},{name:'Dino Crisis',file:'Dino Crisis (USA).chd'},{name:'Metal Gear Solid',subtitle:'Disc 1',file:'Metal Gear Solid (USA) (Disc 1).chd'},{name:'Resident Evil 3',subtitle:'Nemesis',file:'Resident Evil 3 - Nemesis (USA).chd'},{name:'Tekken 3',file:'Tekken 3 (USA).chd'}
   ]},
   sega:   { name: 'Mega Drive', short: 'SEGA', core: 'segaMD', games: [
-    { name: 'Aladdin', file: 'Aladdin (USA).md' },
-    { name: 'Altered Beast', file: 'Altered Beast (USA, Europe).md' },
-    { name: 'Felix', subtitle: 'Detona Ralph', file: 'Felix - Detona Ralph.bin' },
-    { name: 'Golden Axe II', file: 'Golden Axe II (World).md' },
-    { name: 'Great Circus Mystery', subtitle: 'Starring Mickey & Minnie', file: 'Great Circus Mystery Starring Mickey & Minnie, The (USA).md' },
-    { name: 'Kid Chameleon', file: 'Kid Chameleon (USA, Europe).md' },
-    { name: "Mickey's", subtitle: 'Ultimate Challenge', file: "Mickey's Ultimate Challenge (USA).md" },
-    { name: 'Shinobi III', subtitle: 'Return of the Ninja Master', file: 'Shinobi III - Return of the Ninja Master (USA).md' },
-    { name: 'Show do Milhão', file: 'Show do Milhao (Brazil).md' },
-    { name: 'Sonic & Knuckles + Sonic 2', file: 'Sonic & Knuckles + Sonic The Hedgehog 2 (World).md' },
-    { name: 'Sonic Compilation', subtitle: 'Sonic Classics', file: 'Sonic Compilation ~ Sonic Classics (USA, Europe, Korea) (Rev A).md' },
-    { name: 'Streets of Rage 2', file: 'Streets of Rage 2 (USA).md' },
-    { name: 'Top Gear 2', file: 'Top Gear 2 (USA).md' }
+    {name:'Aladdin',file:'Aladdin (USA).md'},{name:'Altered Beast',file:'Altered Beast (USA, Europe).md'},{name:'Golden Axe II',file:'Golden Axe II (World).md'},{name:'Kid Chameleon',file:'Kid Chameleon (USA, Europe).md'},{name:'Shinobi III',subtitle:'Return of the Ninja Master',file:'Shinobi III.md'},{name:'Sonic & Knuckles + Sonic 2',file:'Sonic & Knuckles + Sonic 2.md'},{name:'Streets of Rage 2',file:'Streets of Rage 2 (USA).md'}
   ]},
   segacd: { name: 'Sega CD', short: 'MEGA CD', core: 'segaCD', games: [
-    {name:'Sonic CD',file:'Sonic CD (USA).chd'},
-    {name:'Snatcher',file:'Snatcher (USA).chd'},
-    {name:'Lunar',subtitle:'The Silver Star',file:'Lunar - The Silver Star (USA).chd'},
-    {name:'Shining Force CD',file:'Shining Force CD (USA).chd'},
-    {name:'Final Fight CD',file:'Final Fight CD (USA).chd'}
+    {name:'Sonic CD',file:'Sonic CD (USA).chd'},{name:'Snatcher',file:'Snatcher (USA).chd'},{name:'Lunar',subtitle:'The Silver Star',file:'Lunar - The Silver Star (USA).chd'},{name:'Shining Force CD',file:'Shining Force CD (USA).chd'},{name:'Final Fight CD',file:'Final Fight CD (USA).chd'}
   ]},
-  gamegear: { name: 'Game Gear', short: 'GG', core: 'segaGG', games: [
-    { name: 'Sonic the Hedgehog', file: 'Sonic the Hedgehog (World).gg' },
-    { name: 'Sonic the Hedgehog 2', file: 'Sonic the Hedgehog 2 (World).gg' },
-    { name: 'Shinobi', file: 'Shinobi (World).gg' },
-    { name: 'Shinobi II', subtitle: 'The Silent Fury', file: 'Shinobi II - The Silent Fury (World).gg' },
-    { name: 'Columns', file: 'Columns (World).gg' },
-    { name: 'Wonder Boy', subtitle: "The Dragon's Trap", file: "Wonder Boy - The Dragon's Trap (USA, Europe).gg" },
-    { name: 'Land of Illusion', subtitle: 'Starring Mickey Mouse', file: 'Land of Illusion Starring Mickey Mouse (World).gg' }
+  gamegear:{ name: 'Game Gear', short: 'GG', core: 'segaGG', games: [
+    {name:'Sonic the Hedgehog',file:'Sonic the Hedgehog (World).gg'},{name:'Sonic 2',file:'Sonic the Hedgehog 2 (World).gg'},{name:'Sonic Triple Trouble',file:'Sonic Triple Trouble.gg'},{name:'Shinobi',file:'Shinobi (World).gg'},{name:'Columns',file:'Columns (World).gg'}
   ]},
   nds:    { name: 'Nintendo DS', short: 'NDS', core: 'nds', games: [
-    { name: 'New Super Mario Bros.', file: 'New Super Mario Bros. (USA).nds' },
-    { name: 'Mario Kart DS', file: 'Mario Kart DS (USA).nds' },
-    { name: 'Pokémon', subtitle: 'Diamond Version', file: 'Pokemon - Diamond Version (USA).nds' },
-    { name: 'Pokémon', subtitle: 'Pearl Version', file: 'Pokemon - Pearl Version (USA).nds' },
-    { name: 'Pokémon', subtitle: 'Platinum Version', file: 'Pokemon - Platinum Version (USA).nds' },
-    { name: 'Pokémon', subtitle: 'HeartGold Version', file: 'Pokemon - HeartGold Version (USA).nds' },
-    { name: 'Pokémon', subtitle: 'SoulSilver Version', file: 'Pokemon - SoulSilver Version (USA).nds' },
-    { name: 'Pokémon', subtitle: 'Black Version', file: 'Pokemon - Black Version (USA).nds' },
-    { name: 'Pokémon', subtitle: 'White Version', file: 'Pokemon - White Version (USA).nds' },
-    { name: 'The Legend of Zelda', subtitle: 'Phantom Hourglass', file: 'Legend of Zelda, The - Phantom Hourglass (USA).nds' },
-    { name: 'The Legend of Zelda', subtitle: 'Spirit Tracks', file: 'Legend of Zelda, The - Spirit Tracks (USA).nds' },
-    { name: 'Super Mario 64 DS', file: 'Super Mario 64 DS (USA).nds' },
-    { name: 'Castlevania', subtitle: 'Dawn of Sorrow', file: 'Castlevania - Dawn of Sorrow (USA).nds' },
-    { name: 'Castlevania', subtitle: 'Portrait of Ruin', file: 'Castlevania - Portrait of Ruin (USA).nds' },
-    { name: 'Castlevania', subtitle: 'Order of Ecclesia', file: 'Castlevania - Order of Ecclesia (USA).nds' },
-    { name: 'Metroid Prime Hunters', file: 'Metroid Prime - Hunters (USA).nds' },
-    { name: 'Kirby', subtitle: 'Canvas Curse', file: 'Kirby - Canvas Curse (USA).nds' },
-    { name: 'Advance Wars', subtitle: 'Dual Strike', file: 'Advance Wars - Dual Strike (USA).nds' },
-    { name: 'Chrono Trigger', file: 'Chrono Trigger (USA).nds' },
-    { name: 'Fire Emblem', subtitle: 'Shadow Dragon', file: 'Fire Emblem - Shadow Dragon (USA).nds' }
+    {name:'New Super Mario Bros.',file:'New Super Mario Bros. (USA).nds'},{name:'Mario Kart DS',file:'Mario Kart DS (USA).nds'},{name:'Pokémon',subtitle:'Diamond Version',file:'Pokemon - Diamond Version (USA).nds'},{name:'Pokémon',subtitle:'Platinum Version',file:'Pokemon - Platinum Version (USA).nds'},{name:'Pokémon',subtitle:'HeartGold',file:'Pokemon - HeartGold Version (USA).nds'},{name:'The Legend of Zelda',subtitle:'Phantom Hourglass',file:'Zelda - Phantom Hourglass.nds'},{name:'Castlevania',subtitle:'Dawn of Sorrow',file:'Castlevania - Dawn of Sorrow (USA).nds'},{name:'Chrono Trigger',file:'Chrono Trigger (USA).nds'}
   ]},
   arcade: { name: 'Arcade', short: 'ARCADE', core: 'fbneo', games: [
-    { name: 'Garou', subtitle: 'Mark of the Wolves', file: 'garou.zip' },
-    { name: "The King of Fighters '97", file: 'kof97.zip' },
-    { name: "The King of Fighters '98", subtitle: 'The Slugfest', file: 'kof98.zip' },
-    { name: 'The King of Fighters 2002', subtitle: 'Challenge to Ultimate Match', file: 'kof2002.zip' },
-    { name: 'Metal Slug', file: 'mslug.zip' },
-    { name: 'Marvel vs. Capcom', subtitle: 'Clash of Super Heroes', file: 'mvsc.zip' },
-    { name: 'Real Bout Fatal Fury Special', file: 'rbffspec.zip' },
-    { name: 'Samurai Shodown II', file: 'samsho2.zip' },
-    { name: 'Street Fighter Alpha 3', file: 'sfa3.zip' },
-    { name: 'Vampire Savior', subtitle: 'The Lord of Vampire', file: 'vsav.zip' }
+    {name:'The King of Fighters \'97',file:'kof97.zip'},{name:'The King of Fighters \'98',file:'kof98.zip'},{name:'Metal Slug',file:'mslug.zip'},{name:'Marvel vs. Capcom',file:'mvsc.zip'},{name:'Samurai Shodown II',file:'samsho2.zip'},{name:'Street Fighter Alpha 3',file:'sfa3.zip'}
   ]}
 };
 
@@ -649,17 +526,5 @@ function renderGamepass() {
 }
 </script>
 
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a267fb5aea1b167d',t:'MTc4NTk1NTc2Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.babel.js"></script>
-<script>
-  VanillaTilt.init(document.querySelectorAll(".console-card"), {
-    max: 15, // Rotação máxima
-    speed: 500,
-    glare: true,
-    "max-glare": 0.1 // Efeito de brilho de luz na superfície
-  });
-</script>
-
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a267fb5aea1b167d',t:'MTc4NTk1NTc2Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

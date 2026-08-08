@@ -520,14 +520,17 @@ body {
 }
 
 .hero-title-glow {
-  position: relative;
-  display: inline-block;
   color: var(--green-neon);
   text-shadow:
     0 0 20px rgba(0,255,65,0.8),
     0 0 50px rgba(0,255,65,0.4),
     0 0 100px rgba(0,255,65,0.15);
   animation: titleGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes titleGlow {
+  0%   { text-shadow: 0 0 20px rgba(0,255,65,0.8), 0 0 50px rgba(0,255,65,0.4), 0 0 100px rgba(0,255,65,0.15); }
+  100% { text-shadow: 0 0 30px rgba(0,255,65,1), 0 0 70px rgba(0,255,65,0.5), 0 0 120px rgba(0,255,65,0.25); }
 }
 
 .hero-desc {
@@ -542,10 +545,10 @@ body {
 }
 
 .hero-line {
-  width: 280px;
+  width: 80px;
   height: 2px;
-  background: linear-gradient(90deg, transparent, var(--green-neon), transparent);
-  margin: 0 auto 10px;
+  background: linear-gradient(90deg, transparent, var(--green-neon), rgba(123,45,142,0.8), transparent);
+  margin: 0 auto 36px;
   box-shadow: 0 0 16px var(--green-neon);
   animation: heroFadeIn 1s ease-out 0.8s both;
 }
@@ -1052,7 +1055,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
+  margin-bottom: 16px;
   padding: 0 4px;
 }
 
@@ -1123,7 +1126,7 @@ body {
 }
 
 .user-game-card:hover {
-  transform: translateY(-4px) scale(1.00);
+  transform: translateY(-4px) scale(1.03);
   border-color: var(--green-neon);
   box-shadow: 0 12px 30px rgba(0,0,0,0.7), 0 0 16px rgba(0,255,65,0.2);
 }
@@ -1947,24 +1950,4 @@ body {
   .game-subtitle {
     font-size: 0.55rem;
   }
-}
-
-
-
-
-
-
-.tv-turn-on {
-  position: fixed;
-  inset: 0;
-  background: #fff;
-  z-index: 99999;
-  pointer-events: none;
-  animation: turn-on 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
-
-@keyframes turn-on {
-  0% { transform: scale(1, 0.001) translate3d(0, 0, 0); filter: brightness(10); }
-  50% { transform: scale(1, 0.001) translate3d(0, 0, 0); filter: brightness(10); }
-  100% { transform: scale(1, 1) translate3d(0, 0, 0); filter: brightness(1); opacity: 0; display: none; }
 }
