@@ -1,4 +1,4 @@
-const CACHE_NAME = 'retroverse-v3';
+const CACHE_NAME = 'retroverse-v7';
 const STATIC_ASSETS = [
   'index.html',
   'games.html',
@@ -6,7 +6,21 @@ const STATIC_ASSETS = [
   'profile.html',
   'css/style.css',
   'assets/rv-icon.png',
-  'manifest.json'
+  'manifest.json',
+  // Base de cheats dinâmica do EmulatorJS
+  'cheats/cheats.json',
+  'cheats/nes.json',
+  'cheats/snes.json',
+  'cheats/gba.json',
+  'cheats/gbc.json',
+  'cheats/gb.json',
+  'cheats/n64.json',
+  'cheats/pcsx_rearmed.json',
+  'cheats/segaMD.json',
+  'cheats/segaCD.json',
+  'cheats/segaGG.json',
+  'cheats/nds.json',
+  'cheats/fbneo.json'
 ];
 
 // Install — cache static assets

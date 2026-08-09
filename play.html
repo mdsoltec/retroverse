@@ -19,7 +19,27 @@
       -webkit-user-select: none;
     }
 
-    #game { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 1; }
+    /* ═══ POSIÇÃO/TAMANHO DA TELA DO JOGO ═══
+       Altere estas quatro variáveis para ajustar a imagem do jogo
+       por baixo da moldura do overlay. O padrão ocupa a viewport inteira.
+       Exemplo: top: 8vh; height: 42vh;
+    ═══════════════════════════════════════════ */
+    :root {
+      --rv-game-left: 0px;
+      --rv-game-top: 0px;
+      --rv-game-width: 100vw;
+      --rv-game-height: 100vh;
+    }
+
+    #game {
+      position: fixed;
+      left: var(--rv-game-left);
+      top: var(--rv-game-top);
+      width: var(--rv-game-width);
+      height: var(--rv-game-height);
+      z-index: 1;
+      background: #000;
+    }
 
     /* LOADING (personalizado por console) */
     #rv-loading {
@@ -135,13 +155,54 @@
       transform: translateX(-50%) translateY(0);
     }
 
+    /* ═══ MENU DE CHEATS SOBRE TODOS OS CONTROLES ═══ */
+    body.rv-cheats-open .ejs_popup_container {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 100000 !important;
+      /* Deixa o botão MENU do overlay receber o segundo clique. */
+      pointer-events: none !important;
+    }
+
+    /* Somente os controles da lista continuam interativos. */
+    body.rv-cheats-open .ejs_popup_container .ejs_button,
+    body.rv-cheats-open .ejs_popup_container .ejs_button_button,
+    body.rv-cheats-open .ejs_popup_container .ejs_cheat_row,
+    body.rv-cheats-open .ejs_popup_container .ejs_cheat_row *,
+    body.rv-cheats-open .ejs_popup_container .ejs_cheat_parent,
+    body.rv-cheats-open .ejs_popup_container .ejs_cheat_parent * {
+      pointer-events: auto !important;
+    }
+
     /* ═══════════════════════════════════════════
        THEATER MODE
+       Modo imersivo: oculta a moldura/controles touch e deixa
+       somente a tela do emulador ocupando a viewport.
     ═══════════════════════════════════════════ */
+    body.theater-mode #game {
+      left: 0 !important;
+      top: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 10;
+    }
+
+    body.theater-mode #rv-overlay,
+    body.theater-mode #rv-pad {
+      display: none !important;
+      pointer-events: none !important;
+    }
+
     body.theater-mode #rv-fs-btn,
-    body.theater-mode .rv-float-btns { opacity: 0.3; }
+    body.theater-mode .rv-float-btns { opacity: 0.35; z-index: 8000; }
     body.theater-mode #rv-fs-btn:hover,
     body.theater-mode .rv-float-btns:hover { opacity: 1; }
+    body.theater-mode #rv-theater-btn {
+      border-color: #00ff41;
+      box-shadow: 0 0 14px rgba(0,255,65,.45);
+    }
 
     /* ═══════════════════════════════════════════
        OVERLAY SYSTEM
@@ -158,6 +219,26 @@
       max-height: 100vh;
     }
     #rv-overlay.active { display: block; }
+
+    /* Área transparente da tela inferior do Nintendo DS.
+       Fica abaixo dos botões do overlay e encaminha o toque ao core. */
+    #rv-nds-stylus-layer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 50%;
+      bottom: 0;
+      z-index: 4990;
+      display: none;
+      pointer-events: auto;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      background: transparent;
+    }
+    #rv-nds-stylus-layer.active { display: block; }
+    body.theater-mode #rv-nds-stylus-layer,
+    body.rv-cheats-open #rv-nds-stylus-layer { display: none !important; }
 
     #rv-overlay img.rv-skin-img {
       display: block;
@@ -268,13 +349,17 @@
 
 <div id="game"></div>
 <div id="rv-overlay"></div>
+<div id="rv-nds-stylus-layer" aria-label="Tela touch do Nintendo DS"></div>
 <div id="rv-pad"></div>
 
 <script>
 const params = new URLSearchParams(window.location.search);
 let core = params.get('core') || 'snes';
-const game = params.get('game');
+// Garante que 'game' não carregue query string embutida (ex: "...nes?debug=1")
+// — remove qualquer '?' que apareça DENTRO do valor do game.
+let game = (params.get('game') || '').split('?')[0];
 if (core === 'mupen64plus' || core === 'mupen64plus_next') core = 'n64';
+if (core === 'melonds' || core === 'desmume' || core === 'desmume2015') core = 'nds';
 
 const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 
@@ -500,8 +585,11 @@ const OVERLAYS = {
     }
   },
   nds: {
-    base: 'overlays/gba/gba_phone_portrait_yellow.png',
-    animated: 'overlays/gba/gba_phone_portrait_yellow_animated.png',
+    // O DS não deve reutilizar a moldura de GBA: o core já renderiza
+    // as duas telas. Se não houver um CFG próprio em overlays/DS, usamos
+    // a tela dupla limpa + controles transparentes do fallback.
+    base: null,
+    animated: null,
     animButtons: {
       A:     'overlays/gba/gba_portrait_yellow_animated_a.png',
       B:     'overlays/gba/gba_portrait_yellow_animated_b.png',
@@ -593,14 +681,25 @@ async function preloadGame(gamePath) {
     encodeURIComponent(seg).replace(/'/g, '%27')
   ).join('/');
 
-  // Lista de fontes para tentar carregar a ROM:
-  // 1º Localmente na pasta roms/ do projeto (ex: roms/gamegear/Sonic...)
-  // 2º No servidor online CDN (ROMS_BASE + encodedPath)
-  const candidateUrls = [
-    `roms/${encodedPath}`,
-    `roms/${gamePath}`,
-    ROMS_BASE + encodedPath
-  ];
+  // Lista de fontes para tentar carregar a ROM.
+  // Game Gear aparece no catálogo como "gamegear", mas alguns projetos
+  // guardam as ROMs em "gg" ou "segaGG". Tentamos os aliases sem quebrar
+  // os caminhos originais dos demais consoles.
+  const pathParts = gamePath.split('/');
+  const systemKey = pathParts.shift() || '';
+  const filenamePath = pathParts.join('/');
+  const aliases = {
+    gamegear: ['gamegear', 'GameGear', 'GAMEGEAR', 'gg', 'GG', 'segaGG'],
+    segaGG: ['segaGG', 'gamegear', 'GameGear', 'gg', 'GG'],
+  }[systemKey] || [systemKey];
+
+  const candidateUrls = [];
+  for (const alias of [...new Set(aliases)]) {
+    candidateUrls.push(`roms/${alias}/${filenamePath.split('/').map(seg => encodeURIComponent(seg)).join('/')}`);
+    candidateUrls.push(`roms/${alias}/${filenamePath}`);
+    candidateUrls.push(ROMS_BASE + `${alias}/${filenamePath.split('/').map(seg => encodeURIComponent(seg)).join('/')}`);
+  }
+  candidateUrls.push(`roms/${encodedPath}`, `roms/${gamePath}`, ROMS_BASE + encodedPath);
 
   const msgEl = document.getElementById('rv-msg');
   const dlWrap = document.getElementById('rv-download-progress');
@@ -622,6 +721,7 @@ async function preloadGame(gamePath) {
   }
 
   if (!response) {
+    console.error('[RetroVerse] ROM não encontrada. URLs tentadas:', candidateUrls);
     msgEl.textContent = 'Erro: ROM não encontrada em roms/ nem no servidor online.';
     throw new Error('ROM não encontrada em nenhuma fonte.');
   }
@@ -649,8 +749,261 @@ async function preloadGame(gamePath) {
   } catch(e) { msgEl.textContent = 'Erro ao baixar.'; throw e; }
 }
 
-EJS_player = '#game'; EJS_core = core;
+EJS_player = '#game';
+
+// O core DeSmuME 2015 expõe Pointer/Touch para a tela inferior do DS.
+// Mantemos `core = 'nds'` para catálogo, overlays e cheats, mas usamos
+// desmume2015 internamente para habilitar o stylus no navegador.
+const isNDSCore = ['nds', 'melonds', 'desmume', 'desmume2015'].includes(core);
+const emulatorCore = isNDSCore ? 'desmume2015' : core;
+EJS_core = emulatorCore;
+window.__RV_IS_NDS = isNDSCore;
+
+if (isNDSCore) {
+  EJS_defaultOptions = {
+    // Duas telas em pé: superior + inferior/touch.
+    desmume_screens_layout: 'top/bottom',
+    // Usa o Pointer API em vez de mouse relativo.
+    desmume_pointer_mouse: 'enabled',
+    desmume_pointer_type: 'touch'
+  };
+}
+
 EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+
+/* ═══ STYLUS / TOUCH DO NINTENDO DS ═══ */
+const NDS_TOUCH_REGION = { top: 0.50, bottom: 1, left: 0, right: 1 };
+
+function getNDSCanvas() {
+  return document.querySelector('#game canvas') || window.EJS_emulator?.canvas || null;
+}
+
+function forwardNDSStylus(action, point) {
+  if (!isNDSCore || !point) return false;
+  const canvas = getNDSCanvas();
+  if (!canvas) return false;
+
+  const rect = canvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) return false;
+  const clientX = Number(point.clientX);
+  const clientY = Number(point.clientY);
+  if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) return false;
+
+  const nx = (clientX - rect.left) / rect.width;
+  const ny = (clientY - rect.top) / rect.height;
+  const active = action !== 'end';
+  const inside = nx >= NDS_TOUCH_REGION.left && nx <= NDS_TOUCH_REGION.right
+    && ny >= NDS_TOUCH_REGION.top && ny <= NDS_TOUCH_REGION.bottom;
+  if (!inside && action === 'start') return false;
+
+  const pointerType = point.pointerType || 'touch';
+  const pointerId = point.pointerId ?? point.identifier ?? 1;
+  const pointerEventName = action === 'start' ? 'pointerdown'
+    : action === 'end' ? 'pointerup' : 'pointermove';
+  const mouseEventName = action === 'start' ? 'mousedown'
+    : action === 'end' ? 'mouseup' : 'mousemove';
+  const buttons = active ? 1 : 0;
+
+  // DeSmuME 2015 com desmume_pointer_type=touch usa Pointer API.
+  try {
+    if (window.PointerEvent) {
+      canvas.dispatchEvent(new PointerEvent(pointerEventName, {
+        bubbles: true,
+        cancelable: true,
+        pointerId,
+        pointerType,
+        isPrimary: true,
+        clientX,
+        clientY,
+        screenX: point.screenX ?? clientX,
+        screenY: point.screenY ?? clientY,
+        buttons,
+        button: active ? 0 : 0,
+        pressure: active ? 0.5 : 0
+      }));
+    }
+  } catch (error) {}
+
+  // Fallback para builds que expõem a tela como Mouse API.
+  try {
+    canvas.dispatchEvent(new MouseEvent(mouseEventName, {
+      bubbles: true,
+      cancelable: true,
+      clientX,
+      clientY,
+      screenX: point.screenX ?? clientX,
+      screenY: point.screenY ?? clientY,
+      buttons,
+      button: 0
+    }));
+  } catch (error) {}
+
+  return true;
+}
+
+window.RV_NDS_STYLUS = forwardNDSStylus;
+
+function initNDSStylus() {
+  if (!isNDSCore) return;
+  const layer = document.getElementById('rv-nds-stylus-layer');
+  if (!layer || layer.dataset.bound === '1') {
+    if (layer) layer.classList.add('active');
+    return;
+  }
+
+  const activePointers = new Set();
+  const pointerIdOf = event => event.pointerId ?? 1;
+
+  layer.addEventListener('pointerdown', event => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    if (!forwardNDSStylus('start', event)) return;
+    activePointers.add(pointerIdOf(event));
+    try { layer.setPointerCapture(pointerIdOf(event)); } catch (error) {}
+    event.preventDefault();
+  }, { passive: false });
+
+  layer.addEventListener('pointermove', event => {
+    if (!activePointers.has(pointerIdOf(event))) return;
+    forwardNDSStylus('move', event);
+    event.preventDefault();
+  }, { passive: false });
+
+  const finish = event => {
+    const id = pointerIdOf(event);
+    if (!activePointers.has(id)) return;
+    forwardNDSStylus('end', event);
+    activePointers.delete(id);
+    try { layer.releasePointerCapture(id); } catch (error) {}
+    event.preventDefault();
+  };
+
+  layer.addEventListener('pointerup', finish, { passive: false });
+  layer.addEventListener('pointercancel', finish, { passive: false });
+  window.addEventListener('blur', () => {
+    activePointers.clear();
+  });
+
+  layer.dataset.bound = '1';
+  layer.classList.add('active');
+}
+
+// ═══ CHEATS DINÂMICOS ═══
+// O EmulatorJS carrega cheats/cheats.json e cheats/<core>.json
+// automaticamente. O caminho é relativo a este play.html.
+EJS_cheatPath = 'cheats/';
+
+// Troca o menu genérico (hambúrguer) pelo menu de cheats.
+// O botão mantém o ícone do menu, mas passa a abrir diretamente os cheats.
+function openRetroVerseCheats() {
+  const emulator = window.EJS_emulator;
+  const cheatMenu = emulator?.cheatMenu;
+  if (!emulator || !cheatMenu) return;
+
+  const isOpen = getComputedStyle(cheatMenu).display !== 'none';
+  if (isOpen) {
+    // Segundo clique no menu: fecha a lista de cheats.
+    cheatMenu.style.display = 'none';
+    document.body.classList.remove('rv-cheats-open');
+    if (emulator.menu?.close) emulator.menu.close();
+    return;
+  }
+
+  // Fecha a caixa genérica de screenshot/save/recording, se estiver aberta.
+  if (emulator.elements?.contextmenu) {
+    emulator.elements.contextmenu.style.display = 'none';
+  }
+  if (emulator.menu?.close) {
+    emulator.menu.close();
+  }
+
+  // O popup nasce dentro de #game, mas o overlay de controles fica acima dele.
+  // Movê-lo para o body garante que a lista e os checkboxes recebam cliques.
+  if (cheatMenu.parentElement !== document.body) {
+    const ejsColor = emulator.elements?.parent
+      ? getComputedStyle(emulator.elements.parent).getPropertyValue('--ejs-primary-color')
+      : '';
+    if (ejsColor) document.body.style.setProperty('--ejs-primary-color', ejsColor);
+    document.body.appendChild(cheatMenu);
+  }
+
+  cheatMenu.style.display = 'block';
+  cheatMenu.style.position = 'fixed';
+  cheatMenu.style.inset = '0';
+  cheatMenu.style.zIndex = '100000';
+  cheatMenu.setAttribute('aria-modal', 'true');
+  document.body.classList.add('rv-cheats-open');
+
+  // O botão "Close" nativo altera display diretamente; mantém o estado visual
+  // do RetroVerse sincronizado quando isso acontecer.
+  if (!cheatMenu.__rvCheatObserver) {
+    const observer = new MutationObserver(() => {
+      const visible = getComputedStyle(cheatMenu).display !== 'none';
+      document.body.classList.toggle('rv-cheats-open', visible);
+    });
+    observer.observe(cheatMenu, { attributes: true, attributeFilter: ['style'] });
+    cheatMenu.__rvCheatObserver = observer;
+  }
+}
+
+// Disponibiliza a ação para o parser de overlays.
+window.openRetroVerseCheats = openRetroVerseCheats;
+
+// O botão hambúrguer usado no modo touch (ejs_virtualGamepad_open)
+// chama menu.toggle() internamente e não passa por EJS_Buttons.contextMenu.
+// Interceptamos esse botão para abrir os cheats diretamente.
+function bindEmulatorMenuToCheats() {
+  const emulator = window.EJS_emulator;
+  if (!emulator) return false;
+
+  // O botão hambúrguer chama este método internamente. Redirecionar o método
+  // também cobre versões do EmulatorJS que recriam o botão touch dinamicamente.
+  if (emulator.menu && !emulator.menu.__rvCheatsRedirected) {
+    emulator.menu.toggle = () => openRetroVerseCheats();
+    emulator.menu.__rvCheatsRedirected = true;
+  }
+
+  const menuButton = emulator.elements?.menuToggle
+    || document.querySelector('.ejs_virtualGamepad_open');
+  if (!menuButton || menuButton.dataset.rvCheatsMenuBound === '1') return true;
+
+  let lastHandled = 0;
+  const redirect = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    // Um toque dispara touchstart, touchend e click; abre apenas uma vez.
+    const now = Date.now();
+    if (now - lastHandled < 450) return;
+    lastHandled = now;
+    openRetroVerseCheats();
+  };
+
+  ['touchstart', 'touchend', 'mousedown', 'mouseup', 'click'].forEach(type => {
+    menuButton.addEventListener(type, redirect, { capture: true, passive: false });
+  });
+  menuButton.dataset.rvCheatsMenuBound = '1';
+  menuButton.setAttribute('aria-label', 'Cheats');
+  menuButton.title = 'Cheats';
+  return true;
+}
+
+EJS_Buttons = {
+  // Evita exibir dois botões para a mesma função.
+  cheat: false,
+  contextMenu: {
+    visible: true,
+    displayName: 'Cheats',
+    callback: openRetroVerseCheats
+  }
+};
+
+// Usa o nome base da ROM para aumentar a precisão do matching no JSON.
+try {
+  const romFilename = decodeURIComponent((game || '').split('/').pop() || '');
+  EJS_gameName = romFilename.replace(/\.[^/.]+$/, '');
+} catch (e) {}
+
 EJS_startOnLoaded = true; EJS_fullscreenOnLoaded = false;
 
 const isArcade = game.endsWith('.zip');
@@ -660,6 +1013,13 @@ function onGameReady() {
   if (ld) ld.classList.add('hidden');
   document.getElementById('rv-fs-btn').classList.add('visible');
   document.getElementById('rv-float-btns').classList.add('visible');
+
+  // Redireciona também o menu hambúrguer do modo touch.
+  bindEmulatorMenuToCheats();
+  setTimeout(bindEmulatorMenuToCheats, 250);
+
+  // Ativa a região touch/stylus da tela inferior do Nintendo DS.
+  initNDSStylus();
   initControls();
 
   // Tocar som de boot do console
@@ -677,22 +1037,125 @@ window.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => initControls(), 150);
 });
 
+/* ═══ CARREGAMENTO DA BASE DE CHEATS ═══
+   A versão do EmulatorJS usada pelo loader não encaminha EJS_cheatPath
+   automaticamente. Por isso carregamos o JSON e entregamos os códigos em
+   EJS_cheats antes de iniciar o loader.
+═══════════════════════════════════════════════════════════ */
+function normalizeCheatName(value) {
+  return decodeURIComponent(String(value || ''))
+    .replace(/\.[^/.]+$/, '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[_]+/g, ' ')
+    .replace(/[.!]+$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function cheatNameForms(value) {
+  const full = normalizeCheatName(value);
+  const edition = full
+    .replace(/\s*\([^)]*\)/g, '')
+    .replace(/\s*\[[^\]]*\]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return { full, edition };
+}
+
+function findCheatEntries(database, romName) {
+  if (!database || typeof database !== 'object') return [];
+
+  const target = cheatNameForms(romName);
+  const matches = [];
+  for (const [title, entries] of Object.entries(database)) {
+    if (!Array.isArray(entries)) continue;
+    const key = cheatNameForms(title);
+    let score = 0;
+    if (key.full === target.full) score = 100;
+    else if (key.edition === target.edition) score = 90;
+    else if (target.full.startsWith(key.full + ' (') || target.full.startsWith(key.full + ' -')) score = 70;
+    if (score > 0) matches.push({ score, entries });
+  }
+
+  // Permite aliases sem duplicar cheats quando há mais de uma chave para a ROM.
+  matches.sort((a, b) => b.score - a.score);
+  const result = [];
+  const seen = new Set();
+  for (const match of matches) {
+    for (const item of match.entries) {
+      if (!item || typeof item.desc !== 'string' || typeof item.code !== 'string') continue;
+      if (!item.desc.trim() || !item.code.trim()) continue;
+      const id = `${item.desc.trim()}\u0000${item.code.trim()}`;
+      if (seen.has(id)) continue;
+      seen.add(id);
+      result.push([item.desc.trim(), item.code.trim()]);
+    }
+  }
+  return result;
+}
+
+async function loadRetroVerseCheats() {
+  const base = String(window.EJS_cheatPath || 'cheats/')
+    .replace(/\/+$/, '') + '/';
+  const cheatCore = isNDSCore ? 'nds' : core;
+  const paths = [
+    `${base}cheats.json`,
+    `${base}${encodeURIComponent(cheatCore)}.json`
+  ];
+
+  const databases = [];
+  for (const path of paths) {
+    try {
+      const url = new URL(path, document.baseURI).href;
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) continue;
+      const data = await response.json();
+      if (data && typeof data === 'object') databases.push(data);
+    } catch (error) {
+      console.warn('[RetroVerse] Não foi possível carregar cheats:', path, error);
+    }
+  }
+
+  const database = Object.assign({}, ...databases);
+  const romName = window.EJS_gameName || decodeURIComponent((game || '').split('/').pop() || '');
+  window.EJS_cheats = findCheatEntries(database, romName);
+  console.info(`[RetroVerse] Cheats carregados para "${romName}": ${window.EJS_cheats.length}`);
+}
+
+let __rvLoaderStarted = false;
+async function startRetroVerseEmulator() {
+  if (__rvLoaderStarted) return;
+  __rvLoaderStarted = true;
+
+  try {
+    await loadRetroVerseCheats();
+  } catch (error) {
+    window.EJS_cheats = [];
+    console.warn('[RetroVerse] Falha ao preparar cheats:', error);
+  }
+
+  const script = document.createElement('script');
+  script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+  document.body.appendChild(script);
+}
+
 if (isArcade) {
   preloadGame(game).then(blobUrl => {
     EJS_gameUrl = blobUrl;
     EJS_biosUrl = 'roms/arcade/neogeo.zip';
     EJS_onGameStart = onGameReady; setTimeout(onGameReady, 14000);
-    const s = document.createElement('script'); s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js'; document.body.appendChild(s);
+    startRetroVerseEmulator();
   }).catch(() => {
     EJS_gameUrl = ROMS_BASE + game;
     EJS_biosUrl = ROMS_BASE + 'arcade/neogeo.zip';
     EJS_onGameStart = onGameReady; setTimeout(onGameReady, 14000);
-    const s = document.createElement('script'); s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js'; document.body.appendChild(s);
+    startRetroVerseEmulator();
   });
 } else {
   preloadGame(game).then(blobUrl => {
     EJS_gameUrl = blobUrl; EJS_onGameStart = onGameReady; setTimeout(onGameReady, 14000);
-    const s = document.createElement('script'); s.src = 'https://cdn.emulatorjs.org/stable/data/loader.js'; document.body.appendChild(s);
+    startRetroVerseEmulator();
   }).catch(() => {
     document.getElementById('rv-msg').textContent = 'Erro ao carregar.';
     initControls(); // Mostra overlay mesmo em erro/teste sem ROM
@@ -715,7 +1178,18 @@ if (isArcade) {
 }());
 
 function sendInput(id, val) {
-  try { if (window.EJS_emulator?.gameManager) EJS_emulator.gameManager.simulateInput(0, id, val); } catch(e){}
+  try {
+    const manager = window.EJS_emulator?.gameManager;
+    if (!manager) return;
+    if (typeof manager.simulateInput === 'function') {
+      manager.simulateInput(0, id, val);
+    } else if (typeof manager.functions?.simulateInput === 'function') {
+      manager.functions.simulateInput(0, id, val);
+    }
+    if (new URLSearchParams(window.location.search).has('debug')) {
+      console.log('[RetroVerse] input', { id, val });
+    }
+  } catch (e) {}
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -723,35 +1197,62 @@ function sendInput(id, val) {
    Portrait + overlay disponível → sistema de imagem calibrado
    Landscape ou sem overlay → controles CSS
 ═══════════════════════════════════════════════════════════ */
-async function initControls() {
-  const W = window.innerWidth, H = window.innerHeight;
-  const isPortrait = H > W;
+let __rvInitPromise = null;   // single-flight: impede execuções concorrentes do initControls
+async function initControls(force = false) {
+  // Se já há uma inicialização em andamento, reutiliza-a (evita múltiplos engines)
+  if (__rvInitPromise) { return __rvInitPromise; }
 
-  const overlayWrap = document.getElementById('rv-overlay');
-  const padWrap = document.getElementById('rv-pad');
-
-  overlayWrap.classList.remove('active');
-  overlayWrap.innerHTML = '';
-  padWrap.classList.remove('active');
-  padWrap.innerHTML = '';
-
-  const DEBUG = new URLSearchParams(window.location.search).has('debug');
-
-  // 1º Tenta carregar arquivo .cfg automático do RetroArch (ex: overlays/n64/n64.cfg)
-  if (typeof window.loadRetroArchOverlay === 'function') {
-    const raEngine = await window.loadRetroArchOverlay(core, overlayWrap, { debug: DEBUG, isPortrait });
-    if (raEngine) {
-      overlayWrap.classList.add('active');
-      return;
+  __rvInitPromise = (async () => {
+    // Aguarda o EJS_emulator estar pronto (se ainda não estiver) para que o
+    // envio de input funcione. Timeout de 8s para não travar a tela.
+    const t0 = Date.now();
+    while ((!window.EJS_emulator || !window.EJS_emulator.gameManager) && Date.now() - t0 < 8000) {
+      await new Promise(r => setTimeout(r, 150));
     }
-  }
 
-  const overlay = OVERLAYS[core];
-  if (isPortrait && overlay && overlay.base) {
-    buildOverlay(overlay);
-  } else {
-    buildPad(SKINS[core] || SKINS['snes']);
-  }
+    // Garante que o botão/menu touch também abra Cheats depois que o EJS estiver pronto.
+    bindEmulatorMenuToCheats();
+    initNDSStylus();
+
+    // Destrói qualquer engine antigo de forma segura
+    if (window.__rvRAEngine && window.__rvRAEngine.destroy) {
+      try { window.__rvRAEngine.destroy(); } catch(e){}
+      window.__rvRAEngine = null;
+    }
+
+    const W = window.innerWidth, H = window.innerHeight;
+    const isPortrait = H > W;
+
+    const overlayWrap = document.getElementById('rv-overlay');
+    const padWrap = document.getElementById('rv-pad');
+
+    overlayWrap.classList.remove('active');
+    overlayWrap.innerHTML = '';
+    padWrap.classList.remove('active');
+    padWrap.innerHTML = '';
+
+    const DEBUG = new URLSearchParams(window.location.search).has('debug') || window.location.search.toLowerCase().includes('debug');
+
+    // 1º Tenta carregar arquivo .cfg automático do RetroArch (ex: overlays/n64/n64.cfg)
+    if (typeof window.loadRetroArchOverlay === 'function') {
+      const raEngine = await window.loadRetroArchOverlay(core, overlayWrap, { debug: DEBUG, isPortrait });
+      if (raEngine) {
+        window.__rvRAEngine = raEngine;
+        overlayWrap.classList.add('active');
+        return;
+      }
+    }
+
+    const overlay = OVERLAYS[core];
+    if (isPortrait && overlay && overlay.base) {
+      buildOverlay(overlay);
+    } else {
+      buildPad(SKINS[core] || SKINS['snes']);
+    }
+  })();
+
+  // Libera o "single-flight" após terminar (para permitir re-init em resize/orientação)
+  try { await __rvInitPromise; } finally { __rvInitPromise = null; }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -766,7 +1267,7 @@ function buildOverlay(cfg) {
   const containerH = Math.round(W * cfg.aspect);
   
   // Modo debug: adiciona ?debug=1 na URL para ver as zonas
-  const DEBUG = new URLSearchParams(window.location.search).has('debug');
+  const DEBUG = new URLSearchParams(window.location.search).has('debug') || window.location.search.toLowerCase().includes('debug');
 
   // Seta o tamanho do container (limita à altura da tela)
   const actualH = Math.min(containerH, H);
@@ -977,8 +1478,11 @@ function buildPad(skin) {
   const pad = document.getElementById('rv-pad');
   pad.innerHTML = '';
   const W = window.innerWidth, H = window.innerHeight, LS = W > H;
-  const BAR_H = LS ? H : Math.round(Math.min(H*0.42,260));
+  const isNDSLayout = isNDSCore;
+  // No fallback do DS, a barra é transparente para não esconder a tela touch.
+  const BAR_H = LS ? H : (isNDSLayout ? Math.round(Math.min(H * 0.20, 170)) : Math.round(Math.min(H*0.42,260)));
   const BAR_Y = H - BAR_H;
+  const barBackground = isNDSLayout ? 'transparent' : skin.barBg;
   const COL_W = LS ? Math.round(Math.min(W*0.24,180)) : Math.round(W*0.50);
   const MAR=8, REF=LS?COL_W:BAR_H;
   const DS=Math.round(Math.min(REF*0.72,LS?COL_W-16:160));
@@ -989,8 +1493,8 @@ function buildPad(skin) {
   const MW=Math.round(Math.min(LS?COL_W-2*MAR:W*0.14,72));
   const MH=Math.round(Math.min(REF*0.12,28));
 
-  if(LS){[0,W-COL_W].forEach(x=>{const d=document.createElement('div');Object.assign(d.style,{position:'absolute',left:x+'px',top:'0',width:COL_W+'px',height:H+'px',background:skin.barBg,zIndex:'1',pointerEvents:'none'});pad.appendChild(d);});}
-  else{const d=document.createElement('div');Object.assign(d.style,{position:'absolute',left:'0',top:BAR_Y+'px',width:W+'px',height:BAR_H+'px',background:skin.barBg,zIndex:'1',pointerEvents:'none'});pad.appendChild(d);}
+  if(LS){[0,W-COL_W].forEach(x=>{const d=document.createElement('div');Object.assign(d.style,{position:'absolute',left:x+'px',top:'0',width:COL_W+'px',height:H+'px',background:barBackground,zIndex:'1',pointerEvents:'none'});pad.appendChild(d);});}
+  else{const d=document.createElement('div');Object.assign(d.style,{position:'absolute',left:'0',top:BAR_Y+'px',width:W+'px',height:BAR_H+'px',background:barBackground,zIndex:'1',pointerEvents:'none'});pad.appendChild(d);}
 
   const diskCX=LS?Math.round(COL_W/2):Math.round(W*0.25);
   const diskCY=LS?Math.round(H*0.58):Math.round(BAR_Y+BAR_H*0.52);
@@ -1084,11 +1588,31 @@ function takeScreenshot() {
    THEATER MODE
 ═══════════════════════════════════════════ */
 let theaterMode = false;
+
+function applyTheaterMode() {
+  document.body.classList.toggle('theater-mode', theaterMode);
+
+  const button = document.getElementById('rv-theater-btn');
+  if (button) {
+    button.setAttribute('aria-pressed', String(theaterMode));
+    button.title = theaterMode ? 'Sair do modo Theater' : 'Modo Theater';
+  }
+}
+
 function toggleTheater() {
   theaterMode = !theaterMode;
-  document.body.classList.toggle('theater-mode', theaterMode);
-  showToast(theaterMode ? '🎬 Modo Theater ativado' : '🎬 Modo Theater desativado');
+  applyTheaterMode();
+  showToast(theaterMode ? '🎬 Modo Theater ativado — controles ocultos' : '🎬 Modo Theater desativado');
 }
+
+// ESC também fecha o modo imersivo, sem interferir no menu de cheats.
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && theaterMode && !document.body.classList.contains('rv-cheats-open')) {
+    theaterMode = false;
+    applyTheaterMode();
+    showToast('🎬 Modo Theater desativado');
+  }
+});
 
 /* ═══════════════════════════════════════════
    TOAST NOTIFICATION
@@ -1172,8 +1696,9 @@ function checkAchievements() {
 /* Bind buttons */
 document.getElementById('rv-screenshot-btn').addEventListener('click', takeScreenshot);
 document.getElementById('rv-screenshot-btn').addEventListener('touchend', e => { e.preventDefault(); takeScreenshot(); }, {passive:false});
+// O evento click também funciona em touch; manter um único listener evita
+// ativar/desativar o modo duas vezes no celular.
 document.getElementById('rv-theater-btn').addEventListener('click', toggleTheater);
-document.getElementById('rv-theater-btn').addEventListener('touchend', e => { e.preventDefault(); toggleTheater(); }, {passive:false});
 
 /* Fullscreen */
 function requestFS(){const el=document.documentElement;(el.requestFullscreen||el.webkitRequestFullscreen)?.call(el);document.getElementById('rv-fs-btn').style.display='none';}
@@ -1189,5 +1714,5 @@ window.addEventListener('resize',()=>{
   }
 });
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a269eb58ecee21f9',t:'MTc4NTk3NjA4Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a269eb58ecee21f9',t:'MTc4NTk3NjA4Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a281cd37ffaaf905',t:'MTc4NjIyNjUwNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a28396312e5b21f9',t:'MTc4NjI0NTIyNQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

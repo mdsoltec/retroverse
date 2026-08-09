@@ -57,13 +57,21 @@
     constructor(wrapEl, cfgText, basePath, options = {}) {
       this.wrapEl = wrapEl;
       this.basePath = basePath.replace(/\/$/, '') + '/';
-      this.debug = options.debug || new URLSearchParams(window.location.search).has('debug');
+      this.debug = options.debug || new URLSearchParams(window.location.search).has('debug')
+        || window.location.search.toLowerCase().includes('debug');
       this.isPortrait = options.isPortrait !== undefined ? options.isPortrait : (window.innerHeight > window.innerWidth);
       
       this.overlays = {};
       this.activeOverlayId = null;
       this.activeTouches = new Map(); // identifier -> list of { type, input, desc }
+      this.activeStylus = new Set(); // toques sem zona de botão no DS
       this.activeButtons = new Set(); // EJS_INPUT codes atualmente pressionados
+      // Estado do analógico analógico (contínuo) + rebase "seguir o dedo"
+      this.activeAnalog = new Map();  // touchId -> { axis, nx, ny }
+      this.analogBase = new Map();    // touchId -> { axis, desc, originX, originY }
+      this.AV = 0x7fff;               // amplitude máxima do analógico (valor do RetroArch)
+      // Fator de inflação da zona de toque (hitbox maior que o visual)
+      this.HIT_SCALE = 1.4;
 
       this.parseCfg(cfgText);
       this.init();
@@ -133,37 +141,95 @@
       this.selectDefaultOverlay();
     }
 
+    isPauseOverlay(overlay) {
+      if (!overlay) return false;
+      const label = `${overlay.name || ''} ${overlay.overlayImage || ''}`.toLowerCase();
+      return /(^|[\s_\-/])(pause|menu)([\s_\-/.]|$)/i.test(label);
+    }
+
+    getUniqueOverlays() {
+      return Object.values(this.overlays).filter((overlay, index, list) =>
+        overlay && list.findIndex(item => item.id === overlay.id) === index
+      );
+    }
+
     selectDefaultOverlay() {
-      if (this.isPortrait) {
-        this.activeOverlayId = 'overlay0';
-      } else {
-        this.activeOverlayId = this.overlays['overlay2'] ? 'overlay2' : 'overlay0';
+      const overlays = this.getUniqueOverlays();
+      const preferredId = this.isPortrait
+        ? 'overlay0'
+        : (this.overlays['overlay2'] ? 'overlay2' : 'overlay0');
+      const preferred = this.overlays[preferredId];
+
+      // phone_portrait_pause.png é apenas a tela de menu/pause do pacote
+      // RetroArch. Ela não deve ser usada como overlay inicial do jogo.
+      if (preferred && !this.isPauseOverlay(preferred)) {
+        this.activeOverlayId = preferred.id;
+        return;
       }
-      if (!this.overlays[this.activeOverlayId]) {
-        const keys = Object.keys(this.overlays);
-        this.activeOverlayId = keys[0] || null;
-      }
+
+      const normalOverlay = overlays.find(overlay => !this.isPauseOverlay(overlay));
+      this.activeOverlayId = normalOverlay?.id || preferred?.id || overlays[0]?.id || null;
     }
 
     init() {
       if (!this.activeOverlayId || !this.wrapEl) return;
+      // remove listeners de uma inicialização anterior (evita acúmulo)
+      this.destroy();
       this.renderOverlay(this.activeOverlayId);
+      // DIAGNÓSTICO: mostra qual overlay está ativo e quantas zonas tem
+      if (this.debug) {
+        const ov = this.overlays[this.activeOverlayId];
+        console.log(`[RA] Overlay ativo: ${this.activeOverlayId} (${this.overlays[this.activeOverlayId]?.name})`, 
+          `| zonas: ${ov ? ov.descs.length : 0}`, `| usáveis: ${this.hasUsableZones()}`,
+          `| portrait: ${this.isPortrait}`);
+      }
 
       // Listeners Touch globais no container
-      this.wrapEl.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
-      this.wrapEl.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: false });
-      this.wrapEl.addEventListener('touchend', (e) => this.onTouchEnd(e), { passive: false });
-      this.wrapEl.addEventListener('touchcancel', (e) => this.onTouchEnd(e), { passive: false });
-
-      // Suporte a cliques de mouse para testes no PC
-      this.wrapEl.addEventListener('mousedown', (e) => this.onMouseDown(e));
-      window.addEventListener('mousemove', (e) => this.onMouseMove(e));
-      window.addEventListener('mouseup', (e) => this.onMouseUp(e));
-
-      window.addEventListener('resize', () => {
+      this._touchStart = (e) => this.onTouchStart(e);
+      this._touchMove = (e) => this.onTouchMove(e);
+      this._touchEnd = (e) => this.onTouchEnd(e);
+      this._mouseDown = (e) => this.onMouseDown(e);
+      this._mouseMove = (e) => this.onMouseMove(e);
+      this._mouseUp = (e) => this.onMouseUp(e);
+      this._resize = () => {
         this.isPortrait = window.innerHeight > window.innerWidth;
         this.renderOverlay(this.activeOverlayId);
-      });
+      };
+
+      this.wrapEl.addEventListener('touchstart', this._touchStart, { passive: false });
+      this.wrapEl.addEventListener('touchmove', this._touchMove, { passive: false });
+      this.wrapEl.addEventListener('touchend', this._touchEnd, { passive: false });
+      this.wrapEl.addEventListener('touchcancel', this._touchEnd, { passive: false });
+
+      this.wrapEl.addEventListener('mousedown', this._mouseDown);
+      window.addEventListener('mousemove', this._mouseMove);
+      window.addEventListener('mouseup', this._mouseUp);
+      window.addEventListener('resize', this._resize);
+    }
+
+    /** Remove todos os listeners para poder re-inicializar sem acumular */
+    destroy() {
+      if (this._touchStart) {
+        this.wrapEl.removeEventListener('touchstart', this._touchStart);
+        this.wrapEl.removeEventListener('touchmove', this._touchMove);
+        this.wrapEl.removeEventListener('touchend', this._touchEnd);
+        this.wrapEl.removeEventListener('touchcancel', this._touchEnd);
+        this.wrapEl.removeEventListener('mousedown', this._mouseDown);
+        window.removeEventListener('mousemove', this._mouseMove);
+        window.removeEventListener('mouseup', this._mouseUp);
+        window.removeEventListener('resize', this._resize);
+        this._touchStart = null;
+      }
+    }
+
+    /**
+     * Verifica se o overlay atual tem ao menos UMA zona de toque utilizável.
+     * Se não tiver, o loadRetroArchOverlay retornará null (fallback p/ controle padrão).
+     */
+    hasUsableZones() {
+      const ov = this.overlays[this.activeOverlayId];
+      if (!ov) return false;
+      return ov.descs.some(d => d.x >= 0 && d.y >= 0);
     }
 
     renderOverlay(overlayId) {
@@ -303,18 +369,22 @@
       if (!ov) return [];
 
       const hits = [];
+      const HS = this.HIT_SCALE || 1.4;
       for (const desc of ov.descs) {
         if (desc.x < 0 || desc.y < 0) continue;
 
         let isHit = false;
         const dx = Math.abs(nX - desc.x);
         const dy = Math.abs(nY - desc.y);
+        // Hitbox INFLADA: zona de toque maior que o visual (melhor acerto no celular)
+        const rx = desc.rx * HS;
+        const ry = desc.ry * HS;
 
         if (desc.type === 'radial') {
-          const dist = (dx * dx) / (desc.rx * desc.rx) + (dy * dy) / (desc.ry * desc.ry);
+          const dist = (dx * dx) / (rx * rx) + (dy * dy) / (ry * ry);
           if (dist <= 1.0) isHit = true;
         } else {
-          if (dx <= desc.rx && dy <= desc.ry) isHit = true;
+          if (dx <= rx && dy <= ry) isHit = true;
         }
 
         if (isHit) {
@@ -348,8 +418,16 @@
         return [];
       }
 
-      if (['save_state', 'load_state', 'reset', 'toggle_fast_forward', 'rewind', 'close_content'].includes(desc.button)) {
-        return [{ type: 'system', action: desc.button, desc }];
+      // Alguns CFGs do RetroArch chamam este botão de menu_toggle.
+      // No RetroVerse ele deve abrir o menu de cheats, não o painel
+      // genérico "RetroArch Menu".
+      const systemButton = String(desc.button || '').toLowerCase();
+      if (['menu_toggle', 'menu', 'retroarch_menu', 'menu_bar_button'].includes(systemButton)) {
+        return [{ type: 'system', action: 'open_cheats', desc }];
+      }
+
+      if (['save_state', 'load_state', 'reset', 'toggle_fast_forward', 'rewind', 'close_content'].includes(systemButton)) {
+        return [{ type: 'system', action: systemButton, desc }];
       }
 
       // D-Pad Direcional com 8 direções e diagonais
@@ -393,23 +471,11 @@
         }).filter(Boolean);
       }
 
-      // Analógico esquerdo (analog_left) com arraste dinâmico real
-      if (desc.button === 'analog_left') {
-        const dxNorm = (nX - desc.x) / desc.rx;
-        const dyNorm = (nY - desc.y) / desc.ry;
-        const maxMovePx = 28;
-        const moveX = Math.max(-1, Math.min(1, dxNorm)) * maxMovePx;
-        const moveY = Math.max(-1, Math.min(1, dyNorm)) * maxMovePx;
-
-        this.setDescHighlight(desc, true, moveX, moveY);
-
-        if (Math.hypot(dxNorm, dyNorm) > 0.18) {
-          if (dyNorm < -0.35) actions.push('UP');
-          if (dyNorm > 0.35) actions.push('DOWN');
-          if (dxNorm < -0.35) actions.push('LEFT');
-          if (dxNorm > 0.35) actions.push('RIGHT');
-        }
-        return actions.map(a => ({ type: 'button', input: a, desc }));
+      // Analógico (esquerdo/direito) — analógico ANALÓGICO de verdade
+      // (retorna tipo 'analog'; o controle de posição contínua é feito nas
+      //  handlers via moveAnalog/sendAnalog, com "seguir o dedo" e intensidade)
+      if (desc.button === 'analog_left' || desc.button === 'analog_right') {
+        return [{ type: 'analog', axis: desc.button === 'analog_right' ? 'RSTICK' : 'LSTICK', desc }];
       }
 
       if (desc.button.includes('|')) {
@@ -430,9 +496,28 @@
 
     triggerSystemAction(action, target) {
       if (action === 'overlay_change' && target) {
+        const targetOverlay = this.overlays[target];
+        if (this.isPauseOverlay(targetOverlay)) {
+          if (typeof window.openRetroVerseCheats === 'function') {
+            window.openRetroVerseCheats();
+          }
+          return;
+        }
         this.renderOverlay(target);
         return;
       }
+
+      if (action === 'open_cheats') {
+        if (typeof window.openRetroVerseCheats === 'function') {
+          window.openRetroVerseCheats();
+        } else {
+          // Fallback caso o parser seja usado fora do play.html.
+          const emulator = window.EJS_emulator;
+          if (emulator?.cheatMenu) emulator.cheatMenu.style.display = '';
+        }
+        return;
+      }
+
       try {
         const gm = window.EJS_emulator?.gameManager || window.EJS_emulator;
         if (!gm) return;
@@ -450,9 +535,12 @@
      * Mapeamento direto de cliques e toques para o emulador EmulatorJS
      */
     simulateInput(inputCode, pressed) {
-      const code = (typeof window.EJS_INPUT !== 'undefined' && window.EJS_INPUT[inputCode] !== undefined)
-        ? window.EJS_INPUT[inputCode]
-        : EJS_INPUT_CODES[inputCode];
+      const code = typeof inputCode === 'number'
+        ? inputCode
+        : ((typeof window.EJS_INPUT !== 'undefined' && window.EJS_INPUT[inputCode] !== undefined)
+          ? window.EJS_INPUT[inputCode]
+          : EJS_INPUT_CODES[inputCode]);
+      if (this.debug) console.log(`[RA] simulateInput ${inputCode} -> code=${code} pressed=${pressed ? 1 : 0} | EJS pronto: ${!!(window.EJS_emulator?.gameManager)}`);
       if (code === undefined) return;
       const val = pressed ? 1 : 0;
       try {
@@ -490,24 +578,122 @@
       }
     }
 
+    /** Envia valor cru (não 0/1) para o emulador — usado p/ analógico contínuo */
+    sendRawInput(code, val) {
+      try {
+        if (window.EJS_emulator?.gameManager) window.EJS_emulator.gameManager.simulateInput(0, code, val);
+        else if (window.EJS_emulator && typeof window.EJS_emulator.simulateInput === 'function')
+          window.EJS_emulator.simulateInput(0, code, val);
+      } catch (e) {}
+    }
+
+    /** Envia o analógico contínuo em -1..1 para os eixos LSTICK/RSTICK */
+    sendAnalog(axis, nx, ny) {
+      const AV = this.AV;
+      const isR = axis === 'RSTICK';
+      const R = isR ? EJS_INPUT_CODES.RSTICK_RIGHT : EJS_INPUT_CODES.LSTICK_RIGHT;
+      const L = isR ? EJS_INPUT_CODES.RSTICK_LEFT  : EJS_INPUT_CODES.LSTICK_LEFT;
+      const D = isR ? EJS_INPUT_CODES.RSTICK_DOWN  : EJS_INPUT_CODES.LSTICK_DOWN;
+      const U = isR ? EJS_INPUT_CODES.RSTICK_UP    : EJS_INPUT_CODES.LSTICK_UP;
+      this.sendRawInput(R, nx > 0 ? Math.round(nx * AV) : 0);
+      this.sendRawInput(L, nx < 0 ? Math.round(-nx * AV) : 0);
+      this.sendRawInput(D, ny > 0 ? Math.round(ny * AV) : 0);
+      this.sendRawInput(U, ny < 0 ? Math.round(-ny * AV) : 0);
+    }
+
+    /** Feedback háptico (vibração) no toque — só em dispositivos que suportam.
+     *  Obs.: iPhone/iPad (Safari) não suporta navigator.vibrate (limitação Apple). */
+    vibrate(ms = 20) {
+      try {
+        if (navigator.vibrate) {
+          navigator.vibrate(ms);
+          // tenta padrão curto-duplo para dar "tique" mais perceptível em alguns Androids
+          if (window.navigator.vibratePattern) window.navigator.vibratePattern(ms);
+        }
+      } catch (e) {}
+    }
+
+    /** Inicia o analógico num toque — fixa a origem no ponto do toque (seguir o dedo) */
+    startAnalog(touchId, desc, nX, nY) {
+      const axis = desc.button === 'analog_right' ? 'RSTICK' : 'LSTICK';
+      this.analogBase.set(touchId, { axis, desc, originX: nX, originY: nY });
+      this.activeAnalog.set(touchId, { axis, nx: 0, ny: 0 });
+      this.moveAnalog(touchId, nX, nY);
+    }
+
+    /** Move o analógico: calcula deslocamento contínuo, com rebase (seguir o dedo) */
+    moveAnalog(touchId, nX, nY) {
+      const base = this.analogBase.get(touchId);
+      if (!base) return;
+      let dx = nX - base.originX;
+      let dy = nY - base.originY;
+      const rx = base.desc.rx || 0.15;
+      const ry = base.desc.ry || 0.15;
+      // clamp ao círculo do analógico (elipse)
+      const mag = Math.hypot(dx / rx, dy / ry);
+      if (mag > 1) {
+        dx = dx / mag;
+        dy = dy / mag;
+        // rebase: recentraliza a origem para o dedo "arrastar" o stick
+        base.originX = nX - dx;
+        base.originY = nY - dy;
+      }
+      const nx = dx / rx;
+      const ny = dy / ry;
+      this.activeAnalog.set(touchId, { axis: base.axis, nx, ny });
+      // feedback visual (move o desenho do stick)
+      const maxMovePx = 30;
+      this.setDescHighlight(base.desc, true, nx * maxMovePx, ny * maxMovePx);
+      this.sendAnalog(base.axis, nx, ny);
+    }
+
+    /** Libera o analógico (volta ao centro e zera os eixos) */
+    releaseAnalog(touchId) {
+      const st = this.activeAnalog.get(touchId);
+      const base = this.analogBase.get(touchId);
+      if (st) this.sendAnalog(st.axis, 0, 0);
+      if (base) this.setDescHighlight(base.desc, false);
+      this.activeAnalog.delete(touchId);
+      this.analogBase.delete(touchId);
+    }
+
     onTouchStart(e) {
       e.preventDefault();
       for (let i = 0; i < e.changedTouches.length; i++) {
         const touch = e.changedTouches[i];
         const { nX, nY } = this.getNormalizedCoords(touch.clientX, touch.clientY);
         const hitDescs = this.findHitDescs(nX, nY);
+
+        // No DS, uma área sem botão representa a tela inferior/stylus.
+        if (window.__RV_IS_NDS && hitDescs.length === 0
+            && typeof window.RV_NDS_STYLUS === 'function'
+            && window.RV_NDS_STYLUS('start', touch)) {
+          this.activeStylus.add(touch.identifier);
+          continue;
+        }
+
         const actions = [];
+
+        // DIAGNÓSTICO: mostra o toque e quantas zonas bateram
+        if (this.debug) {
+          console.log(`[RA] touchstart (${nX.toFixed(3)},${nY.toFixed(3)})`,
+            `| zonas batidas: ${hitDescs.length}`, hitDescs.map(d=>d.button));
+        }
 
         for (const desc of hitDescs) {
           const res = this.processDescTouch(desc, nX, nY);
           for (const item of res) {
             if (item.type === 'system') {
               this.triggerSystemAction(item.action, item.target);
+            } else if (item.type === 'analog') {
+              this.startAnalog(touch.identifier, item.desc, nX, nY);
+              this.vibrate();
             } else {
               actions.push(item);
             }
           }
         }
+        if (actions.length) this.vibrate();
         this.activeTouches.set(touch.identifier, actions);
       }
       this.updatePressedButtons();
@@ -518,13 +704,30 @@
       for (let i = 0; i < e.changedTouches.length; i++) {
         const touch = e.changedTouches[i];
         const { nX, nY } = this.getNormalizedCoords(touch.clientX, touch.clientY);
+
+        // Mantém o stylus mesmo quando o dedo sai da área inicial da tela.
+        if (this.activeStylus.has(touch.identifier)) {
+          if (typeof window.RV_NDS_STYLUS === 'function') window.RV_NDS_STYLUS('move', touch);
+          continue;
+        }
+
+        // Se este toque já é um analógico, move o stick (seguir o dedo) e para aqui
+        if (this.analogBase.has(touch.identifier)) {
+          this.moveAnalog(touch.identifier, nX, nY);
+          continue;
+        }
+
         const hitDescs = this.findHitDescs(nX, nY);
         const actions = [];
 
         for (const desc of hitDescs) {
           const res = this.processDescTouch(desc, nX, nY);
           for (const item of res) {
-            if (item.type === 'button') actions.push(item);
+            if (item.type === 'analog') {
+              this.startAnalog(touch.identifier, item.desc, nX, nY);
+            } else if (item.type === 'button') {
+              actions.push(item);
+            }
           }
         }
         this.activeTouches.set(touch.identifier, actions);
@@ -536,9 +739,16 @@
       e.preventDefault();
       for (let i = 0; i < e.changedTouches.length; i++) {
         const touch = e.changedTouches[i];
+        if (this.activeStylus.has(touch.identifier)) {
+          if (typeof window.RV_NDS_STYLUS === 'function') window.RV_NDS_STYLUS('end', touch);
+          this.activeStylus.delete(touch.identifier);
+          continue;
+        }
+        // libera analógico deste toque (zera eixos + reseta visual)
+        this.releaseAnalog(touch.identifier);
         const descActs = this.activeTouches.get(touch.identifier) || [];
         for (const act of descActs) {
-          if (act.desc && act.desc.button === 'analog_left') {
+          if (act.desc && (act.desc.button === 'analog_left' || act.desc.button === 'analog_right')) {
             this.setDescHighlight(act.desc, false);
           }
         }
@@ -550,19 +760,36 @@
     onMouseDown(e) {
       const { nX, nY } = this.getNormalizedCoords(e.clientX, e.clientY);
       const hitDescs = this.findHitDescs(nX, nY);
+      if (window.__RV_IS_NDS && hitDescs.length === 0
+          && typeof window.RV_NDS_STYLUS === 'function'
+          && window.RV_NDS_STYLUS('start', e)) {
+        this.activeStylus.add('mouse');
+        return;
+      }
       const actions = [];
       for (const desc of hitDescs) {
         const res = this.processDescTouch(desc, nX, nY);
         for (const item of res) {
           if (item.type === 'system') this.triggerSystemAction(item.action, item.target);
+          else if (item.type === 'analog') this.startAnalog('mouse', item.desc, nX, nY);
           else actions.push(item);
         }
       }
+      if (actions.length) this.vibrate();
       this.activeTouches.set('mouse', actions);
       this.updatePressedButtons();
     }
 
     onMouseMove(e) {
+      if (this.activeStylus.has('mouse')) {
+        if (typeof window.RV_NDS_STYLUS === 'function') window.RV_NDS_STYLUS('move', e);
+        return;
+      }
+      if (this.analogBase.has('mouse')) {
+        const { nX, nY } = this.getNormalizedCoords(e.clientX, e.clientY);
+        this.moveAnalog('mouse', nX, nY);
+        return;
+      }
       if (!this.activeTouches.has('mouse')) return;
       const { nX, nY } = this.getNormalizedCoords(e.clientX, e.clientY);
       const hitDescs = this.findHitDescs(nX, nY);
@@ -570,7 +797,8 @@
       for (const desc of hitDescs) {
         const res = this.processDescTouch(desc, nX, nY);
         for (const item of res) {
-          if (item.type === 'button') actions.push(item);
+          if (item.type === 'analog') this.startAnalog('mouse', item.desc, nX, nY);
+          else if (item.type === 'button') actions.push(item);
         }
       }
       this.activeTouches.set('mouse', actions);
@@ -578,9 +806,15 @@
     }
 
     onMouseUp(e) {
+      if (this.activeStylus.has('mouse')) {
+        if (typeof window.RV_NDS_STYLUS === 'function') window.RV_NDS_STYLUS('end', e);
+        this.activeStylus.delete('mouse');
+        return;
+      }
+      this.releaseAnalog('mouse');
       const descActs = this.activeTouches.get('mouse') || [];
       for (const act of descActs) {
-        if (act.desc && act.desc.button === 'analog_left') {
+        if (act.desc && (act.desc.button === 'analog_left' || act.desc.button === 'analog_right')) {
           this.setDescHighlight(act.desc, false);
         }
       }
@@ -636,7 +870,7 @@
         files: ['genesis_phone_portrait.cfg', 'genesis.cfg', 'Genesis.cfg', 'segacd.cfg', 'segaCD.cfg', 'overlay.cfg', 'config.cfg']
       },
       'segaGG': {
-        folders: ['GameGear', 'gamegear', 'gg', 'segaGG', 'GBC', 'gbc', 'GB', 'gb', 'GBA', 'gba', 'Universal', 'universal'],
+        folders: ['GameGear', 'gamegear', 'GAMEGEAR', 'gg', 'GG', 'segaGG', 'SEGGG', 'GBC', 'gbc', 'GB', 'gb', 'GBA', 'gba', 'Universal', 'universal'],
         files: ['gg.cfg', 'gamegear.cfg', 'GameGear.cfg', 'gbc_phone_portrait.cfg', 'gbc.cfg', 'gb_phone_portrait.cfg', 'gb.cfg', 'gba_phone_portrait.cfg', 'gba.cfg', 'Universal.cfg', 'universal.cfg', 'overlay.cfg', 'config.cfg']
       },
       'nds': {
@@ -675,7 +909,14 @@
         if (resp.ok) {
           const cfgText = await resp.text();
           console.log(`[RetroArchOverlay] Sucesso ao carregar ${cand.url} (Compatível com PocketArch)`);
-          return new RetroArchOverlayEngine(wrapEl, cfgText, cand.base, options);
+          const engine = new RetroArchOverlayEngine(wrapEl, cfgText, cand.base, options);
+          // Segurança: se o CFG carregou mas NÃO tem zona de toque utilizável,
+          // devolve null p/ o site cair no controle padrão (em vez de "engolir" o toque).
+          if (!engine.hasUsableZones()) {
+            console.warn(`[RetroArchOverlay] ${cand.url} não tem zonas de toque utilizáveis. Fallback p/ controle padrão.`);
+            return null;
+          }
+          return engine;
         }
       } catch (err) {}
     }

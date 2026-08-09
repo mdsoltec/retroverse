@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
   <title>RetroVerse - Jogos</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
   <!-- EFEITO CRT SCANLINES -->
@@ -17,7 +19,7 @@
   <header class="navbar games-navbar">
     <a href="index.html" class="btn-back">Consoles</a>
     <div class="games-header-center">
-      <span class="games-header-brand">RETROVERSE</span>
+      <span class="games-header-brand">RETROVERSE // BETA</span>
       <h1 id="console-title" class="console-header-title">Jogos</h1>
       <span class="games-count-badge" id="games-count">0 JOGOS DISPONÍVEIS</span>
     </div>
@@ -51,18 +53,18 @@
     const consoleType = params.get('console') || 'snes';
 
     const config = {
-      'snes':   { title: 'Super Nintendo',    core: 'snes' },
-      'nes':    { title: 'Nintendo Classic',   core: 'nes' },
-      'gba':    { title: 'Game Boy Advance',   core: 'gba' },
-      'gbc':    { title: 'Game Boy Color',     core: 'gbc' },
-      'gb':     { title: 'Game Boy',           core: 'gb' },
-      'sega':   { title: 'Mega Drive',         core: 'segaMD' },
+      'snes': { title: 'Super Nintendo', core: 'snes' },
+      'nes': { title: 'Nintendo Classic', core: 'nes' },
+      'gba': { title: 'Game Boy Advance', core: 'gba' },
+      'gbc': { title: 'Game Boy Color', core: 'gbc' },
+      'gb': { title: 'Game Boy', core: 'gb' },
+      'sega': { title: 'Mega Drive', core: 'segaMD' },
       'arcade': { title: 'Arcade / Fliperama', core: 'fbneo' },
-      'n64':    { title: 'Nintendo 64',        core: 'n64' },
-      'psx':    { title: 'PlayStation 1',      core: 'pcsx_rearmed' },
-      'nds':    { title: 'Nintendo DS',        core: 'nds' },
-      'segacd': { title: 'Sega CD',            core: 'segaCD' },
-      'gamegear': { title: 'Game Gear',        core: 'segaGG' }
+      'n64': { title: 'Nintendo 64', core: 'n64' },
+      'psx': { title: 'PlayStation 1', core: 'pcsx_rearmed' },
+      'nds': { title: 'Nintendo DS', core: 'nds' },
+      'segacd': { title: 'Sega CD', core: 'segaCD' },
+      'gamegear': { title: 'Game Gear', core: 'segaGG' }
     };
 
     const currentConfig = config[consoleType] || config['snes'];
@@ -71,13 +73,51 @@
 
     // ─────────────────────────────────────────────────────────
     // SISTEMA DE CAPAS AUTOMÁTICO — Múltiplas fontes sem CORS
-    // Busca de capas na pasta local: covers/NOME_DO_CONSOLE/
+    // 1) Capa LOCAL  → covers/NOME_DO_CONSOLE/<arquivo>.png
+    // 2) Se não existir, busca automaticamente na base comunitária
+    //    "libretro-thumbnails" (mesma base de capas do RetroArch/
+    //    RetroPie/Lakka). Funciona direto no navegador: sem login e
+    //    sem problema de CORS (imagens via <img>).
+    // 3) Se também falhar, mostra o placeholder "RV".
     const getCover = (game) => {
       const imageName = game.file.replace(/\.[^/.]+$/, "") + ".png";
       return `covers/${consoleType}/${encodeURIComponent(imageName)}`;
     };
 
-        // BANCO DE DADOS DOS JOGOS
+    // Mapa de pastas (sistemas) do libretro-thumbnails
+    const RETRO_SYSTEM = {
+      'snes': 'Nintendo - Super Nintendo Entertainment System',
+      'nes': 'Nintendo - Nintendo Entertainment System',
+      'gba': 'Nintendo - Game Boy Advance',
+      'gbc': 'Nintendo - Game Boy Color',
+      'gb': 'Nintendo - Game Boy',
+      'n64': 'Nintendo - Nintendo 64',
+      'nds': 'Nintendo - Nintendo DS',
+      'sega': 'Sega - Mega Drive - Genesis',
+      'segacd': 'Sega - Mega-CD - Sega CD',
+      'gamegear': 'Sega - Game Gear',
+      'psx': 'Sony - PlayStation',
+      'arcade': 'FBNeo - Arcade Games'
+    };
+    const RETRO_BASE = 'https://thumbnails.libretro.com';
+
+    // Gera a lista de URLs remotas (em ordem) a tentar para um jogo.
+    // Usa o nome do arquivo da ROM por padrão (coincide com o padrão
+    // No-Intro). Para exceções (ex.: arcade), o jogo pode definir
+    // `remote` com o nome EXATO da capa na fonte.
+    const getRemoteCovers = (game) => {
+      const sys = RETRO_SYSTEM[consoleType];
+      if (!sys) return [];
+      const base = game.remote || game.file.replace(/\.[^/.]+$/, "");
+      const enc = encodeURIComponent(base);
+      // Tenta capa 3D (Named_Boxarts) e depois capa 2D (Named_Covers)
+      return [
+        `${RETRO_BASE}/${sys}/Named_Boxarts/${enc}.png`,
+        `${RETRO_BASE}/${sys}/Named_Covers/${enc}.png`
+      ];
+    };
+
+    // BANCO DE DADOS DOS JOGOS
     const catalog = {
       'snes': [
         { name: 'Aladdin', file: 'Aladdin (USA).sfc' },
@@ -98,8 +138,8 @@
         { name: "Road Runner's", subtitle: 'Death Valley Rally', file: "Road Runner's Death Valley Rally (USA).sfc" },
         { name: 'Space Invaders', file: 'Space Invaders (USA).sfc' },
         { name: 'Super Bomberman', file: 'Super Bomberman (USA).sfc' },
-        { name: 'Super Bomberman 4', file: 'Super Bomberman 4.smc' },
-        { name: 'Super Bomberman 5', subtitle: 'Gold Cartridge', file: 'Super Bomberman 5 Gold Cartridge (J) [!].smc' },
+        { name: 'Super Bomberman 4', file: 'Super Bomberman 4.smc', remote: 'Super Bomberman 4 (USA)' },
+        { name: 'Super Bomberman 5', subtitle: 'Gold Cartridge', file: 'Super Bomberman 5 Gold Cartridge (J) [!].smc', remote: 'Super Bomberman 5 (USA)' },
         { name: 'Super Mario All-Stars', file: 'Super Mario All-Stars (USA) (Wii).sfc' },
         { name: 'Super Mario Kart', file: 'Super Mario Kart (USA).sfc' },
         { name: 'Super Mario RPG', subtitle: 'Legend of the Seven Stars', file: 'Super Mario RPG - Legend of the Seven Stars (USA).sfc' },
@@ -109,7 +149,7 @@
         { name: 'Super Tennis', file: 'Super Tennis (USA).sfc' },
         { name: 'Taz-Mania', file: 'Taz-Mania (USA).sfc' },
         { name: 'Tiny Toon', subtitle: 'Buster Busts Loose!', file: 'Tiny Toon Adventures - Buster Busts Loose! (USA).sfc' },
-        { name: 'Tiny Toon', subtitle: 'Wild & Wacky Sports', file: 'Tiny Toon Adventures - Wild & Wacky Sports (Europe).sfc' },
+        { name: 'Tiny Toon', subtitle: 'Wild & Wacky Sports', file: 'Tiny Toon Adventures - Wild & Wacky Sports (Europe).sfc', remote: 'Tiny Toon Adventures - Wild _ Wacky Sports (Europe)' },
         { name: 'Top Gear', file: 'Top Gear (USA).sfc' },
         { name: 'Top Gear 2', file: 'Top Gear 2 (USA).sfc' },
         { name: 'Top Gear 3000', file: 'Top Gear 3000 (USA).sfc' },
@@ -119,14 +159,14 @@
       'sega': [
         { name: 'Aladdin', file: 'Aladdin (USA).md' },
         { name: 'Altered Beast', file: 'Altered Beast (USA, Europe).md' },
-        { name: 'Felix', subtitle: 'Detona Ralph', file: 'Felix - Detona Ralph.bin' },
+        { name: 'Felix', subtitle: 'Detona Ralph', file: 'Felix - Detona Ralph.bin', remote: 'Fix It Felix Jr. (USA)' },
         { name: 'Golden Axe II', file: 'Golden Axe II (World).md' },
-        { name: 'Great Circus Mystery', subtitle: 'Starring Mickey & Minnie', file: 'Great Circus Mystery Starring Mickey & Minnie, The (USA).md' },
+        { name: 'Great Circus Mystery', subtitle: 'Starring Mickey & Minnie', file: 'Great Circus Mystery Starring Mickey & Minnie, The (USA).md', remote: 'Great Circus Mystery Starring Mickey _ Minnie, The (USA)' },
         { name: 'Kid Chameleon', file: 'Kid Chameleon (USA, Europe).md' },
         { name: "Mickey's", subtitle: 'Ultimate Challenge', file: "Mickey's Ultimate Challenge (USA).md" },
         { name: 'Shinobi III', subtitle: 'Return of the Ninja Master', file: 'Shinobi III - Return of the Ninja Master (USA).md' },
         { name: 'Show do Milhão', file: 'Show do Milhao (Brazil).md' },
-        { name: 'Sonic & Knuckles + Sonic 2', file: 'Sonic & Knuckles + Sonic The Hedgehog 2 (World).md' },
+        { name: 'Sonic & Knuckles + Sonic 2', file: 'Sonic & Knuckles + Sonic The Hedgehog 2 (World).md', remote: 'Sonic _ Knuckles + Sonic The Hedgehog 2 (World)' },
         { name: 'Sonic Compilation', subtitle: 'Sonic Classics', file: 'Sonic Compilation ~ Sonic Classics (USA, Europe, Korea) (Rev A).md' },
         { name: 'Streets of Rage 2', file: 'Streets of Rage 2 (USA).md' },
         { name: 'Top Gear 2', file: 'Top Gear 2 (USA).md' }
@@ -136,24 +176,24 @@
         { name: 'Contra', file: 'Contra (USA).nes' },
         { name: 'Duck Hunt', file: 'Duck Hunt (World).nes' },
         { name: 'Mega Man 2', file: 'Mega Man 2 (USA).nes' },
-        { name: 'Super Mario Bros', file: 'Super Mario Bros (World).nes' },
-        { name: 'Super Mario Bros 2', subtitle: 'PT-BR', file: 'Super Mario Bros 2 (PT-BR).nes' },
-        { name: 'Super Mario Bros 3', subtitle: 'PT-BR', file: 'Super Mario Bros 3 (PT-BR).nes' },
+        { name: 'Super Mario Bros', file: 'Super Mario Bros (World).nes', remote: 'Super Mario Bros. (World)' },
+        { name: 'Super Mario Bros 2', subtitle: 'PT-BR', file: 'Super Mario Bros 2 (PT-BR).nes', remote: 'Super Mario Bros. 2 (USA) (Rev 1)' },
+        { name: 'Super Mario Bros 3', subtitle: 'PT-BR', file: 'Super Mario Bros 3 (PT-BR).nes', remote: 'Super Mario Bros. 3 (USA) (Rev 1)' },
         { name: 'Zelda II', subtitle: 'The Adventure of Link', file: 'Zelda II - The Adventure of Link (USA).nes' }
       ],
       'gbc': [
         { name: 'The Legend of Zelda', subtitle: "Link's Awakening DX", file: "Legend of Zelda, The - Link's Awakening DX (USA, Europe) (Rev 2) (SGB Enhanced) (GB Compatible).gbc" },
         { name: 'Pokémon', subtitle: 'Gold Version', file: 'Pokemon - Gold Version (USA, Europe) (SGB Enhanced) (GB Compatible).gbc' },
         { name: 'Pokémon', subtitle: 'Silver Version', file: 'Pokemon - Silver Version (USA, Europe) (SGB Enhanced) (GB Compatible).gbc' },
-        { name: 'Spider-Man', subtitle: 'PT-BR', file: 'Spider-Man (PT-BR).gbc' },
-        { name: 'Super Mario Bros. Deluxe', file: 'Super Mario Bros. Deluxe (USA, Europe) (Rev 2).gbc' },
+        { name: 'Spider-Man', subtitle: 'PT-BR', file: 'Spider-Man (PT-BR).gbc', remote: 'Spider-Man (USA, Europe)' },
+        { name: 'Super Mario Bros. Deluxe', file: 'Super Mario Bros. Deluxe (USA, Europe) (Rev 2).gbc', remote: 'Super Mario Bros. Deluxe (USA, Europe)' },
         { name: 'Tetris DX', file: 'Tetris DX (World) (SGB Enhanced) (GB Compatible).gbc' },
-        { name: 'Tom & Jerry', file: 'Tom & Jerry (USA).gbc' },
+        { name: 'Tom & Jerry', file: 'Tom & Jerry (USA).gbc', remote: 'Tom and Jerry (USA, Europe)' },
         { name: 'Wario Land 3', file: 'Wario Land 3 (World) (En,Ja).gbc' },
         { name: 'Wario Land II', file: 'Wario Land II (USA, Europe) (SGB Enhanced) (GB Compatible).gbc' }
       ],
       'gba': [
-        { name: 'Carros', subtitle: 'Disney / Pixar', file: 'Carros Disney.gba' },
+        { name: 'Carros', subtitle: 'Disney / Pixar', file: 'Carros Disney.gba', remote: 'Cars (Europe) (Es,Pt)' },
         { name: 'Castlevania', subtitle: 'Aria of Sorrow', file: 'Castlevania - Aria of Sorrow (USA).gba' },
         { name: 'Pac-Man', subtitle: 'Classic NES Series', file: 'Classic NES Series - Pac-Man (USA, Europe).gba' },
         { name: 'The Legend of Zelda', subtitle: 'The Minish Cap', file: 'Legend of Zelda, The - The Minish Cap (USA).gba' },
@@ -172,24 +212,24 @@
         { name: 'Super Smash Bros.', file: 'Super Smash Bros. (USA).z64' }
       ],
       'arcade': [
-        { name: 'Garou', subtitle: 'Mark of the Wolves', file: 'garou.zip' },
-        { name: "The King of Fighters '97", file: 'kof97.zip' },
-        { name: "The King of Fighters '98", subtitle: 'The Slugfest', file: 'kof98.zip' },
-        { name: 'The King of Fighters 2002', subtitle: 'Challenge to Ultimate Match', file: 'kof2002.zip' },
-        { name: 'Metal Slug', file: 'mslug.zip' },
-        { name: 'Marvel vs. Capcom', subtitle: 'Clash of Super Heroes', file: 'mvsc.zip' },
-        { name: 'Real Bout Fatal Fury Special', file: 'rbffspec.zip' },
-        { name: 'Samurai Shodown II', file: 'samsho2.zip' },
-        { name: 'Street Fighter Alpha 3', file: 'sfa3.zip' },
-        { name: 'Vampire Savior', subtitle: 'The Lord of Vampire', file: 'vsav.zip' }
+        { name: 'Garou', subtitle: 'Mark of the Wolves', file: 'garou.zip', remote: "Garou - Mark of the Wolves (NGH-2530)" },
+        { name: "The King of Fighters '97", file: 'kof97.zip', remote: "The King of Fighters '97 (NGH-2320)" },
+        { name: "The King of Fighters '98", subtitle: 'The Slugfest', file: 'kof98.zip', remote: "The King of Fighters '98 - The Slugfest _ King of Fighters '98 - Dream Match Never Ends (NGH-2420)" },
+        { name: 'The King of Fighters 2002', subtitle: 'Challenge to Ultimate Match', file: 'kof2002.zip', remote: 'The King of Fighters 2002 (NGM-2650)(NGH-2650)' },
+        { name: 'Metal Slug', file: 'mslug.zip', remote: 'Metal Slug - Super Vehicle-001' },
+        { name: 'Marvel vs. Capcom', subtitle: 'Clash of Super Heroes', file: 'mvsc.zip', remote: 'Marvel Vs. Capcom_ Clash of Super Heroes (Brazil 980123)' },
+        { name: 'Real Bout Fatal Fury Special', file: 'rbffspec.zip', remote: 'Real Bout Fatal Fury Special _ Real Bout Garou Densetsu Special' },
+        { name: 'Samurai Shodown II', file: 'samsho2.zip', remote: 'Samurai Shodown II _ Shin Samurai Spirits - Haohmaru Jigokuhen (NGM-063 ~ NGH-063)' },
+        { name: 'Street Fighter Alpha 3', file: 'sfa3.zip', remote: 'Street Fighter Alpha 3 (980904 USA)' },
+        { name: 'Vampire Savior', subtitle: 'The Lord of Vampire', file: 'vsav.zip', remote: 'Vampire Savior - the lord of vampire (970519 USA)' }
       ],
       'psx': [
         { name: 'Castlevania', subtitle: 'Symphony of the Night', file: 'Castlevania - Symphony of the Night (USA).chd' },
         { name: 'Crash Bandicoot 3', subtitle: 'Warped', file: 'Crash Bandicoot - Warped (USA).chd' },
         { name: 'Crash Bandicoot 2', subtitle: 'Cortex Strikes Back', file: 'Crash Bandicoot 2 - Cortex Strikes Back (USA).chd' },
-        { name: 'Crash Team Racing', subtitle: 'CTR', file: 'Crash Team Racing (USA).chd' },
+        { name: 'Crash Team Racing', subtitle: 'CTR', file: 'Crash Team Racing (USA).chd', remote: 'CTR - Crash Team Racing (USA)' },
         { name: 'Dino Crisis', file: 'Dino Crisis (USA).chd' },
-        { name: 'Gran Turismo 2', file: 'Gran Turismo 2 (USA).chd' },
+        { name: 'Gran Turismo 2', file: 'Gran Turismo 2 (USA).chd', remote: 'Gran Turismo 2 (Europe) (En,Fr,De,Es,It) (Disc 1) (Arcade Mode)' },
         { name: 'Metal Gear Solid', subtitle: 'Disc 1', file: 'Metal Gear Solid (USA) (Disc 1).chd' },
         { name: 'Metal Slug X', file: 'Metal Slug X (USA).chd' },
         { name: 'Resident Evil 3', subtitle: 'Nemesis', file: 'Resident Evil 3 - Nemesis (USA).chd' },
@@ -198,46 +238,35 @@
         { name: "Tony Hawk's", subtitle: 'Pro Skater 2', file: "Tony Hawk's Pro Skater 2 (USA).chd" }
       ],
       'nds': [
-        { name: 'New Super Mario Bros.', file: 'New Super Mario Bros. (USA).nds' },
-        { name: 'Mario Kart DS', file: 'Mario Kart DS (USA).nds' },
-        { name: 'Pokémon', subtitle: 'Diamond Version', file: 'Pokemon - Diamond Version (USA).nds' },
-        { name: 'Pokémon', subtitle: 'Pearl Version', file: 'Pokemon - Pearl Version (USA).nds' },
-        { name: 'Pokémon', subtitle: 'Platinum Version', file: 'Pokemon - Platinum Version (USA).nds' },
+        { name: 'New Super Mario Bros.', file: 'New Super Mario Bros (USA).nds', remote: 'New Super Mario Bros. (Europe) (En,Fr,De,Es,It)' },
+        { name: 'Mario Kart DS', file: 'Mario Kart DS (USA).nds', remote: 'Mario Kart DS (USA) (En,Fr,De,Es,It)' },
         { name: 'Pokémon', subtitle: 'HeartGold Version', file: 'Pokemon - HeartGold Version (USA).nds' },
-        { name: 'Pokémon', subtitle: 'SoulSilver Version', file: 'Pokemon - SoulSilver Version (USA).nds' },
-        { name: 'Pokémon', subtitle: 'Black Version', file: 'Pokemon - Black Version (USA).nds' },
-        { name: 'Pokémon', subtitle: 'White Version', file: 'Pokemon - White Version (USA).nds' },
-        { name: 'The Legend of Zelda', subtitle: 'Phantom Hourglass', file: 'Legend of Zelda, The - Phantom Hourglass (USA).nds' },
-        { name: 'The Legend of Zelda', subtitle: 'Spirit Tracks', file: 'Legend of Zelda, The - Spirit Tracks (USA).nds' },
-        { name: 'Super Mario 64 DS', file: 'Super Mario 64 DS (USA).nds' },
+        { name: 'The Legend of Zelda', subtitle: 'Phantom Hourglass', file: 'Legend of Zelda, The - Phantom Hourglass (USA).nds', remote: 'Legend of Zelda, The - Phantom Hourglass (USA) (En,Fr,Es)' },
         { name: 'Castlevania', subtitle: 'Dawn of Sorrow', file: 'Castlevania - Dawn of Sorrow (USA).nds' },
-        { name: 'Castlevania', subtitle: 'Portrait of Ruin', file: 'Castlevania - Portrait of Ruin (USA).nds' },
-        { name: 'Castlevania', subtitle: 'Order of Ecclesia', file: 'Castlevania - Order of Ecclesia (USA).nds' },
-        { name: 'Metroid Prime Hunters', file: 'Metroid Prime - Hunters (USA).nds' },
-        { name: 'Kirby', subtitle: 'Canvas Curse', file: 'Kirby - Canvas Curse (USA).nds' },
-        { name: 'Advance Wars', subtitle: 'Dual Strike', file: 'Advance Wars - Dual Strike (USA).nds' },
-        { name: 'Chrono Trigger', file: 'Chrono Trigger (USA).nds' },
-        { name: 'Fire Emblem', subtitle: 'Shadow Dragon', file: 'Fire Emblem - Shadow Dragon (USA).nds' }
+        { name: 'Grand Theft Auto', subtitle: 'Chinatown Wars', file: 'Grand Theft Auto - Chinatown Wars (USA).nds', remote: 'Grand Theft Auto - Chinatown Wars (USA) (En,Fr,De,Es,It)' },
+        { name: "Tony Hawk's", subtitle: 'American Sk8land', file: "Tony Hawk's American Sk8land (USA).nds" },
+        { name: 'Contra 4', file: 'Contra 4 (USA).nds' },
+        { name: 'Chrono Trigger', file: 'Chrono Trigger (USA).nds', remote: 'Chrono Trigger (USA) (En,Fr)' },
+        { name: 'Tetris DS', file: 'Tetris DS (USA).nds' }
       ],
       'segacd': [
         { name: 'Sonic CD', file: 'Sonic CD (USA).chd' },
         { name: 'Snatcher', file: 'Snatcher (USA).chd' },
         { name: 'Lunar', subtitle: 'The Silver Star', file: 'Lunar - The Silver Star (USA).chd' },
-        { name: 'Lunar 2', subtitle: 'Eternal Blue', file: 'Lunar 2 - Eternal Blue (USA).chd' },
+        { name: 'Lunar 2', subtitle: 'Eternal Blue', file: 'Lunar 2 - Eternal Blue (USA).chd', remote: 'Lunar - Eternal Blue (USA)' },
         { name: 'Popful Mail', file: 'Popful Mail (USA).chd' },
         { name: 'Shining Force CD', file: 'Shining Force CD (USA).chd' },
-        { name: 'Ecco the Dolphin', subtitle: 'CD', file: 'Ecco the Dolphin - CD (USA).chd' },
-        { name: 'Final Fight CD', file: 'Final Fight CD (USA).chd' },
-        { name: 'Streets of Rage', subtitle: 'Sega CD', file: 'Streets of Rage (USA) (Sega CD).chd' }
+        { name: 'Ecco the Dolphin', subtitle: 'CD', file: 'Ecco the Dolphin - CD (USA).chd', remote: 'Ecco the Dolphin (USA)' },
+        { name: 'Final Fight CD', file: 'Final Fight CD (USA).chd' }
       ],
       'gamegear': [
-        { name: 'Sonic the Hedgehog', file: 'Sonic the Hedgehog (World).gg' },
-        { name: 'Sonic the Hedgehog 2', file: 'Sonic the Hedgehog 2 (World).gg' },
-        { name: 'Shinobi', file: 'Shinobi (World).gg' },
+        { name: 'Sonic the Hedgehog', file: 'Sonic the Hedgehog (World).gg', remote: 'Sonic The Hedgehog (World) (Rev 1) (Virtual Console)' },
+        { name: 'Sonic the Hedgehog 2', file: 'Sonic the Hedgehog 2 (World).gg', remote: 'Sonic The Hedgehog 2 (World)' },
+        { name: 'Shinobi', file: 'Shinobi (World).gg', remote: 'Shinobi (World) (Rev A)' },
         { name: 'Shinobi II', subtitle: 'The Silent Fury', file: 'Shinobi II - The Silent Fury (World).gg' },
-        { name: 'Columns', file: 'Columns (World).gg' },
-        { name: 'Wonder Boy', subtitle: "The Dragon's Trap", file: "Wonder Boy - The Dragon's Trap (USA, Europe).gg" },
-        { name: 'Land of Illusion', subtitle: 'Starring Mickey Mouse', file: 'Land of Illusion Starring Mickey Mouse (World).gg' }
+        { name: 'Columns', file: 'Columns (World).gg', remote: 'Columns (USA, Europe, Brazil) (En) (Rev 2)' },
+        { name: 'Wonder Boy', subtitle: "The Dragon's Trap", file: "Wonder Boy - The Dragon's Trap (USA, Europe).gg", remote: "Wonder Boy - The Dragon's Trap (Europe)" },
+        { name: 'Land of Illusion', subtitle: 'Starring Mickey Mouse', file: 'Land of Illusion Starring Mickey Mouse (World).gg', remote: 'Land of Illusion Starring Mickey Mouse (USA, Europe, Brazil) (En)' }
       ],
     };
 
@@ -259,7 +288,7 @@
       if (idx >= 0) {
         favs.splice(idx, 1);
       } else {
-        const consoleShorts = {snes:'SNES',nes:'NES',gba:'GBA',gbc:'GBC',n64:'N64',psx:'PS1',sega:'SEGA',segacd:'MEGA CD',gamegear:'GG',nds:'NDS',arcade:'ARCADE'};
+        const consoleShorts = { snes: 'SNES', nes: 'NES', gba: 'GBA', gbc: 'GBC', n64: 'N64', psx: 'PS1', sega: 'SEGA', segacd: 'MEGA CD', gamegear: 'GG', nds: 'NDS', arcade: 'ARCADE' };
         favs.unshift({
           name: game.name,
           subtitle: game.subtitle || '',
@@ -329,39 +358,59 @@
         coverWrap.style.position = 'relative';
 
         const coverUrl = getCover(game);
+        const remoteCovers = getRemoteCovers(game);
 
         const img = document.createElement('img');
-        img.src = coverUrl;
         img.alt = game.name;
         img.className = 'game-cover-img';
         img.loading = 'lazy';
 
-        img.onload = function() {
-          coverWrap.style.setProperty('--cover-bg', `url('${coverUrl}')`);
-          coverWrap.style.setProperty('--cover-loaded', '1');
-          const style = coverWrap.querySelector('.cover-blur-bg');
-          if (!style) {
-            const bgEl = document.createElement('div');
-            bgEl.className = 'cover-blur-bg';
-            bgEl.style.backgroundImage = `url('${coverUrl}')`;
-            coverWrap.insertBefore(bgEl, img);
-          }
-        };
+        let currentSrc = coverUrl;
+        let remoteIndex = 0;
 
-        img.onerror = function() {
+        // Esgotou todas as fontes → mostra o placeholder "RV"
+        const showFallback = () => {
           const icon = document.createElement('div');
           icon.className = 'game-icon rv-fallback';
           icon.innerHTML = '<span class="rv-fallback-text">RV</span>';
           coverWrap.replaceWith(icon);
         };
 
+        // Tenta a próxima fonte remota (ou cai no placeholder)
+        const tryNextSource = () => {
+          if (remoteIndex < remoteCovers.length) {
+            currentSrc = remoteCovers[remoteIndex++];
+            img.src = currentSrc;
+          } else {
+            showFallback();
+          }
+        };
+
+        img.onload = function () {
+          // Capa carregada (local ou remota) → aplica o fundo com blur real
+          coverWrap.style.setProperty('--cover-bg', `url('${currentSrc}')`);
+          coverWrap.style.setProperty('--cover-loaded', '1');
+          if (!coverWrap.querySelector('.cover-blur-bg')) {
+            const bgEl = document.createElement('div');
+            bgEl.className = 'cover-blur-bg';
+            bgEl.style.backgroundImage = `url('${currentSrc}')`;
+            coverWrap.insertBefore(bgEl, img);
+          }
+        };
+
+        img.onerror = function () {
+          // Capa local falhou (ou uma remota falhou) → avança na cadeia
+          tryNextSource();
+        };
+
+        img.src = coverUrl;
         coverWrap.appendChild(img);
 
         // Botão de favorito
         const favBtn = document.createElement('button');
         favBtn.className = 'fav-btn' + (isFavorite(game.file) ? ' active' : '');
         favBtn.innerHTML = '<span class="heart">♥</span>';
-        favBtn.addEventListener('click', function(e) {
+        favBtn.addEventListener('click', function (e) {
           e.preventDefault();
           e.stopPropagation();
           toggleFavorite(game);
@@ -390,4 +439,5 @@
   </script>
 
 </body>
+
 </html>

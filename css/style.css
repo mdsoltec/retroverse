@@ -9,52 +9,52 @@
   color-scheme: dark;
 
   /* Fundo e Superfícies */
-  --bg:           #030604;
-  --card:         #090e0b;
-  --surface-hover:#121c16;
+  --bg: #030604;
+  --card: #090e0b;
+  --surface-hover: #121c16;
 
   /* Neon Glow & Acentos */
-  --green-neon:   #00ff41;
-  --green-glow:   rgba(0, 255, 65, 0.4);
-  --green-soft:   rgba(0, 255, 65, 0.08);
-  --green-mid:    rgba(0, 255, 65, 0.18);
+  --green-neon: #00ff41;
+  --green-glow: rgba(0, 255, 65, 0.4);
+  --green-soft: rgba(0, 255, 65, 0.08);
+  --green-mid: rgba(0, 255, 65, 0.18);
 
   /* Bordas */
-  --border:       #1a261e;
-  --border-bright:#00ff41;
+  --border: #1a261e;
+  --border-bright: #00ff41;
 
   /* Tipografia */
-  --text:         #ffffff;
-  --text-muted:   #8e9e94;
-  --radius:       16px;
+  --text: #ffffff;
+  --text-muted: #8e9e94;
+  --radius: 16px;
 
   /* Fontes */
   --font-display: 'Orbitron', 'Segoe UI', Roboto, sans-serif;
-  --font-body:    'Rajdhani', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-body: 'Rajdhani', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
   /* ═══ Cores Temáticas por Console ═══ */
-  --snes-color:     #7B2D8E;
-  --snes-glow:      rgba(123, 45, 142, 0.5);
-  --psx-color:      #1560BD;
-  --psx-glow:       rgba(21, 96, 189, 0.5);
-  --n64-color:      #E4000F;
-  --n64-glow:       rgba(228, 0, 15, 0.5);
-  --sega-color:     #003087;
-  --sega-glow:      rgba(0, 48, 135, 0.5);
-  --gba-color:      #6B2FA0;
-  --gba-glow:       rgba(107, 47, 160, 0.5);
-  --gbc-color:      #00A651;
-  --gbc-glow:       rgba(0, 166, 81, 0.5);
-  --nes-color:      #E4002B;
-  --nes-glow:       rgba(228, 0, 43, 0.5);
-  --arcade-color:   #00FF41;
-  --arcade-glow:    rgba(0, 255, 65, 0.5);
-  --nds-color:      #00BFFF;
-  --nds-glow:       rgba(0, 191, 255, 0.5);
-  --segacd-color:   #1A1AFF;
-  --segacd-glow:    rgba(26, 26, 255, 0.5);
+  --snes-color: #7B2D8E;
+  --snes-glow: rgba(123, 45, 142, 0.5);
+  --psx-color: #1560BD;
+  --psx-glow: rgba(21, 96, 189, 0.5);
+  --n64-color: #E4000F;
+  --n64-glow: rgba(228, 0, 15, 0.5);
+  --sega-color: #003087;
+  --sega-glow: rgba(0, 48, 135, 0.5);
+  --gba-color: #6B2FA0;
+  --gba-glow: rgba(107, 47, 160, 0.5);
+  --gbc-color: #00A651;
+  --gbc-glow: rgba(0, 166, 81, 0.5);
+  --nes-color: #E4002B;
+  --nes-glow: rgba(228, 0, 43, 0.5);
+  --arcade-color: #00FF41;
+  --arcade-glow: rgba(0, 255, 65, 0.5);
+  --nds-color: #00BFFF;
+  --nds-glow: rgba(0, 191, 255, 0.5);
+  --segacd-color: #1A1AFF;
+  --segacd-glow: rgba(26, 26, 255, 0.5);
   --gamegear-color: #CC0000;
-  --gamegear-glow:  rgba(204, 0, 0, 0.5);
+  --gamegear-glow: rgba(204, 0, 0, 0.5);
 }
 
 * {
@@ -65,9 +65,9 @@
 
 body {
   background:
-    radial-gradient(ellipse at 20% 0%, rgba(0,255,65,0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 0%, rgba(123,45,142,0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 100%, rgba(0,100,255,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 0%, rgba(0, 255, 65, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 0%, rgba(123, 45, 142, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(0, 100, 255, 0.06) 0%, transparent 50%),
     #020503;
   color: var(--text);
   min-height: 100vh;
@@ -83,21 +83,32 @@ body {
   inset: 0;
   z-index: 9998;
   pointer-events: none;
-  background-image: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.07) 2px,
-    rgba(0, 0, 0, 0.07) 4px
-  );
+  background-image: repeating-linear-gradient(0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.07) 2px,
+      rgba(0, 0, 0, 0.07) 4px);
   animation: crtFlicker 8s linear infinite;
 }
 
 @keyframes crtFlicker {
-  0%,100% { opacity: 1; }
-  92%      { opacity: 1; }
-  93%      { opacity: 0.97; }
-  94%      { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  92% {
+    opacity: 1;
+  }
+
+  93% {
+    opacity: 0.97;
+  }
+
+  94% {
+    opacity: 1;
+  }
 }
 
 /* ==========================================
@@ -112,7 +123,7 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(0, 255, 65, 0.2);
   padding: 14px 32px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), 0 0 1px rgba(0,255,65,0.15);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), 0 0 1px rgba(0, 255, 65, 0.15);
 }
 
 /* --- NAVBAR INDEX (centralizada, com branding) --- */
@@ -143,7 +154,7 @@ body {
   font-weight: 900;
   color: var(--green-neon);
   letter-spacing: 1px;
-  box-shadow: 0 0 14px var(--green-glow), inset 0 0 10px rgba(0,255,65,0.06);
+  box-shadow: 0 0 14px var(--green-glow), inset 0 0 10px rgba(0, 255, 65, 0.06);
   transition: all 0.3s ease;
   flex-shrink: 0;
   animation: logoPulseNav 3s ease-in-out infinite;
@@ -156,35 +167,41 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0,0,0,0.15) 2px,
-    rgba(0,0,0,0.15) 4px
-  );
+  background: repeating-linear-gradient(0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.15) 2px,
+      rgba(0, 0, 0, 0.15) 4px);
   pointer-events: none;
   animation: logoScanline 4s linear infinite;
 }
 
 @keyframes logoPulseNav {
-  0%, 100% {
-    box-shadow: 0 0 14px var(--green-glow), inset 0 0 10px rgba(0,255,65,0.06);
+
+  0%,
+  100% {
+    box-shadow: 0 0 14px var(--green-glow), inset 0 0 10px rgba(0, 255, 65, 0.06);
     text-shadow: 0 0 8px var(--green-neon);
   }
+
   50% {
-    box-shadow: 0 0 28px var(--green-glow), 0 0 50px rgba(0,255,65,0.15), inset 0 0 18px rgba(0,255,65,0.12);
+    box-shadow: 0 0 28px var(--green-glow), 0 0 50px rgba(0, 255, 65, 0.15), inset 0 0 18px rgba(0, 255, 65, 0.12);
     text-shadow: 0 0 16px var(--green-neon);
   }
 }
 
 @keyframes logoScanline {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(4px); }
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(4px);
+  }
 }
 
 .brand:hover .brand-logo {
-  box-shadow: 0 0 35px var(--green-neon), 0 0 60px rgba(0,255,65,0.2), inset 0 0 22px rgba(0,255,65,0.18);
+  box-shadow: 0 0 35px var(--green-neon), 0 0 60px rgba(0, 255, 65, 0.2), inset 0 0 22px rgba(0, 255, 65, 0.18);
   animation: none;
 }
 
@@ -201,7 +218,7 @@ body {
   letter-spacing: 6px;
   color: var(--text);
   text-transform: uppercase;
-  text-shadow: 0 0 14px var(--green-glow), 0 0 28px rgba(0,255,65,0.18);
+  text-shadow: 0 0 14px var(--green-glow), 0 0 28px rgba(0, 255, 65, 0.18);
   transition: all 0.3s ease;
 }
 
@@ -354,8 +371,10 @@ body {
   background: #070c09;
   border: 1px solid var(--border);
   color: var(--text);
-  padding: 9px 18px 9px 36px; /* espaço para o ícone à esquerda */
-  border-radius: 6px;         /* retangular com leve arredondamento — mais cyberpunk */
+  padding: 9px 18px 9px 36px;
+  /* espaço para o ícone à esquerda */
+  border-radius: 6px;
+  /* retangular com leve arredondamento — mais cyberpunk */
   outline: none;
   font-family: var(--font-display);
   font-size: 0.72rem;
@@ -379,8 +398,8 @@ body {
 .search-box input:focus {
   border-color: var(--green-neon);
   box-shadow:
-    0 0 0 2px rgba(0,255,65,0.12),
-    0 0 16px rgba(0,255,65,0.2);
+    0 0 0 2px rgba(0, 255, 65, 0.12),
+    0 0 16px rgba(0, 255, 65, 0.2);
   background: #070d09;
   color: var(--green-neon);
 }
@@ -402,17 +421,25 @@ body {
   position: absolute;
   inset: -50%;
   background:
-    radial-gradient(circle at 20% 50%, rgba(123,45,142,0.15) 0%, transparent 40%),
-    radial-gradient(circle at 80% 50%, rgba(0,100,255,0.12) 0%, transparent 40%),
-    radial-gradient(circle at 50% 80%, rgba(0,255,65,0.1) 0%, transparent 40%);
+    radial-gradient(circle at 20% 50%, rgba(123, 45, 142, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 80% 50%, rgba(0, 100, 255, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(0, 255, 65, 0.1) 0%, transparent 40%);
   animation: heroGradientShift 12s ease-in-out infinite alternate;
   z-index: 0;
 }
 
 @keyframes heroGradientShift {
-  0%   { transform: translate(0, 0) scale(1); }
-  50%  { transform: translate(-3%, 2%) scale(1.05); }
-  100% { transform: translate(3%, -2%) scale(1.02); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(-3%, 2%) scale(1.05);
+  }
+
+  100% {
+    transform: translate(3%, -2%) scale(1.02);
+  }
 }
 
 /* Grid de linhas sutis (efeito holográfico) */
@@ -421,8 +448,8 @@ body {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px);
+    linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
   background-size: 60px 60px;
   animation: gridScroll 20s linear infinite;
   z-index: 0;
@@ -430,8 +457,13 @@ body {
 }
 
 @keyframes gridScroll {
-  0%   { transform: translateY(0); }
-  100% { transform: translateY(60px); }
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(60px);
+  }
 }
 
 /* Partículas decorativas (melhoradas) */
@@ -453,28 +485,164 @@ body {
   opacity: 0;
 }
 
-.hero-particles span:nth-child(1)  { left: 10%; top: 20%; animation-delay: 0s;    animation-duration: 7s;  background: #00ff41; box-shadow: 0 0 8px #00ff41; }
-.hero-particles span:nth-child(2)  { left: 25%; top: 60%; animation-delay: 1s;    animation-duration: 9s;  background: #7B2D8E; box-shadow: 0 0 8px #7B2D8E; }
-.hero-particles span:nth-child(3)  { left: 45%; top: 35%; animation-delay: 2s;    animation-duration: 6s;  background: #1560BD; box-shadow: 0 0 8px #1560BD; }
-.hero-particles span:nth-child(4)  { left: 70%; top: 75%; animation-delay: 0.5s;  animation-duration: 8s;  background: #00ff41; box-shadow: 0 0 8px #00ff41; }
-.hero-particles span:nth-child(5)  { left: 85%; top: 15%; animation-delay: 3s;    animation-duration: 7.5s; background: #E4000F; box-shadow: 0 0 8px #E4000F; }
-.hero-particles span:nth-child(6)  { left: 55%; top: 85%; animation-delay: 1.5s;  animation-duration: 10s; background: #7B2D8E; box-shadow: 0 0 8px #7B2D8E; }
-.hero-particles span:nth-child(7)  { left: 5%;  top: 50%; animation-delay: 4s;    animation-duration: 6.5s; background: #00BFFF; box-shadow: 0 0 8px #00BFFF; }
-.hero-particles span:nth-child(8)  { left: 90%; top: 40%; animation-delay: 2.5s;  animation-duration: 9.5s; background: #00ff41; box-shadow: 0 0 8px #00ff41; }
-.hero-particles span:nth-child(9)  { left: 38%; top: 10%; animation-delay: 0.8s;  animation-duration: 8.5s; background: #1560BD; box-shadow: 0 0 8px #1560BD; }
-.hero-particles span:nth-child(10) { left: 78%; top: 55%; animation-delay: 3.5s;  animation-duration: 7s;  background: #E4000F; box-shadow: 0 0 8px #E4000F; }
-.hero-particles span:nth-child(11) { left: 15%; top: 75%; animation-delay: 1.2s;  animation-duration: 11s; background: #00A651; box-shadow: 0 0 8px #00A651; }
-.hero-particles span:nth-child(12) { left: 62%; top: 20%; animation-delay: 0.3s;  animation-duration: 9s;  background: #FFD700; box-shadow: 0 0 8px #FFD700; }
-.hero-particles span:nth-child(13) { left: 33%; top: 90%; animation-delay: 2.8s;  animation-duration: 7.5s; background: #7B2D8E; box-shadow: 0 0 8px #7B2D8E; }
-.hero-particles span:nth-child(14) { left: 88%; top: 65%; animation-delay: 4.2s;  animation-duration: 8s;  background: #00BFFF; box-shadow: 0 0 8px #00BFFF; }
-.hero-particles span:nth-child(15) { left: 50%; top: 45%; animation-delay: 1.8s;  animation-duration: 10s; background: #00ff41; box-shadow: 0 0 10px #00ff41; }
+.hero-particles span:nth-child(1) {
+  left: 10%;
+  top: 20%;
+  animation-delay: 0s;
+  animation-duration: 7s;
+  background: #00ff41;
+  box-shadow: 0 0 8px #00ff41;
+}
+
+.hero-particles span:nth-child(2) {
+  left: 25%;
+  top: 60%;
+  animation-delay: 1s;
+  animation-duration: 9s;
+  background: #7B2D8E;
+  box-shadow: 0 0 8px #7B2D8E;
+}
+
+.hero-particles span:nth-child(3) {
+  left: 45%;
+  top: 35%;
+  animation-delay: 2s;
+  animation-duration: 6s;
+  background: #1560BD;
+  box-shadow: 0 0 8px #1560BD;
+}
+
+.hero-particles span:nth-child(4) {
+  left: 70%;
+  top: 75%;
+  animation-delay: 0.5s;
+  animation-duration: 8s;
+  background: #00ff41;
+  box-shadow: 0 0 8px #00ff41;
+}
+
+.hero-particles span:nth-child(5) {
+  left: 85%;
+  top: 15%;
+  animation-delay: 3s;
+  animation-duration: 7.5s;
+  background: #E4000F;
+  box-shadow: 0 0 8px #E4000F;
+}
+
+.hero-particles span:nth-child(6) {
+  left: 55%;
+  top: 85%;
+  animation-delay: 1.5s;
+  animation-duration: 10s;
+  background: #7B2D8E;
+  box-shadow: 0 0 8px #7B2D8E;
+}
+
+.hero-particles span:nth-child(7) {
+  left: 5%;
+  top: 50%;
+  animation-delay: 4s;
+  animation-duration: 6.5s;
+  background: #00BFFF;
+  box-shadow: 0 0 8px #00BFFF;
+}
+
+.hero-particles span:nth-child(8) {
+  left: 90%;
+  top: 40%;
+  animation-delay: 2.5s;
+  animation-duration: 9.5s;
+  background: #00ff41;
+  box-shadow: 0 0 8px #00ff41;
+}
+
+.hero-particles span:nth-child(9) {
+  left: 38%;
+  top: 10%;
+  animation-delay: 0.8s;
+  animation-duration: 8.5s;
+  background: #1560BD;
+  box-shadow: 0 0 8px #1560BD;
+}
+
+.hero-particles span:nth-child(10) {
+  left: 78%;
+  top: 55%;
+  animation-delay: 3.5s;
+  animation-duration: 7s;
+  background: #E4000F;
+  box-shadow: 0 0 8px #E4000F;
+}
+
+.hero-particles span:nth-child(11) {
+  left: 15%;
+  top: 75%;
+  animation-delay: 1.2s;
+  animation-duration: 11s;
+  background: #00A651;
+  box-shadow: 0 0 8px #00A651;
+}
+
+.hero-particles span:nth-child(12) {
+  left: 62%;
+  top: 20%;
+  animation-delay: 0.3s;
+  animation-duration: 9s;
+  background: #FFD700;
+  box-shadow: 0 0 8px #FFD700;
+}
+
+.hero-particles span:nth-child(13) {
+  left: 33%;
+  top: 90%;
+  animation-delay: 2.8s;
+  animation-duration: 7.5s;
+  background: #7B2D8E;
+  box-shadow: 0 0 8px #7B2D8E;
+}
+
+.hero-particles span:nth-child(14) {
+  left: 88%;
+  top: 65%;
+  animation-delay: 4.2s;
+  animation-duration: 8s;
+  background: #00BFFF;
+  box-shadow: 0 0 8px #00BFFF;
+}
+
+.hero-particles span:nth-child(15) {
+  left: 50%;
+  top: 45%;
+  animation-delay: 1.8s;
+  animation-duration: 10s;
+  background: #00ff41;
+  box-shadow: 0 0 10px #00ff41;
+}
 
 @keyframes floatParticle {
-  0%   { transform: translateY(0) translateX(0) scale(0.5); opacity: 0; }
-  15%  { opacity: 0.8; }
-  50%  { transform: translateY(-40px) translateX(15px) scale(1); opacity: 1; }
-  85%  { opacity: 0.6; }
-  100% { transform: translateY(-100px) translateX(-10px) scale(0.3); opacity: 0; }
+  0% {
+    transform: translateY(0) translateX(0) scale(0.5);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: translateY(-40px) translateX(15px) scale(1);
+    opacity: 1;
+  }
+
+  85% {
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: translateY(-100px) translateX(-10px) scale(0.3);
+    opacity: 0;
+  }
 }
 
 .hero-content {
@@ -486,8 +654,15 @@ body {
 }
 
 @keyframes heroFadeIn {
-  0%   { opacity: 0; transform: translateY(30px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero-badge {
@@ -498,11 +673,11 @@ body {
   letter-spacing: 5px;
   color: var(--green-neon);
   text-transform: uppercase;
-  border: 1px solid rgba(0,255,65,0.25);
+  border: 1px solid rgba(0, 255, 65, 0.25);
   padding: 6px 22px;
   border-radius: 30px;
   margin-bottom: 32px;
-  background: rgba(0,255,65,0.04);
+  background: rgba(0, 255, 65, 0.04);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   animation: heroFadeIn 1s ease-out 0.2s both;
@@ -524,9 +699,9 @@ body {
   display: inline-block;
   color: var(--green-neon);
   text-shadow:
-    0 0 20px rgba(0,255,65,0.8),
-    0 0 50px rgba(0,255,65,0.4),
-    0 0 100px rgba(0,255,65,0.15);
+    0 0 20px rgba(0, 255, 65, 0.8),
+    0 0 50px rgba(0, 255, 65, 0.4),
+    0 0 100px rgba(0, 255, 65, 0.15);
   animation: titleGlow 3s ease-in-out infinite alternate;
 }
 
@@ -626,7 +801,7 @@ body {
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 4px;
-  color: rgba(0,255,65,0.45);
+  color: rgba(0, 255, 65, 0.45);
   text-transform: uppercase;
 }
 
@@ -659,7 +834,7 @@ body {
 .category-line {
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, rgba(0,255,65,0.3), transparent);
+  background: linear-gradient(90deg, rgba(0, 255, 65, 0.3), transparent);
 }
 
 .category-badge {
@@ -668,8 +843,8 @@ body {
   font-weight: 600;
   letter-spacing: 2px;
   color: var(--text-muted);
-  background: rgba(0,255,65,0.06);
-  border: 1px solid rgba(0,255,65,0.15);
+  background: rgba(0, 255, 65, 0.06);
+  border: 1px solid rgba(0, 255, 65, 0.15);
   padding: 3px 12px;
   border-radius: 20px;
   white-space: nowrap;
@@ -688,7 +863,8 @@ body {
 }
 
 /* ═══ Glassmorphism Cards ═══ */
-.console-card, .card {
+.console-card,
+.card {
   background: rgba(8, 14, 10, 0.6);
   backdrop-filter: blur(16px) saturate(1.2);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
@@ -711,7 +887,8 @@ body {
 /* Linha neon no topo (temática por console) */
 .card-glow-top {
   position: absolute;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 3px;
   background: linear-gradient(90deg, transparent, var(--console-color, var(--green-neon)), transparent);
@@ -723,7 +900,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% -20%, var(--console-glow, rgba(0,255,65,0.06)) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 50% -20%, var(--console-glow, rgba(0, 255, 65, 0.06)) 0%, transparent 70%);
   opacity: 0;
   transition: opacity 0.4s ease;
   pointer-events: none;
@@ -735,7 +912,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 50%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
@@ -746,9 +923,9 @@ body {
   background: rgba(12, 20, 15, 0.8);
   box-shadow:
     0 24px 60px rgba(0, 0, 0, 0.8),
-    0 0 40px var(--console-glow, rgba(0,255,65,0.2)),
-    0 0 80px var(--console-glow, rgba(0,255,65,0.06)),
-    inset 0 1px 0 rgba(255,255,255,0.08);
+    0 0 40px var(--console-glow, rgba(0, 255, 65, 0.2)),
+    0 0 80px var(--console-glow, rgba(0, 255, 65, 0.06)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .console-card:hover .card-glow-top {
@@ -775,8 +952,7 @@ body {
 .console-card:hover .console-img {
   transform: scale(1.18) translateY(-4px);
   filter:
-    drop-shadow(0px 16px 35px var(--console-glow, rgba(0,255,65,0.5)))
-    brightness(1.1);
+    drop-shadow(0px 16px 35px var(--console-glow, rgba(0, 255, 65, 0.5))) brightness(1.1);
 }
 
 .console-info {
@@ -805,7 +981,7 @@ body {
   display: inline-block;
   color: var(--console-color, var(--green-neon));
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--console-color, rgba(0,255,65,0.25));
+  border: 1px solid var(--console-color, rgba(0, 255, 65, 0.25));
   padding: 4px 16px;
   border-radius: 20px;
   font-family: var(--font-display);
@@ -824,17 +1000,60 @@ body {
 }
 
 /* ═══ Cores Temáticas por Console ═══ */
-.console-card.snes     { --console-color: var(--snes-color);   --console-glow: var(--snes-glow); }
-.console-card.psx      { --console-color: var(--psx-color);    --console-glow: var(--psx-glow); }
-.console-card.n64      { --console-color: var(--n64-color);    --console-glow: var(--n64-glow); }
-.console-card.sega     { --console-color: var(--sega-color);   --console-glow: var(--sega-glow); }
-.console-card.gba      { --console-color: var(--gba-color);    --console-glow: var(--gba-glow); }
-.console-card.gbc      { --console-color: var(--gbc-color);    --console-glow: var(--gbc-glow); }
-.console-card.nes      { --console-color: var(--nes-color);    --console-glow: var(--nes-glow); }
-.console-card.arcade   { --console-color: var(--arcade-color); --console-glow: var(--arcade-glow); }
-.console-card.nds      { --console-color: var(--nds-color);    --console-glow: var(--nds-glow); }
-.console-card.segacd   { --console-color: var(--segacd-color); --console-glow: var(--segacd-glow); }
-.console-card.gamegear { --console-color: var(--gamegear-color); --console-glow: var(--gamegear-glow); }
+.console-card.snes {
+  --console-color: var(--snes-color);
+  --console-glow: var(--snes-glow);
+}
+
+.console-card.psx {
+  --console-color: var(--psx-color);
+  --console-glow: var(--psx-glow);
+}
+
+.console-card.n64 {
+  --console-color: var(--n64-color);
+  --console-glow: var(--n64-glow);
+}
+
+.console-card.sega {
+  --console-color: var(--sega-color);
+  --console-glow: var(--sega-glow);
+}
+
+.console-card.gba {
+  --console-color: var(--gba-color);
+  --console-glow: var(--gba-glow);
+}
+
+.console-card.gbc {
+  --console-color: var(--gbc-color);
+  --console-glow: var(--gbc-glow);
+}
+
+.console-card.nes {
+  --console-color: var(--nes-color);
+  --console-glow: var(--nes-glow);
+}
+
+.console-card.arcade {
+  --console-color: var(--arcade-color);
+  --console-glow: var(--arcade-glow);
+}
+
+.console-card.nds {
+  --console-color: var(--nds-color);
+  --console-glow: var(--nds-glow);
+}
+
+.console-card.segacd {
+  --console-color: var(--segacd-color);
+  --console-glow: var(--segacd-glow);
+}
+
+.console-card.gamegear {
+  --console-color: var(--gamegear-color);
+  --console-glow: var(--gamegear-glow);
+}
 
 /* ==========================================
    GRID E CARDS - GAMES (NOVO — GRADE DE CAPAS)
@@ -863,8 +1082,8 @@ body {
   padding: 0;
   gap: 0;
   transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-              border-color 0.25s ease,
-              box-shadow 0.25s ease;
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
   cursor: pointer;
 }
 
@@ -872,16 +1091,17 @@ body {
   transform: translateY(-6px) scale(1.03);
   border-color: var(--green-neon);
   box-shadow:
-    0 16px 40px rgba(0,0,0,0.9),
-    0 0 20px rgba(0,255,65,0.25),
-    0 0 60px rgba(0,255,65,0.08);
+    0 16px 40px rgba(0, 0, 0, 0.9),
+    0 0 20px rgba(0, 255, 65, 0.25),
+    0 0 60px rgba(0, 255, 65, 0.08);
 }
 
 /* ── Wrapper da imagem — altura fixa, todas iguais ── */
 .game-cover-wrap {
   position: relative;
   width: 100%;
-  height: 200px;          /* altura fixa — mesma para todas as capas */
+  height: 200px;
+  /* altura fixa — mesma para todas as capas */
   overflow: hidden;
   background: #0a100d;
   border-radius: 10px 10px 0 0;
@@ -891,8 +1111,10 @@ body {
 .game-cover-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;        /* preenche sem distorcer */
-  object-position: center top; /* alinha ao topo — mostra a parte importante */
+  object-fit: cover;
+  /* preenche sem distorcer */
+  object-position: center top;
+  /* alinha ao topo — mostra a parte importante */
   display: block;
   transition: transform 0.4s ease, filter 0.4s ease;
   border-radius: 0;
@@ -912,12 +1134,10 @@ body {
   content: 'JOGAR ▶';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(0,255,65,0.92) 0%,
-    rgba(0,30,10,0.75) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(to top,
+      rgba(0, 255, 65, 0.92) 0%,
+      rgba(0, 30, 10, 0.75) 50%,
+      transparent 100%);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -940,7 +1160,8 @@ body {
 .game-card::before {
   content: '';
   position: absolute;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--green-neon), transparent);
@@ -956,7 +1177,8 @@ body {
 /* ── Fallback RV quando não há capa ── */
 .game-icon {
   width: 100%;
-  height: 200px;           /* mesma altura fixa dos covers */
+  height: 200px;
+  /* mesma altura fixa dos covers */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -971,7 +1193,7 @@ body {
   background: linear-gradient(145deg, #0a1a0d, #050c07);
   border: none;
   border-radius: 10px 10px 0 0;
-  box-shadow: inset 0 0 30px rgba(0,255,65,0.06);
+  box-shadow: inset 0 0 30px rgba(0, 255, 65, 0.06);
 }
 
 .rv-fallback-text {
@@ -991,11 +1213,13 @@ body {
 /* ── Info (nome + subtítulo) — altura fixa para alinhar todos ── */
 .game-info {
   flex: 0 0 auto;
-  height: 54px;             /* altura fixa: espaço para nome + subtítulo */
+  height: 54px;
+  /* altura fixa: espaço para nome + subtítulo */
   padding: 8px 10px;
   display: flex;
   flex-direction: column;
-  justify-content: center;  /* centraliza verticalmente */
+  justify-content: center;
+  /* centraliza verticalmente */
   gap: 2px;
   background: linear-gradient(180deg, #0b1309 0%, #080d0a 100%);
   border-radius: 0 0 10px 10px;
@@ -1033,11 +1257,14 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-height: 1em;  /* reserva espaço mesmo sem conteúdo */
+  min-height: 1em;
+  /* reserva espaço mesmo sem conteúdo */
 }
 
 /* ── Botão JOGAR — removido do HTML, substituído pelo overlay ── */
-.play-btn { display: none; }
+.play-btn {
+  display: none;
+}
 
 /* ==========================================
    SEÇÃO CONTINUE JOGANDO / FAVORITOS
@@ -1081,7 +1308,7 @@ body {
   color: var(--text-muted);
   text-transform: uppercase;
   background: none;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 4px 12px;
   border-radius: 20px;
   cursor: pointer;
@@ -1090,8 +1317,8 @@ body {
 
 .user-section-clear:hover {
   color: #ff4444;
-  border-color: rgba(255,68,68,0.3);
-  background: rgba(255,68,68,0.05);
+  border-color: rgba(255, 68, 68, 0.3);
+  background: rgba(255, 68, 68, 0.05);
 }
 
 /* Grid horizontal scrollável para continue/favoritos */
@@ -1105,7 +1332,9 @@ body {
   scrollbar-width: none;
 }
 
-.user-games-row::-webkit-scrollbar { display: none; }
+.user-games-row::-webkit-scrollbar {
+  display: none;
+}
 
 .user-game-card {
   flex: 0 0 160px;
@@ -1114,8 +1343,8 @@ body {
   position: relative;
   border-radius: 10px;
   overflow: hidden;
-  background: rgba(8,14,10,0.6);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(8, 14, 10, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
@@ -1125,7 +1354,7 @@ body {
 .user-game-card:hover {
   transform: translateY(-4px) scale(1.00);
   border-color: var(--green-neon);
-  box-shadow: 0 12px 30px rgba(0,0,0,0.7), 0 0 16px rgba(0,255,65,0.2);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 255, 65, 0.2);
 }
 
 .user-game-cover {
@@ -1186,7 +1415,7 @@ body {
   height: 28px;
   border-radius: 50%;
   border: none;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
@@ -1200,18 +1429,18 @@ body {
 }
 
 .fav-btn:hover {
-  background: rgba(0,0,0,0.8);
+  background: rgba(0, 0, 0, 0.8);
   transform: scale(1.15);
 }
 
 .fav-btn .heart {
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
   transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .fav-btn.active .heart {
   color: #ff3355;
-  text-shadow: 0 0 8px rgba(255,51,85,0.6);
+  text-shadow: 0 0 8px rgba(255, 51, 85, 0.6);
 }
 
 .fav-btn.active:hover .heart {
@@ -1246,7 +1475,7 @@ body {
   color: var(--text-muted);
   text-transform: uppercase;
   background: none;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 5px 14px;
   border-radius: 20px;
   cursor: pointer;
@@ -1255,14 +1484,14 @@ body {
 
 .filter-btn:hover {
   color: var(--text);
-  border-color: rgba(0,255,65,0.3);
+  border-color: rgba(0, 255, 65, 0.3);
 }
 
 .filter-btn.active {
   color: #000;
   background: var(--green-neon);
   border-color: var(--green-neon);
-  box-shadow: 0 0 10px rgba(0,255,65,0.3);
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
 }
 
 /* ═══ Busca global na navbar da home ═══ */
@@ -1302,7 +1531,7 @@ body {
   justify-content: center;
   color: var(--green-neon);
   background: rgba(10, 22, 14, 0.85);
-  box-shadow: 0 0 14px var(--green-glow), inset 0 0 10px rgba(0,255,65,0.06);
+  box-shadow: 0 0 14px var(--green-glow), inset 0 0 10px rgba(0, 255, 65, 0.06);
   text-decoration: none;
   transition: all 0.3s ease;
   flex-shrink: 0;
@@ -1313,7 +1542,7 @@ body {
 .profile-link:hover {
   opacity: 1;
   border-color: var(--green-neon);
-  box-shadow: 0 0 25px var(--green-neon), 0 0 45px rgba(0,255,65,0.25), inset 0 0 15px rgba(0,255,65,0.15);
+  box-shadow: 0 0 25px var(--green-neon), 0 0 45px rgba(0, 255, 65, 0.25), inset 0 0 15px rgba(0, 255, 65, 0.15);
   transform: scale(1.05);
 }
 
@@ -1389,8 +1618,8 @@ body {
   left: 0;
   right: 0;
   margin-top: 8px;
-  background: rgba(8,14,10,0.95);
-  border: 1px solid rgba(0,255,65,0.2);
+  background: rgba(8, 14, 10, 0.95);
+  border: 1px solid rgba(0, 255, 65, 0.2);
   border-radius: 12px;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -1398,10 +1627,12 @@ body {
   overflow-y: auto;
   display: none;
   z-index: 100;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.8);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
 }
 
-.global-search-results.visible { display: block; }
+.global-search-results.visible {
+  display: block;
+}
 
 .gsr-item {
   display: flex;
@@ -1411,13 +1642,15 @@ body {
   text-decoration: none;
   color: var(--text);
   transition: background 0.15s ease;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.gsr-item:last-child { border-bottom: none; }
+.gsr-item:last-child {
+  border-bottom: none;
+}
 
 .gsr-item:hover {
-  background: rgba(0,255,65,0.06);
+  background: rgba(0, 255, 65, 0.06);
 }
 
 .gsr-item-console {
@@ -1427,8 +1660,8 @@ body {
   letter-spacing: 2px;
   color: var(--green-neon);
   text-transform: uppercase;
-  background: rgba(0,255,65,0.08);
-  border: 1px solid rgba(0,255,65,0.2);
+  background: rgba(0, 255, 65, 0.08);
+  border: 1px solid rgba(0, 255, 65, 0.2);
   padding: 2px 8px;
   border-radius: 10px;
   flex-shrink: 0;
@@ -1587,7 +1820,7 @@ body {
 .rv-footer {
   text-align: center;
   padding: 40px 24px;
-  border-top: 1px solid rgba(0,255,65,0.1);
+  border-top: 1px solid rgba(0, 255, 65, 0.1);
   margin-top: 20px;
 }
 
@@ -1602,12 +1835,12 @@ body {
   justify-content: center;
   width: 36px;
   height: 36px;
-  border: 1.5px solid rgba(0,255,65,0.4);
+  border: 1.5px solid rgba(0, 255, 65, 0.4);
   border-radius: 8px;
   font-family: var(--font-display);
   font-size: 0.85rem;
   font-weight: 900;
-  color: rgba(0,255,65,0.5);
+  color: rgba(0, 255, 65, 0.5);
   margin-bottom: 10px;
 }
 
@@ -1615,7 +1848,7 @@ body {
   font-family: var(--font-display);
   font-size: 0.65rem;
   letter-spacing: 5px;
-  color: rgba(255,255,255,0.2);
+  color: rgba(255, 255, 255, 0.2);
   text-transform: uppercase;
   margin-bottom: 6px;
 }
@@ -1624,7 +1857,7 @@ body {
   font-family: var(--font-body);
   font-size: 0.7rem;
   letter-spacing: 1px;
-  color: rgba(255,255,255,0.12);
+  color: rgba(255, 255, 255, 0.12);
 }
 
 /* ==========================================
@@ -1728,7 +1961,9 @@ body {
     padding: 10px 14px;
   }
 
-  .navbar-spacer { display: none; }
+  .navbar-spacer {
+    display: none;
+  }
 
   .games-header-center {
     align-items: flex-end;
@@ -1780,7 +2015,9 @@ body {
     scrollbar-width: none;
   }
 
-  .games-filters::-webkit-scrollbar { display: none; }
+  .games-filters::-webkit-scrollbar {
+    display: none;
+  }
 
   /* ── Grid de jogos — 3 colunas no mobile ── */
   .games-grid {
@@ -1964,7 +2201,20 @@ body {
 }
 
 @keyframes turn-on {
-  0% { transform: scale(1, 0.001) translate3d(0, 0, 0); filter: brightness(10); }
-  50% { transform: scale(1, 0.001) translate3d(0, 0, 0); filter: brightness(10); }
-  100% { transform: scale(1, 1) translate3d(0, 0, 0); filter: brightness(1); opacity: 0; display: none; }
+  0% {
+    transform: scale(1, 0.001) translate3d(0, 0, 0);
+    filter: brightness(10);
+  }
+
+  50% {
+    transform: scale(1, 0.001) translate3d(0, 0, 0);
+    filter: brightness(10);
+  }
+
+  100% {
+    transform: scale(1, 1) translate3d(0, 0, 0);
+    filter: brightness(1);
+    opacity: 0;
+    display: none;
+  }
 }
