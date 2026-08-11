@@ -6,8 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="assets/rv-icon.png">
   <link rel="apple-touch-icon" href="assets/rv-icon.png">
+  <link rel="manifest" href="manifest.json">
   <title>RetroVerse - Jogos</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/audio.js"></script>
 </head>
 
 <body>
@@ -50,14 +52,13 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const consoleType = params.get('console') || 'snes';
+    let consoleType = params.get('console') || 'snes';
 
     const config = {
       'snes': { title: 'Super Nintendo', core: 'snes' },
       'nes': { title: 'Nintendo Classic', core: 'nes' },
       'gba': { title: 'Game Boy Advance', core: 'gba' },
       'gbc': { title: 'Game Boy Color', core: 'gbc' },
-      'gb': { title: 'Game Boy', core: 'gb' },
       'sega': { title: 'Mega Drive', core: 'segaMD' },
       'arcade': { title: 'Arcade / Fliperama', core: 'fbneo' },
       'n64': { title: 'Nintendo 64', core: 'n64' },
@@ -67,7 +68,10 @@
       'gamegear': { title: 'Game Gear', core: 'segaGG' }
     };
 
-    const currentConfig = config[consoleType] || config['snes'];
+    // Consoles sem catálogo (ou parâmetro inválido) caem no padrão —
+    // antes ?console=gb/psp mostrava a página vazia "0 JOGOS DISPONÍVEIS".
+    if (!config[consoleType]) consoleType = 'snes';
+    const currentConfig = config[consoleType];
     document.getElementById('console-title').innerText = currentConfig.title;
     document.title = 'RetroVerse - ' + currentConfig.title;
 
@@ -436,8 +440,13 @@
     }
 
     renderGames(games);
+
+    /* Register Service Worker (PWA) — sw.js na raiz, escopo cobre todo o app */
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js', { scope: './' }).catch(() => { });
+    }
   </script>
 
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a29952cb58cec134',t:'MTc4NjQ3MzE1MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 
 </html>

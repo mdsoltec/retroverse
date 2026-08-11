@@ -66,6 +66,8 @@
       this.activeTouches = new Map(); // identifier -> list of { type, input, desc }
       this.activeStylus = new Set(); // toques sem zona de botão no DS
       this.activeButtons = new Set(); // EJS_INPUT codes atualmente pressionados
+      this.activeHolds = new Map();   // identifier -> Set de ações "segurar" (fast_forward, rewind)
+      this.menuPresses = new Map();   // identifier -> { timer, firedLong } para tap=cheats / hold=barra de sistema
       // Estado do analógico analógico (contínuo) + rebase "seguir o dedo"
       this.activeAnalog = new Map();  // touchId -> { axis, nx, ny }
       this.analogBase = new Map();    // touchId -> { axis, desc, originX, originY }
@@ -96,6 +98,7 @@
       }
 
       const totalOverlays = parseInt(data['overlays'] || '1', 10);
+      this.overlayOrder = [];
       for (let i = 0; i < totalOverlays; i++) {
         const prefix = `overlay${i}_`;
         const ov = {
@@ -129,6 +132,7 @@
             left: data[`${dKey}_left`] || null,
             right: data[`${dKey}_right`] || null,
             overlayImg: data[`${dKey}_overlay`] || null,
+            overlayKey: ov.id,
             imgEl: null,
           };
           ov.descs.push(desc);
@@ -136,6 +140,7 @@
 
         this.overlays[ov.id] = ov;
         this.overlays[ov.name] = ov;
+        this.overlayOrder.push(ov.id);
       }
 
       this.selectDefaultOverlay();
@@ -412,22 +417,44 @@
       const actions = [];
 
       if (desc.button === 'overlay_next') {
-        if (desc.nextTarget && this.overlays[desc.nextTarget]) {
-          return [{ type: 'system', action: 'overlay_change', target: desc.nextTarget, desc }];
+        let target = desc.nextTarget || null;
+        if ((!target || !this.overlays[target]) && Array.isArray(this.overlayOrder) && this.overlayOrder.length > 1) {
+          // RetroArch: overlay_next sem next_target avança para o PRÓXIMO
+          // overlay declarado no CFG (e o último cicla de volta ao primeiro).
+          const cur = this.overlayOrder.indexOf(desc.overlayKey);
+          if (cur !== -1) target = this.overlayOrder[(cur + 1) % this.overlayOrder.length];
+        }
+        if (target && this.overlays[target]) {
+          // Overlays de pausa se comportam como o botão MENU do RetroVerse:
+          // toque rápido = cheats / segurar = barra de sistema.
+          if (this.isPauseOverlay(this.overlays[target])) {
+            return [{ type: 'system_menu', action: 'open_cheats', desc }];
+          }
+          return [{ type: 'system', action: 'overlay_change', target, desc }];
         }
         return [];
       }
 
       // Alguns CFGs do RetroArch chamam este botão de menu_toggle.
-      // No RetroVerse ele deve abrir o menu de cheats, não o painel
-      // genérico "RetroArch Menu".
+      // No RetroVerse: toque rápido abre os cheats (execução deferida ao
+      // touchend); SEGURAR abre a mini-barra com as ações de sistema.
       const systemButton = String(desc.button || '').toLowerCase();
       if (['menu_toggle', 'menu', 'retroarch_menu', 'menu_bar_button'].includes(systemButton)) {
-        return [{ type: 'system', action: 'open_cheats', desc }];
+        return [{ type: 'system_menu', action: 'open_cheats', desc }];
       }
 
-      if (['save_state', 'load_state', 'reset', 'toggle_fast_forward', 'rewind', 'close_content'].includes(systemButton)) {
+      if (['save_state', 'load_state', 'reset', 'toggle_fast_forward', 'close_content'].includes(systemButton)) {
         return [{ type: 'system', action: systemButton, desc }];
+      }
+
+      // Ações de SEGURAR (estilo RetroArch hold-to-*): ativas enquanto o dedo
+      // estiver no botão, desativam ao soltar. Antes caíam no fallback de input
+      // (toUpperCase → código inexistente) e os botões eram completamente mortos.
+      if (systemButton === 'hold_fast_forward') {
+        return [{ type: 'system_hold', action: 'fast_forward', desc }];
+      }
+      if (systemButton === 'rewind') {
+        return [{ type: 'system_hold', action: 'rewind', desc }];
       }
 
       // D-Pad Direcional com 8 direções e diagonais
@@ -521,14 +548,105 @@
       try {
         const gm = window.EJS_emulator?.gameManager || window.EJS_emulator;
         if (!gm) return;
-        if (action === 'save_state' && gm.saveState) gm.saveState();
-        else if (action === 'load_state' && gm.loadState) gm.loadState();
+        // Salvar/carregar passa antes pelo sistema de saves do RetroVerse
+        // (play.html): é o MESMO slot mostrado na barra de sistema, com data
+        // e tamanho — o botão do overlay e a barra nunca divergem.
+        // Fallback: quickSave/quickLoad do EJS (gm.saveState não existe na
+        // runtime atual — por isso save_state era no-op silencioso).
+        if (action === 'save_state') {
+          if (typeof window.rvSaveNow === 'function') { window.rvSaveNow(); return; }
+          const fn = gm.quickSave || gm.saveState; if (fn) fn.call(gm);
+        }
+        else if (action === 'load_state') {
+          if (typeof window.rvLoadNow === 'function') { window.rvLoadNow(); return; }
+          const fn = gm.quickLoad || gm.loadState; if (fn) fn.call(gm);
+        }
         else if (action === 'reset' && gm.restart) gm.restart();
-        else if (action === 'toggle_fast_forward' && gm.toggleFastForward) gm.toggleFastForward();
+        else if (action === 'toggle_fast_forward' && gm.toggleFastForward) {
+          // toggle requer 1/0 explícito: sem argumento o cwrap recebia undefined
+          // (→ 0) e o botão nunca ativava o fast-forward. Sincronizamos a flag
+          // isFastForward do emulador para o próximo toque inverter corretamente.
+          const em = window.EJS_emulator;
+          const isOn = em && em.isFastForward;
+          gm.toggleFastForward(isOn ? 0 : 1);
+          if (em) em.isFastForward = !isOn;
+        }
         else if (action === 'close_content') {
           window.location.href = 'index.html';
         }
       } catch(e) {}
+    }
+
+    /**
+     * Ações de SEGURAR: liga ao pressionar, desliga ao soltar/sair do botão.
+     */
+    triggerSystemHoldAction(action, pressed) {
+      try {
+        const gm = window.EJS_emulator?.gameManager;
+        if (!gm) return;
+        if (action === 'fast_forward' && gm.toggleFastForward) gm.toggleFastForward(pressed ? 1 : 0);
+        else if (action === 'rewind' && gm.toggleRewind) gm.toggleRewind(pressed ? 1 : 0);
+      } catch (e) {}
+    }
+
+    /**
+     * Sincroniza as ações de segurar deste toque com os descs atualmente
+     * atingidos: liga o que entrou, desliga o que saiu (move/end inclusos).
+     */
+    syncHoldActions(touchId, items) {
+      const desired = new Set((items || []).filter(it => it && it.type === 'system_hold').map(it => it.action));
+      const current = this.activeHolds.get(touchId) || new Set();
+      current.forEach(a => { if (!desired.has(a)) this.triggerSystemHoldAction(a, false); });
+      desired.forEach(a => { if (!current.has(a)) this.triggerSystemHoldAction(a, true); });
+      if (desired.size) this.activeHolds.set(touchId, desired);
+      else this.activeHolds.delete(touchId);
+    }
+
+    releaseHoldActions(touchId) {
+      const current = this.activeHolds.get(touchId);
+      if (current) current.forEach(a => this.triggerSystemHoldAction(a, false));
+      this.activeHolds.delete(touchId);
+    }
+
+    /**
+     * MENU com detecção de long-press: a ação de cheats só dispara no touchend
+     * (tap rápido). Segurar MENU_LONG_PRESS_MS abre a mini-barra de sistema.
+     */
+    startMenuPress(touchId, hasMenuDesc) {
+      this.cancelMenuPress(touchId);
+      if (!hasMenuDesc) return;
+      const pending = {
+        firedLong: false,
+        timer: setTimeout(() => {
+          pending.firedLong = true;
+          this.vibrate();
+          if (typeof window.openRetroVerseSystemBar === 'function') window.openRetroVerseSystemBar();
+          else if (typeof window.openRetroVerseCheats === 'function') window.openRetroVerseCheats();
+          this.menuPresses.delete(touchId);
+        }, 500)
+      };
+      this.menuPresses.set(touchId, pending);
+    }
+
+    updateMenuPress(touchId, stillOnMenu) {
+      // Dedo saiu do botão antes do long-press: cancela (nem cheats nem barra).
+      if (this.menuPresses.has(touchId) && !stillOnMenu) this.cancelMenuPress(touchId);
+    }
+
+    endMenuPress(touchId) {
+      const pending = this.menuPresses.get(touchId);
+      if (!pending) return;
+      this.menuPresses.delete(touchId);
+      if (!pending.firedLong) {
+        clearTimeout(pending.timer);
+        if (typeof window.openRetroVerseCheats === 'function') window.openRetroVerseCheats();
+      }
+    }
+
+    cancelMenuPress(touchId) {
+      const pending = this.menuPresses.get(touchId);
+      if (pending) clearTimeout(pending.timer);
+      this.menuPresses.delete(touchId);
     }
 
     /**
@@ -680,6 +798,8 @@
             `| zonas batidas: ${hitDescs.length}`, hitDescs.map(d=>d.button));
         }
 
+        const holdItems = [];
+        let menuFound = false;
         for (const desc of hitDescs) {
           const res = this.processDescTouch(desc, nX, nY);
           for (const item of res) {
@@ -688,11 +808,17 @@
             } else if (item.type === 'analog') {
               this.startAnalog(touch.identifier, item.desc, nX, nY);
               this.vibrate();
+            } else if (item.type === 'system_hold') {
+              holdItems.push(item);
+            } else if (item.type === 'system_menu') {
+              menuFound = true;
             } else {
               actions.push(item);
             }
           }
         }
+        this.syncHoldActions(touch.identifier, holdItems);
+        this.startMenuPress(touch.identifier, menuFound);
         if (actions.length) this.vibrate();
         this.activeTouches.set(touch.identifier, actions);
       }
@@ -719,17 +845,25 @@
 
         const hitDescs = this.findHitDescs(nX, nY);
         const actions = [];
+        const holdItems = [];
+        let menuFound = false;
 
         for (const desc of hitDescs) {
           const res = this.processDescTouch(desc, nX, nY);
           for (const item of res) {
             if (item.type === 'analog') {
               this.startAnalog(touch.identifier, item.desc, nX, nY);
+            } else if (item.type === 'system_hold') {
+              holdItems.push(item);
+            } else if (item.type === 'system_menu') {
+              menuFound = true;
             } else if (item.type === 'button') {
               actions.push(item);
             }
           }
         }
+        this.syncHoldActions(touch.identifier, holdItems);
+        this.updateMenuPress(touch.identifier, menuFound);
         this.activeTouches.set(touch.identifier, actions);
       }
       this.updatePressedButtons();
@@ -746,6 +880,8 @@
         }
         // libera analógico deste toque (zera eixos + reseta visual)
         this.releaseAnalog(touch.identifier);
+        this.releaseHoldActions(touch.identifier);
+        this.endMenuPress(touch.identifier);
         const descActs = this.activeTouches.get(touch.identifier) || [];
         for (const act of descActs) {
           if (act.desc && (act.desc.button === 'analog_left' || act.desc.button === 'analog_right')) {
@@ -767,14 +903,20 @@
         return;
       }
       const actions = [];
+      const holdItems = [];
+      let menuFound = false;
       for (const desc of hitDescs) {
         const res = this.processDescTouch(desc, nX, nY);
         for (const item of res) {
           if (item.type === 'system') this.triggerSystemAction(item.action, item.target);
           else if (item.type === 'analog') this.startAnalog('mouse', item.desc, nX, nY);
+          else if (item.type === 'system_hold') holdItems.push(item);
+          else if (item.type === 'system_menu') menuFound = true;
           else actions.push(item);
         }
       }
+      this.syncHoldActions('mouse', holdItems);
+      this.startMenuPress('mouse', menuFound);
       if (actions.length) this.vibrate();
       this.activeTouches.set('mouse', actions);
       this.updatePressedButtons();
@@ -794,13 +936,19 @@
       const { nX, nY } = this.getNormalizedCoords(e.clientX, e.clientY);
       const hitDescs = this.findHitDescs(nX, nY);
       const actions = [];
+      const holdItems = [];
+      let menuFound = false;
       for (const desc of hitDescs) {
         const res = this.processDescTouch(desc, nX, nY);
         for (const item of res) {
           if (item.type === 'analog') this.startAnalog('mouse', item.desc, nX, nY);
+          else if (item.type === 'system_hold') holdItems.push(item);
+          else if (item.type === 'system_menu') menuFound = true;
           else if (item.type === 'button') actions.push(item);
         }
       }
+      this.syncHoldActions('mouse', holdItems);
+      this.updateMenuPress('mouse', menuFound);
       this.activeTouches.set('mouse', actions);
       this.updatePressedButtons();
     }
@@ -812,6 +960,8 @@
         return;
       }
       this.releaseAnalog('mouse');
+      this.releaseHoldActions('mouse');
+      this.endMenuPress('mouse');
       const descActs = this.activeTouches.get('mouse') || [];
       for (const act of descActs) {
         if (act.desc && (act.desc.button === 'analog_left' || act.desc.button === 'analog_right')) {
@@ -829,67 +979,48 @@
     // Tabela de perfis com pastas e arquivos candidatos em ordem de preferência
     // Dá prioridade para DualShock no PSX, Saturn (6 botões + analógico) no Arcade e reconhece variações do PocketArch
     const coreProfiles = {
-      'snes': {
-        folders: ['snes', 'SNES'],
-        files: ['snes.cfg']
-      },
-      'nes': {
-        folders: ['nes', 'NES'],
-        files: ['nes.cfg']
-      },
-      'gba': {
-        folders: ['gba', 'GBA'],
-        files: ['gba.cfg']
-      },
+      'snes': { folders: ['snes', 'SNES'], files: ['snes.cfg'] },
+      'nes': { folders: ['nes', 'NES'], files: ['nes.cfg'] },
+      'gba': { folders: ['gba', 'GBA'], files: ['gba.cfg', 'gba_phone_portrait_red.cfg', 'gba_phone_yellow_animated.cfg'] },
       'gbc': {
-        folders: ['gbc', 'GBC'],
-        files: ['gbc.cfg']
+        folders: ['gbc', 'GBC', 'GAMEGEAR', 'GameGear', 'gamegear', 'GB', 'gb', 'GBA', 'gba', 'Universal', 'universal'],
+        files: ['gbc.cfg', 'gbc_phone_animated_blue.cfg', 'gg.cfg', 'gamegear.cfg', 'GameGear.cfg', 'gbc_phone_portrait.cfg', 'gb.cfg', 'gb_phone_portrait.cfg', 'gba.cfg', 'gba_phone_portrait.cfg', 'Universal.cfg', 'universal.cfg', 'overlay.cfg', 'config.cfg']
       },
       'gb': {
-        folders: ['gb', 'GB'],
-        files: ['gb.cfg']
+        folders: ['gbc', 'GBC', 'gb', 'GB'],
+        files: ['gbc.cfg', 'gb.cfg', 'gb_phone_portrait.cfg', 'overlay.cfg', 'config.cfg']
       },
-      'n64': {
-        folders: ['n64', 'N64'],
-        files: ['n64.cfg']
-      },
+      'n64': { folders: ['n64', 'N64'], files: ['n64.cfg'] },
       'pcsx_rearmed': {
         folders: ['psx', 'PSX', 'PS1', 'ps1'],
-        files: ['psx.cfg']
+        files: ['psx.cfg', 'psx_phone_transparent.cfg']
       },
-      'ps1': {
-        folders: ['psx', 'PSX', 'PS1', 'ps1'],
-        files: ['psx.cfg']
-      },
-      'segaMD': {
-        folders: ['segaMD'],
-        files: ['segaMD.cfg']
-      },
+      'ps1': { folders: ['psx', 'PSX', 'PS1', 'ps1'], files: ['psx.cfg', 'psx_phone_transparent.cfg'] },
+      'segaMD': { folders: ['segaMD'], files: ['segaMD.cfg'] },
       'segaCD': {
-        folders: ['Genesis', 'genesis', 'segacd', 'segaCD', 'SegaCD'],
-        files: ['genesis_phone_portrait.cfg', 'genesis.cfg', 'Genesis.cfg', 'segacd.cfg', 'segaCD.cfg', 'overlay.cfg', 'config.cfg']
+        folders: ['segaCD', 'segacd', 'SegaCD', 'Genesis', 'genesis'],
+        files: ['segacd.cfg', 'segaCD.cfg', 'genesis_phone_portrait.cfg', 'genesis.cfg', 'Genesis.cfg', 'overlay.cfg', 'config.cfg']
       },
       'segaGG': {
-        folders: ['GameGear', 'gamegear', 'GAMEGEAR', 'gg', 'GG', 'segaGG', 'SEGGG', 'GBC', 'gbc', 'GB', 'gb', 'GBA', 'gba', 'Universal', 'universal'],
+        folders: ['GAMEGEAR', 'GameGear', 'gamegear', 'gg', 'GG', 'segaGG', 'SEGGG', 'gbc', 'GBC'],
         files: ['gg.cfg', 'gamegear.cfg', 'GameGear.cfg', 'gbc_phone_portrait.cfg', 'gbc.cfg', 'gb_phone_portrait.cfg', 'gb.cfg', 'gba_phone_portrait.cfg', 'gba.cfg', 'Universal.cfg', 'universal.cfg', 'overlay.cfg', 'config.cfg']
       },
       'nds': {
-        folders: ['DS', 'ds', 'nds', 'NDS'],
-        files: ['nds_phone_portrait.cfg', 'ds_phone_portrait.cfg', 'nds.cfg', 'NDS.cfg', 'DS.cfg', 'ds.cfg', 'overlay.cfg', 'config.cfg']
+        folders: ['nds', 'NDS', 'ds', 'DS'],
+        files: ['nds.cfg', 'nds_phone_white.cfg', 'nds_phone_white_animated.cfg', 'nds_phone_portrait.cfg', 'ds_phone_portrait.cfg', 'NDS.cfg', 'DS.cfg', 'ds.cfg', 'overlay.cfg', 'config.cfg']
       },
-      // Saturn (6 botões + analógico) como prioridade 1 para Arcade / Fliperama!
+      // Arcade: o arcade.cfg real vem primeiro (é o comportamento ao vivo hoje);
+      // Saturn (6 botões) permanece como fallback — a pasta é "SATURN", em
+      // maiúsculas, e por isso nunca era encontrada pelas variantes em minúsculas.
       'fbneo': {
-        folders: ['arcade', 'Arcade', 'Saturn', 'saturn', 'Universal', 'universal'],
-        files: ['saturn.cfg', 'Saturn.cfg', 'saturn_phone_portrait.cfg', 'arcade.cfg', 'Universal.cfg', 'universal.cfg', 'overlay.cfg', 'config.cfg']
+        folders: ['arcade', 'Arcade', 'SATURN', 'Saturn', 'saturn', 'Universal', 'universal'],
+        files: ['arcade.cfg', 'saturn.cfg', 'Saturn.cfg', 'saturn_phone_portrait.cfg', 'Universal.cfg', 'universal.cfg', 'overlay.cfg', 'config.cfg']
       },
       'arcade': {
-        folders: ['arcade', 'Arcade', 'Saturn', 'saturn', 'Universal', 'universal'],
-        files: ['saturn.cfg', 'Saturn.cfg', 'saturn_phone_portrait.cfg', 'arcade.cfg', 'Universal.cfg', 'universal.cfg', 'overlay.cfg', 'config.cfg']
-      },
-      'psp': {
-        folders: ['psp', 'PSP'],
-        files: ['psp_phone_portrait.cfg', 'psp.cfg', 'PSP.cfg', 'overlay.cfg', 'config.cfg']
+        folders: ['arcade', 'Arcade', 'SATURN', 'Saturn', 'saturn', 'Universal', 'universal'],
+        files: ['arcade.cfg', 'saturn.cfg', 'Saturn.cfg', 'saturn_phone_portrait.cfg', 'Universal.cfg', 'universal.cfg', 'overlay.cfg', 'config.cfg']
       }
+      // Perfil 'psp' removido: o projeto não tem catálogo, ROMs nem núcleo PSP.
     };
 
     const profile = coreProfiles[core];
