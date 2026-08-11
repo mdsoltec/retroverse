@@ -1542,7 +1542,7 @@ body {
   white-space: nowrap;
 }
 @media (max-width: 600px) {
-  .home-user-name { max-width: 130px; font-size: 0.6rem; letter-spacing: 1px; }
+  .home-user-name { max-width: 100px; font-size: 0.58rem; letter-spacing: 1px; }
 }
 
 .profile-link {

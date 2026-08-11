@@ -189,8 +189,9 @@
           `| portrait: ${this.isPortrait}`);
       }
 
-      // Listeners Touch globais no container
-      this._touchStart = (e) => this.onTouchStart(e);
+      // Listeners Touch globais no container. A primeira ocorrência de um
+      // TouchEvent nativo marca que o canal touch do aparelho está OK.
+      this._touchStart = (e) => { this._nativeTouchOk = true; this.onTouchStart(e); };
       this._touchMove = (e) => this.onTouchMove(e);
       this._touchEnd = (e) => this.onTouchEnd(e);
       this._mouseDown = (e) => this.onMouseDown(e);
@@ -210,6 +211,24 @@
       window.addEventListener('mousemove', this._mouseMove);
       window.addEventListener('mouseup', this._mouseUp);
       window.addEventListener('resize', this._resize);
+
+      // ── Canal POINTER EVENTS (plano B) ──
+      // Só entra em ação em shells que NÃO têm a API TouchEvent (alguns
+      // WebViews/shells de PWA com input via pointer apenas). Em celulares e
+      // navegadores com touch normal, nada muda: o canal touch continua.
+      if (!('ontouchstart' in window) && typeof window.PointerEvent !== 'undefined') {
+        const adapt = (handler) => (e) => {
+          const t = { identifier: 'ptr' + (e.pointerId || 1), clientX: e.clientX, clientY: e.clientY, target: e.target };
+          handler.call(this, { changedTouches: [t], touches: [t], preventDefault: () => { try { e.preventDefault(); } catch (_) { } } });
+        };
+        this._ptrDown = adapt(this.onTouchStart);
+        this._ptrMove = adapt(this.onTouchMove);
+        this._ptrUp = adapt(this.onTouchEnd);
+        this.wrapEl.addEventListener('pointerdown', this._ptrDown);
+        this.wrapEl.addEventListener('pointermove', this._ptrMove);
+        this.wrapEl.addEventListener('pointerup', this._ptrUp);
+        this.wrapEl.addEventListener('pointercancel', this._ptrUp);
+      }
     }
 
     /** Remove todos os listeners para poder re-inicializar sem acumular */
@@ -223,6 +242,13 @@
         window.removeEventListener('mousemove', this._mouseMove);
         window.removeEventListener('mouseup', this._mouseUp);
         window.removeEventListener('resize', this._resize);
+        if (this._ptrDown) {
+          this.wrapEl.removeEventListener('pointerdown', this._ptrDown);
+          this.wrapEl.removeEventListener('pointermove', this._ptrMove);
+          this.wrapEl.removeEventListener('pointerup', this._ptrUp);
+          this.wrapEl.removeEventListener('pointercancel', this._ptrUp);
+          this._ptrDown = null;
+        }
         this._touchStart = null;
       }
     }
@@ -256,6 +282,7 @@
         zIndex: '5000',
         pointerEvents: 'auto',
         display: 'block',
+        touchAction: 'none', // garante o canal pointer em shells sem TouchEvent
       });
 
       // 1) Imagem base de fundo (ex: snes_phone_portrait_purple.png ou n64_phone_portrait_green.png)
@@ -661,6 +688,8 @@
       if (this.debug) console.log(`[RA] simulateInput ${inputCode} -> code=${code} pressed=${pressed ? 1 : 0} | EJS pronto: ${!!(window.EJS_emulator?.gameManager)}`);
       if (code === undefined) return;
       const val = pressed ? 1 : 0;
+      // HUD de diagnóstico (?paddebug=1): play.html exibe cada input na tela.
+      if (typeof window.__rvPadHUD === 'function') { try { window.__rvPadHUD(inputCode, pressed); } catch (hudErr) { } }
       try {
         if (window.EJS_emulator && window.EJS_emulator.gameManager) {
           window.EJS_emulator.gameManager.simulateInput(0, code, val);
@@ -699,7 +728,9 @@
     /** Envia valor cru (não 0/1) para o emulador — usado p/ analógico contínuo */
     sendRawInput(code, val) {
       try {
-        if (window.EJS_emulator?.gameManager) window.EJS_emulator.gameManager.simulateInput(0, code, val);
+        // Os analógicos são contínuos: também notificam o HUD de diagnóstico.
+      if (typeof window.__rvPadHUD === 'function') { try { window.__rvPadHUD(code, val !== 0); } catch (hudErr) { } }
+      if (window.EJS_emulator?.gameManager) window.EJS_emulator.gameManager.simulateInput(0, code, val);
         else if (window.EJS_emulator && typeof window.EJS_emulator.simulateInput === 'function')
           window.EJS_emulator.simulateInput(0, code, val);
       } catch (e) {}
@@ -889,6 +920,21 @@
           }
         }
         this.activeTouches.delete(touch.identifier);
+      }
+      // Trava de segurança: se NENHUM dedo resta na tela mas algum estado
+      // ficou preso (touchend perdido por gesto do sistema, PiP, chamada,
+      // identifier divergente em shells incomuns), varre TUDO e solta
+      // todos os botões — senão um único evento perdido deixaria um botão
+      // "grudado" para sempre (mata o controle até recarregar a página).
+      if (e.touches && e.touches.length === 0) {
+        if (this.activeTouches.size || this.analogBase.size || this.activeHolds.size || this.activeStylus.size || this.menuPresses.size) {
+          this.activeTouches.clear();
+          for (const id of [...this.analogBase.keys()]) this.releaseAnalog(id);
+          for (const id of [...this.activeHolds.keys()]) this.releaseHoldActions(id);
+          this.activeStylus.clear();
+          this.menuPresses.forEach(p => { try { clearTimeout(p.timer); } catch (_) { } });
+          this.menuPresses.clear();
+        }
       }
       this.updatePressedButtons();
     }

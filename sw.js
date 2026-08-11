@@ -1,4 +1,4 @@
-const CACHE_NAME = 'retroverse-v7';
+const CACHE_NAME = 'retroverse-v8';
 const STATIC_ASSETS = [
   'index.html',
   'games.html',

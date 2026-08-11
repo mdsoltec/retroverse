@@ -54,6 +54,83 @@
       letter-spacing: 2px;
     }
 
+    /* Editor do nome do jogador */
+    .profile-edit-card {
+      max-width: 440px;
+      margin: -18px auto 36px;
+      background: rgba(8,14,10,0.6);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 18px 20px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .profile-edit-label {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--green-neon);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .profile-edit-row { display: flex; gap: 10px; }
+    #player-name-input {
+      flex: 1;
+      min-width: 0;
+      background: rgba(3,8,5,0.9);
+      border: 1px solid rgba(0,255,65,0.25);
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    #player-name-input:focus {
+      border-color: var(--green-neon);
+      box-shadow: 0 0 14px var(--green-glow);
+    }
+    #player-name-save {
+      background: rgba(0,255,65,0.1);
+      border: 1px solid rgba(0,255,65,0.45);
+      border-radius: 10px;
+      color: var(--green-neon);
+      font-family: var(--font-display);
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 0 18px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    #player-name-save:hover { background: rgba(0,255,65,0.2); box-shadow: 0 0 12px var(--green-glow); }
+    #player-name-save.saved { background: rgba(0,255,65,0.28); color: #fff; }
+    .profile-edit-hint {
+      margin-top: 9px;
+      text-align: center;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+    .profile-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+      font-size: 0.72rem;
+      color: var(--text);
+      letter-spacing: 0.5px;
+      cursor: pointer;
+    }
+    .profile-toggle-row input { accent-color: #00ff41; width: 16px; height: 16px; cursor: pointer; }
+
     /* Stats Grid */
     .stats-grid {
       display: grid;
@@ -273,6 +350,16 @@
       <div class="profile-subtitle" id="profile-joined">Membro do RetroVerse</div>
     </div>
 
+    <!-- Nome do jogador -->
+    <div class="profile-edit-card">
+      <label class="profile-edit-label" for="player-name-input">Nome do jogador</label>
+      <div class="profile-edit-row">
+        <input type="text" id="player-name-input" maxlength="20" placeholder="Digite seu nome..." autocomplete="off" spellcheck="false">
+        <button type="button" id="player-name-save">Salvar</button>
+      </div>
+      <div class="profile-edit-hint">Aparece na tela inicial, ao lado do ícone de perfil.</div>
+    </div>
+
     <!-- Stats -->
     <div class="stats-grid" id="stats-grid"></div>
 
@@ -321,6 +408,47 @@ function getLS(key, fallback) {
   try { const v = JSON.parse(localStorage.getItem(key)); return v !== null ? v : fallback; }
   catch { return fallback; }
 }
+
+/* ═══ NOME DO JOGADOR ═══
+   Salvo em localStorage (rv_player_name) como texto simples; a home
+   (index.html) lê a mesma chave e mostra o nome ao lado do ícone. */
+const nameInput = document.getElementById('player-name-input');
+const nameSave = document.getElementById('player-name-save');
+const profileNameEl = document.querySelector('.profile-name');
+const avatarEl = document.querySelector('.profile-avatar');
+
+function renderPlayerName() {
+  const n = (localStorage.getItem('rv_player_name') || '').trim();
+  profileNameEl.textContent = n ? n.toUpperCase() : 'JOGADOR';
+  // Iniciais no avatar (estilo do "RV": até 2 letras)
+  let initials = 'RV';
+  if (n) {
+    const parts = n.split(/\s+/).filter(Boolean);
+    initials = ((parts[0][0] || '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+  }
+  avatarEl.textContent = initials;
+  if (document.activeElement !== nameInput) nameInput.value = n;
+}
+
+function savePlayerName() {
+  const n = nameInput.value.trim().slice(0, 20);
+  if (n) localStorage.setItem('rv_player_name', n);
+  else localStorage.removeItem('rv_player_name');
+  nameInput.value = n;
+  renderPlayerName();
+  nameSave.textContent = 'Salvo';
+  nameSave.classList.add('saved');
+  setTimeout(() => { nameSave.textContent = 'Salvar'; nameSave.classList.remove('saved'); }, 1400);
+  window.dispatchEvent(new Event('rv-player-name-changed'));
+}
+nameSave.addEventListener('click', savePlayerName);
+nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') savePlayerName(); });
+renderPlayerName();
+
+/* Limpeza: a opção de HUD de toque saiu do perfil; remove a preferência
+   antiga de quem chegou a ativá-la (o HUD continua acessível via
+   ?paddebug=1 na URL do jogo, para diagnóstico manual). */
+try { localStorage.removeItem('rv_paddebug'); } catch (e) { }
 
 // Stats
 const playedGames = getLS('rv_played_games', []);
@@ -379,7 +507,7 @@ ALL_ACHIEVEMENTS.forEach(a => {
 
 function resetProfile() {
   if (confirm('Tem certeza? Todos os dados de conquistas, recentes e favoritos serão apagados.')) {
-    ['rv_recent', 'rv_favorites', 'rv_achievements', 'rv_played_games', 'rv_sessions', 'rv_consoles_played', 'rv_screenshots'].forEach(k => localStorage.removeItem(k));
+    ['rv_recent', 'rv_favorites', 'rv_achievements', 'rv_played_games', 'rv_sessions', 'rv_consoles_played', 'rv_screenshots', 'rv_player_name'].forEach(k => localStorage.removeItem(k));
     location.reload();
   }
 }
@@ -390,5 +518,5 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a29952800b58c134',t:'MTc4NjQ3MzEzOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

@@ -7,6 +7,20 @@
   <link rel="apple-touch-icon" href="assets/rv-icon.png">
   <link rel="manifest" href="manifest.json">
   <title>RetroVerse - Jogando...</title>
+  <!-- Defesa: o EmulatorJS consulta MediaRecorder.isTypeSupported SEM checar
+       se a API existe. Em navegadores sem MediaRecorder (WebKit/Safari antigo,
+       alguns WebViews e shells de PWA) a referência crua lançava ReferenceError
+       e QUEBRAVA o boot: tela preta, controles aparentemente vivos, jogo morto
+       ("toques recebidos, jogo não responde"). O stub só desativa a gravação. -->
+  <script>
+    if (typeof window.MediaRecorder === 'undefined') {
+      window.MediaRecorder = function () { };
+      window.MediaRecorder.isTypeSupported = function () { return false; };
+    }
+    window.addEventListener('error', function (e) {
+      window.__rvLastError = String((e.error && e.error.message) || e.message || '');
+    });
+  </script>
   <script src="js/audio.js"></script>
   <script src="js/overlay-parser.js"></script>
   <style>
@@ -1438,6 +1452,7 @@ let __rvGameReadyFired = false;
 function onGameReady() {
   if (__rvGameReadyFired) return;
   __rvGameReadyFired = true;
+  clearTimeout(window.__rvBootWatchdog); // boot OK: desarma o watchdog
   const ld = document.getElementById('rv-loading');
   if (ld) ld.classList.add('hidden');
   document.getElementById('rv-fs-btn').classList.add('visible');
@@ -1567,6 +1582,23 @@ async function startRetroVerseEmulator() {
   const script = document.createElement('script');
   script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
   document.body.appendChild(script);
+
+  /* Watchdog de boot: se o núcleo não levantar em 30s, mostra o erro na
+     tela em vez de deixar tela preta + controles "vivos" sem jogo. */
+  window.__rvBootWatchdog = setTimeout(() => {
+    try {
+      if (window.EJS_emulator && window.EJS_emulator.started) return;
+      const msg = document.getElementById('rv-msg');
+      if (msg) {
+        const detalhe = window.__rvLastError ? ' [' + String(window.__rvLastError).slice(0, 90) + ']' : '';
+        msg.textContent = 'O núcleo não iniciou neste navegador.' + detalhe + ' Recarregue; se persistir, atualize o navegador.';
+        msg.style.color = '#ff7777';
+        msg.style.whiteSpace = 'normal';
+        msg.style.maxWidth = '320px';
+      }
+      console.warn('[RetroVerse] watchdog: emulador não iniciou em 30s.', window.__rvLastError || '');
+    } catch (e) { }
+  }, 30000);
 }
 
 if (isArcade) {
@@ -2204,6 +2236,38 @@ function syncFsBtnVisibility(){
 document.getElementById('rv-fs-btn').addEventListener('click',requestFS);
 document.getElementById('rv-fs-btn').addEventListener('touchend',e=>{e.preventDefault();requestFS();},{passive:false});
 
+/* ═══ HUD DE DIAGNÓSTICO DE TOQUES (?paddebug=1) ═══
+   Mostra no canto da tela, em tempo real, cada input que o controle
+   entrega ao núcleo. Serve para diagnosticar no CELULAR o que chega
+   quando um botão é pressionado. Não interfere no jogo. */
+(function initPadDebugHUD() {
+  const viaUrl = /[?&]paddebug=1/.test(location.search);
+  let viaPrefs = false;
+  try { viaPrefs = localStorage.getItem('rv_paddebug') === '1'; } catch (e) { }
+  if (!viaUrl && !viaPrefs) return;
+  const hud = document.createElement('div');
+  hud.id = 'rv-pad-hud';
+  hud.style.cssText = [
+    'position:fixed', 'top:calc(64px + env(safe-area-inset-top,0px))', 'left:8px',
+    'z-index:9999', 'background:rgba(0,0,0,.82)', 'border:1px solid #00ff41',
+    'border-radius:8px', 'color:#00ff41', "font:11px/1.6 'Courier New',monospace",
+    'padding:7px 10px', 'max-width:64vw', 'pointer-events:none', 'white-space:pre-wrap',
+    'text-shadow:0 0 6px rgba(0,255,65,.6)'
+  ].join(';');
+  hud.textContent = 'HUD-TOQUE: aguardando...';
+  document.body.appendChild(hud);
+  const linhas = [];
+  window.__rvPadHUD = function (input, pressed) {
+    linhas.push(input + (pressed ? ' ON' : ' off'));
+    if (linhas.length > 8) linhas.shift();
+    hud.textContent = 'HUD-TOQUE: ' + linhas.join(' | ');
+  };
+  window.addEventListener('touchstart', function once() {
+    hud.textContent = 'HUD-TOQUE: touch ok, aguardando input...';
+    window.removeEventListener('touchstart', once);
+  });
+})();
+
 /* Resize/orientation */
 window.addEventListener('orientationchange',()=>{setTimeout(()=>{if(isTouch)initControls();},350);});
 window.addEventListener('resize',()=>{
@@ -2213,5 +2277,5 @@ window.addEventListener('resize',()=>{
   }
 });
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a29953585be6c134',t:'MTc4NjQ3MzE3Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

@@ -2,7 +2,9 @@
   "name": "RetroVerse - Enter The Classics",
   "short_name": "RetroVerse",
   "description": "Plataforma de emulação de jogos retro no navegador. 11 consoles, 100+ jogos.",
-  "start_url": "/retroverse/index.html",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#020503",
   "theme_color": "#020503",
@@ -10,13 +12,9 @@
   "icons": [
     {
       "src": "assets/rv-icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "assets/rv-icon.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "sizes": "792x796",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "categories": ["games", "entertainment"]
