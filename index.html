@@ -37,6 +37,7 @@
         </svg>
       </a>
     </div>
+    
   </header>
 
   <!-- BARRA DE BUSCA GLOBAL (fixa abaixo da navbar) -->
@@ -230,14 +231,14 @@
           </div>
         </a>
 
-        <!-- PLAYSTATION 1 -->
+        <!-- PLAYSTATION -->
         <a href="games.html?console=psx" class="card console-card psx">
           <div class="card-glow-top"></div>
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/PSX-Console-wController.png/330px-PSX-Console-wController.png"
-            alt="PlayStation 1" class="console-img">
+            alt="PlayStation" class="console-img">
           <div class="console-info">
-            <h2>PlayStation 1</h2>
+            <h2>PlayStation</h2>
             <p>PS1</p>
           </div>
         </a>
@@ -658,11 +659,7 @@
     renderFavorites();
     renderGamepass();
 
-    /* Register Service Worker (PWA) — sw.js na raiz, escopo cobre todo o app.
-       Obs.: SW só existe em contexto seguro (https ou localhost). Via Live
-       Server por IP de rede local (ex.: http://192.168.x.x:5500) NÃO existe —
-       por isso o chip do jogador FICA FORA deste if, senão o nome nunca
-       aparecia no celular em teste local. */
+
     if ('serviceWorker' in navigator) {
       // try/catch: alguns WebViews expõem a chave serviceWorker com valor
       // undefined — chamar .register ali quebraria o script inteiro da página.
@@ -756,22 +753,8 @@
     }
   </script>
 
-  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.babel.js"></script>
-  <script>
-    // Cards de console — efeito 3D/parallax. Se o CDN do VanillaTilt estiver
-    // fora (offline/SW), a home segue funcional, só sem o efeito.
-    if (window.VanillaTilt) {
-      VanillaTilt.init(document.querySelectorAll(".console-card"), {
-        max: 15,
-        speed: 500,
-        glare: true,
-        "max-glare": 0.1,
-        perspective: 900
-      });
-    }
-  </script>
 
-  </body>
+</body>
 
 </html>

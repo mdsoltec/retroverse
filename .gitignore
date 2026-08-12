@@ -1,4 +1,5 @@
 roms/
+common-overlays/
 .DS_Store
 Thumbs.db
 push_git.bat
