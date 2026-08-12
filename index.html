@@ -60,12 +60,12 @@
       <div class="hero-line"></div>
       <div class="hero-stats">
         <div class="hero-stat">
-          <span class="hero-stat-num">11</span>
+          <span class="hero-stat-num" id="hero-consoles">—</span>
           <span class="hero-stat-label">Consoles</span>
         </div>
         <div class="hero-stat-divider"></div>
         <div class="hero-stat">
-          <span class="hero-stat-num">100+</span>
+          <span class="hero-stat-num" id="hero-games">—</span>
           <span class="hero-stat-label">Jogos</span>
         </div>
         <div class="hero-stat-divider"></div>
@@ -654,10 +654,33 @@
       }
     });
 
+    /* Conta só o que está visível na home.
+       Card HTML comentado (NES-OCULTO) não entra no DOM.
+       Jogos vêm do CATALOG — se o nes continuar comentado lá, não soma. */
+    function renderHeroStats() {
+      const cards = [...document.querySelectorAll('a.console-card[href*="console="]')];
+      const keys = cards.map((a) => {
+        try { return new URL(a.getAttribute('href'), location.href).searchParams.get('console'); }
+        catch (e) { return null; }
+      }).filter(Boolean);
+
+      const unique = [...new Set(keys)];
+      const gameCount = unique.reduce((n, key) => {
+        const cat = CATALOG[key];
+        return n + (cat && Array.isArray(cat.games) ? cat.games.length : 0);
+      }, 0);
+
+      const elC = document.getElementById('hero-consoles');
+      const elG = document.getElementById('hero-games');
+      if (elC) elC.textContent = String(unique.length);
+      if (elG) elG.textContent = String(gameCount);
+    }
+
     /* Init */
     renderRecent();
     renderFavorites();
     renderGamepass();
+    renderHeroStats();
 
 
     if ('serviceWorker' in navigator) {
@@ -755,6 +778,6 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.babel.js"></script>
 
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a29bde5d6a11a623',t:'MTc4NjQ5OTgzOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 
 </html>
