@@ -65,7 +65,9 @@
       'psx': { title: 'PlayStation 1', core: 'pcsx_rearmed' },
       'nds': { title: 'Nintendo DS', core: 'nds' },
       'segacd': { title: 'Sega CD', core: 'segaCD' },
-      'gamegear': { title: 'Game Gear', core: 'segaGG' }
+      'gamegear': { title: 'Game Gear', core: 'segaGG' },
+      'mastersystem': { title: 'Master System', core: 'segaMS' },
+      'atari2600': { title: 'Atari 2600', core: 'atari2600' }
     };
 
     // Consoles sem catálogo (ou parâmetro inválido) caem no padrão —
@@ -100,6 +102,8 @@
       'sega': 'Sega - Mega Drive - Genesis',
       'segacd': 'Sega - Mega-CD - Sega CD',
       'gamegear': 'Sega - Game Gear',
+      'mastersystem': 'Sega - Master System - Mark III',
+      'atari2600': 'Atari - 2600',
       'psx': 'Sony - PlayStation',
       'arcade': 'FBNeo - Arcade Games'
     };
@@ -272,6 +276,50 @@
         { name: 'Wonder Boy', subtitle: "The Dragon's Trap", file: "Wonder Boy - The Dragon's Trap (USA, Europe).gg", remote: "Wonder Boy - The Dragon's Trap (Europe)" },
         { name: 'Land of Illusion', subtitle: 'Starring Mickey Mouse', file: 'Land of Illusion Starring Mickey Mouse (World).gg', remote: 'Land of Illusion Starring Mickey Mouse (USA, Europe, Brazil) (En)' }
       ],
+      'mastersystem': [
+        { name: 'Alex Kidd in Miracle World', file: 'Alex Kidd in Miracle World (USA, Europe, Brazil) (Rev 1).sms' },
+        { name: 'Alex Kidd in Shinobi World', file: 'Alex Kidd in Shinobi World (USA, Europe, Brazil).sms' },
+        { name: 'Sonic the Hedgehog', file: 'Sonic The Hedgehog (USA, Europe, Brazil) (Rev 1).sms' },
+        { name: 'Sonic the Hedgehog 2', file: 'Sonic The Hedgehog 2 (USA, Europe, Brazil).sms' },
+        { name: 'Wonder Boy III', subtitle: "The Dragon's Trap", file: "Wonder Boy III - The Dragon's Trap (USA, Europe, Brazil).sms" },
+        { name: 'Wonder Boy', subtitle: 'In Monster Land', file: 'Wonder Boy in Monster Land (USA, Europe, Brazil).sms' },
+        { name: 'Phantasy Star', file: 'Phantasy Star (USA, Europe, Brazil).sms' },
+        { name: 'Golden Axe', file: 'Golden Axe (USA, Europe, Brazil).sms' },
+        { name: 'Out Run', file: 'Out Run (USA, Europe, Brazil).sms' },
+        { name: 'After Burner', file: 'After Burner (USA, Europe, Brazil).sms' },
+        { name: 'Double Dragon', file: 'Double Dragon (USA, Europe, Brazil).sms' },
+        { name: 'California Games', file: 'California Games (USA, Europe, Brazil).sms' },
+        { name: 'Castle of Illusion', subtitle: 'Starring Mickey Mouse', file: 'Mickey Mouse - Castle of Illusion (USA, Europe, Brazil).sms' },
+        { name: 'Psycho Fox', file: 'Psycho Fox (USA, Europe, Brazil).sms' },
+        { name: 'Fantasy Zone', file: 'Fantasy Zone (World).sms' },
+        { name: 'Kung Fu Kid', file: 'Kung Fu Kid (USA, Europe, Brazil).sms' },
+        { name: 'R-Type', file: 'R-Type (USA, Europe, Brazil).sms' },
+        { name: 'Space Harrier', file: 'Space Harrier (USA, Europe, Brazil).sms' },
+        { name: 'Shinobi', file: 'Shinobi (USA, Europe, Brazil).sms' },
+        { name: 'Mortal Kombat', file: 'Mortal Kombat (USA, Europe, Brazil).sms' }
+      ],
+      'atari2600': [
+        { name: 'Pac-Man', file: 'Pac-Man (USA).a26' },
+        { name: 'Pitfall!', file: 'Pitfall! (USA).a26' },
+        { name: 'River Raid', file: 'River Raid (USA).a26' },
+        { name: 'Enduro', file: 'Enduro (USA).a26' },
+        { name: 'Space Invaders', file: 'Space Invaders (USA).a26' },
+        { name: 'Adventure', file: 'Adventure (USA).a26' },
+        { name: "Yars' Revenge", file: "Yars' Revenge (USA).a26" },
+        { name: 'Missile Command', file: 'Missile Command (USA).a26' },
+        { name: 'Combat', file: 'Combat (USA).a26' },
+        { name: 'Breakout', file: 'Breakout (USA).a26' },
+        { name: 'Frogger', file: 'Frogger (USA).a26' },
+        { name: 'Donkey Kong', file: 'Donkey Kong (USA).a26' },
+        { name: 'Joust', file: 'Joust (USA).a26' },
+        { name: 'Defender', file: 'Defender (USA).a26' },
+        { name: 'Berzerk', file: 'Berzerk (USA).a26' },
+        { name: 'Keystone Kapers', file: 'Keystone Kapers (USA).a26' },
+        { name: 'Kaboom!', file: 'Kaboom! (USA).a26' },
+        { name: 'Galaxian', file: 'Galaxian (USA).a26' },
+        { name: 'Phoenix', file: 'Phoenix (USA).a26' },
+        { name: 'E.T. The Extra Terrestrial', file: 'E.T. The Extra Terrestrial (USA).a26' }
+      ],
     };
 
     const container = document.getElementById('games-list');
@@ -292,7 +340,7 @@
       if (idx >= 0) {
         favs.splice(idx, 1);
       } else {
-        const consoleShorts = { snes: 'SNES', nes: 'NES', gba: 'GBA', gbc: 'GBC', n64: 'N64', psx: 'PS1', sega: 'SEGA', segacd: 'MEGA CD', gamegear: 'GG', nds: 'NDS', arcade: 'ARCADE' };
+        const consoleShorts = { snes: 'SNES', nes: 'NES', gba: 'GBA', gbc: 'GBC', n64: 'N64', psx: 'PS1', sega: 'SEGA', segacd: 'MEGA CD', gamegear: 'GG', mastersystem: 'SMS', atari2600: 'ATARI', nds: 'NDS', arcade: 'ARCADE' };
         favs.unshift({
           name: game.name,
           subtitle: game.subtitle || '',
@@ -447,6 +495,8 @@
     }
   </script>
 
-</body>
+  <script src="js/fichas.js"></script>
+  <script src="js/card-info.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2aa298268cbf8e9',t:'MTc4NjY0OTcxOA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 
 </html>

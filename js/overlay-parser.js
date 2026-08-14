@@ -1042,6 +1042,14 @@
         files: ['psx.cfg', 'psx_phone_transparent.cfg']
       },
       'ps1': { folders: ['psx', 'PSX', 'PS1', 'ps1'], files: ['psx.cfg', 'psx_phone_transparent.cfg'] },
+      'segaMS': {
+        folders: ['mastersystem', 'segaMS', 'SegaMS', 'SMS', 'sms'],
+        files: ['mastersystem.cfg', 'segaMS.cfg', 'sms.cfg', 'SMS.cfg', 'overlay.cfg', 'config.cfg']
+      },
+      'atari2600': {
+        folders: ['atari2600', 'Atari2600', 'ATARI2600'],
+        files: ['atari2600.cfg', 'overlay.cfg', 'config.cfg']
+      },
       'segaMD': { folders: ['segaMD'], files: ['segaMD.cfg'] },
       'segaCD': {
         folders: ['segaCD', 'segacd', 'SegaCD', 'Genesis', 'genesis'],

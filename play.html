@@ -6,6 +6,9 @@
   <link rel="icon" type="image/png" href="assets/rv-icon.png">
   <link rel="apple-touch-icon" href="assets/rv-icon.png">
   <link rel="manifest" href="manifest.json">
+  <!-- Boot rápido: abre a conexão com o CDN dos núcleos antes de o jogo pedir -->
+  <link rel="preconnect" href="https://cdn.emulatorjs.org" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.emulatorjs.org">
   <title>RetroVerse - Jogando...</title>
   <!-- Defesa: o EmulatorJS consulta MediaRecorder.isTypeSupported SEM checar
        se a API existe. Em navegadores sem MediaRecorder (WebKit/Safari antigo,
@@ -688,6 +691,27 @@ const OVERLAYS = {
       STICK_R:  { type:'analog', x:70, y:82, w:22, h:10 },
     }
   },
+  segaMS: {
+    base: 'overlays/mastersystem/mastersystem_phone_portrait_grey.png',
+    animated: null,
+    aspect: 2.056,
+    zones: {
+      dpad:   { type:'dpad', x:23.6, y:70.3, w:30, h:13.5 },
+      A:      { type:'btn', input:EJS_INPUT.A, x:79.2, y:68.0, w:20, h:9 },
+      B:      { type:'btn', input:EJS_INPUT.B, x:64.8, y:68.0, w:20, h:9 },
+      START:  { type:'btn', input:EJS_INPUT.START, x:37.0, y:86.9, w:17, h:4.5 },
+      SELECT: { type:'btn', input:EJS_INPUT.SELECT, x:51.9, y:86.9, w:17, h:4.5 },
+    }
+  },
+  atari2600: {
+    base: 'overlays/atari2600/atari2600_phone_portrait_brown.png',
+    animated: null,
+    aspect: 2.056,
+    zones: {
+      dpad:   { type:'dpad', x:27.8, y:70.3, w:40, h:18 },
+      A:      { type:'btn', input:EJS_INPUT.A, x:74.1, y:70.3, w:26, h:11.7 },
+    }
+  },
   segaMD: {
     // Antes: 'overlays/sega/saturn_portrait_black.png' (pasta inexistente) —
     // fallback aparecia transparente se o parser de .cfg falhasse.
@@ -941,7 +965,14 @@ if (isNDSCore) {
   };
 }
 
-EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+/* ═══ VERSÃO FIXADA DO EMULATORJS ═══
+   'stable' é um alias móvel: quando o projeto sobe de versão, os patches
+   de runtime do RetroVerse (cheats, BIOS trap, stylus NDS, MediaRecorder
+   stub) podem quebrar SEM aviso. Fixamos a tag exata que hoje serve o
+   stable (v4.2.3 — bytes idênticos, verificado por hash do CDN).
+   Para atualizar: troque o número AQUI e no sw.js (warmup). */
+const RV_EJS_CDN = 'https://cdn.emulatorjs.org/4.2.3/data/';
+EJS_pathtodata = RV_EJS_CDN;
 
 /* ═══ STYLUS / TOUCH DO NINTENDO DS ═══ */
 // Frações do canvas onde fica a tela touch (metade inferior do vídeo empilhado).
@@ -1580,7 +1611,7 @@ async function startRetroVerseEmulator() {
   }
 
   const script = document.createElement('script');
-  script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+  script.src = RV_EJS_CDN + 'loader.js';
   document.body.appendChild(script);
 
   /* Watchdog de boot: se o núcleo não levantar em 30s, mostra o erro na

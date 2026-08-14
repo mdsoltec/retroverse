@@ -55,6 +55,14 @@
   --segacd-glow: rgba(26, 26, 255, 0.5);
   --gamegear-color: #CC0000;
   --gamegear-glow: rgba(204, 0, 0, 0.5);
+  --mastersystem-color: #d32f2f;
+  --mastersystem-glow: rgba(211, 47, 47, 0.5);
+  --atari2600-color: #b5651d;
+  --atari2600-glow: rgba(181, 101, 29, 0.5);
+  --cs16-color: #ffb400;
+  --cs16-glow: rgba(255, 180, 0, 0.5);
+  --retrotv-color: #00bfff;
+  --retrotv-glow: rgba(0, 191, 255, 0.5);
 }
 
 * {
@@ -1053,6 +1061,26 @@ body {
 .console-card.gamegear {
   --console-color: var(--gamegear-color);
   --console-glow: var(--gamegear-glow);
+}
+
+.console-card.mastersystem {
+  --console-color: var(--mastersystem-color);
+  --console-glow: var(--mastersystem-glow);
+}
+
+.console-card.atari2600 {
+  --console-color: var(--atari2600-color);
+  --console-glow: var(--atari2600-glow);
+}
+
+.console-card.cs16 {
+  --console-color: var(--cs16-color);
+  --console-glow: var(--cs16-glow);
+}
+
+.console-card.retrotv {
+  --console-color: var(--retrotv-color);
+  --console-glow: var(--retrotv-glow);
 }
 
 /* ==========================================

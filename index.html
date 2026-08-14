@@ -126,11 +126,19 @@
       </div>
       <main class="grid-container">
 
-        <!-- NES-OCULTO: card escondido da home. O console continua
-             configurado no projeto (games.html?console=nes funciona);
-             para reativar na home basta descomentar este bloco E a
-             entrada "nes" do CATALOG mais abaixo (mesma marca NES-OCULTO). -->
-        <!--
+        <!-- ATARI 2600 -->
+        <a href="games.html?console=atari2600" class="card console-card atari2600">
+          <div class="card-glow-top"></div>
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Atari-2600-Wood-4Sw-Set.png/330px-Atari-2600-Wood-4Sw-Set.png"
+            alt="Atari 2600" class="console-img">
+          <div class="console-info">
+            <h2>Atari 2600 - Em Construção</h2>
+            <p>VCS</p>
+          </div>
+        </a>
+
+        <!-- NES (reativado) -->
         <a href="games.html?console=nes" class="card console-card nes">
           <div class="card-glow-top"></div>
           <img
@@ -141,7 +149,6 @@
             <p>NES</p>
           </div>
         </a>
-        -->
 
         <!-- GBC -->
         <a href="games.html?console=gbc" class="card console-card gbc">
@@ -152,6 +159,18 @@
           <div class="console-info">
             <h2>Game Boy Color</h2>
             <p>GBC</p>
+          </div>
+        </a>
+
+        <!-- MASTER SYSTEM (TECTOY) -->
+        <a href="games.html?console=mastersystem" class="card console-card mastersystem">
+          <div class="card-glow-top"></div>
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sega-Master-System-Set.png/330px-Sega-Master-System-Set.png"
+            alt="Master System" class="console-img">
+          <div class="console-info">
+            <h2>Master System - Em Construção</h2>
+            <p>SMS</p>
           </div>
         </a>
 
@@ -322,6 +341,49 @@
       </main>
     </div>
 
+    <!-- ════════════════════════════════════
+         ESPECIAIS (RetroVerse originais)
+    ════════════════════════════════════ -->
+    <div class="category-section">
+      <div class="category-header">
+        <span class="category-title">Especiais</span>
+        <span class="category-line"></span>
+        <span class="category-badge">RETROVERSE</span>
+      </div>
+      <main class="grid-container">
+
+        <!-- CS-OFF: Counter-Strike desativado (motor ainda em ajuste).
+             Para reativar, descomente o bloco abaixo (mesma marca CS-OFF). -->
+        <!--
+        <a href="cs16.html" class="card console-card cs16">
+          <div class="card-glow-top"></div>
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Half-Life_Counter-Strike.svg/330px-Half-Life_Counter-Strike.svg.png"
+            alt="Counter-Strike 1.6" class="console-img">
+          <div class="console-info">
+            <h2>Counter-Strike 1.6</h2>
+            <p>PC · WASM</p>
+          </div>
+        </a>
+        -->
+
+        <!-- RETROTV -->
+        <a href="retrotv.html" class="card console-card retrotv">
+          <div class="card-glow-top"></div>
+          <img
+            src="assets/tv.png"
+            alt="RetroTV" class="console-img">
+          <div class="console-info">
+            <h2>RetroVerse TV</h2>
+            <p>Canais Ao Vivo
+            
+            </p>
+          </div>
+        </a>
+
+      </main>
+    </div>
+
   </section>
 
   <!-- FOOTER -->
@@ -375,8 +437,6 @@
           { name: 'Urban Strike', file: 'Urban Strike (USA).sfc' }
         ]
       },
-      /* NES-OCULTO: catálogo do NES preservado, só fora da home.
-         Para reativar: descomente este bloco e o card HTML (marca NES-OCULTO acima).
       nes: {
         name: 'Nintendo Classic', short: 'NES', core: 'nes', games: [
           { name: 'Castlevania III', subtitle: "Dracula's Curse", file: "Castlevania III - Dracula's Curse (USA).nes" },
@@ -389,7 +449,6 @@
           { name: 'Zelda II', subtitle: 'The Adventure of Link', file: 'Zelda II - The Adventure of Link (USA).nes' }
         ]
       },
-      */
       gba: {
         name: 'Game Boy Advance', short: 'GBA', core: 'gba', games: [
           { name: 'Carros', subtitle: 'Disney / Pixar', file: 'Carros Disney.gba', remote: 'Cars (Europe) (Es,Pt)' },
@@ -494,6 +553,54 @@
           { name: 'Contra 4', file: 'Contra 4 (USA).nds' },
           { name: 'Chrono Trigger', file: 'Chrono Trigger (USA).nds', remote: 'Chrono Trigger (USA) (En,Fr)' },
           { name: 'Tetris DS', file: 'Tetris DS (USA).nds' }
+        ]
+      },
+      atari2600: {
+        name: 'Atari 2600', short: 'ATARI', core: 'atari2600', games: [
+          { name: 'Pac-Man', file: 'Pac-Man (USA).a26' },
+          { name: 'Pitfall!', file: 'Pitfall! (USA).a26' },
+          { name: 'River Raid', file: 'River Raid (USA).a26' },
+          { name: 'Enduro', file: 'Enduro (USA).a26' },
+          { name: 'Space Invaders', file: 'Space Invaders (USA).a26' },
+          { name: 'Adventure', file: 'Adventure (USA).a26' },
+          { name: "Yars' Revenge", file: "Yars' Revenge (USA).a26" },
+          { name: 'Missile Command', file: 'Missile Command (USA).a26' },
+          { name: 'Combat', file: 'Combat (USA).a26' },
+          { name: 'Breakout', file: 'Breakout (USA).a26' },
+          { name: 'Frogger', file: 'Frogger (USA).a26' },
+          { name: 'Donkey Kong', file: 'Donkey Kong (USA).a26' },
+          { name: 'Joust', file: 'Joust (USA).a26' },
+          { name: 'Defender', file: 'Defender (USA).a26' },
+          { name: 'Berzerk', file: 'Berzerk (USA).a26' },
+          { name: 'Keystone Kapers', file: 'Keystone Kapers (USA).a26' },
+          { name: 'Kaboom!', file: 'Kaboom! (USA).a26' },
+          { name: 'Galaxian', file: 'Galaxian (USA).a26' },
+          { name: 'Phoenix', file: 'Phoenix (USA).a26' },
+          { name: 'E.T. The Extra Terrestrial', file: 'E.T. The Extra Terrestrial (USA).a26' }
+        ]
+      },
+      mastersystem: {
+        name: 'Master System', short: 'SMS', core: 'segaMS', games: [
+          { name: 'Alex Kidd in Miracle World', file: 'Alex Kidd in Miracle World (USA, Europe, Brazil) (Rev 1).sms' },
+          { name: 'Alex Kidd in Shinobi World', file: 'Alex Kidd in Shinobi World (USA, Europe, Brazil).sms' },
+          { name: 'Sonic the Hedgehog', file: 'Sonic The Hedgehog (USA, Europe, Brazil) (Rev 1).sms' },
+          { name: 'Sonic the Hedgehog 2', file: 'Sonic The Hedgehog 2 (USA, Europe, Brazil).sms' },
+          { name: 'Wonder Boy III', subtitle: "The Dragon's Trap", file: "Wonder Boy III - The Dragon's Trap (USA, Europe, Brazil).sms" },
+          { name: 'Wonder Boy', subtitle: 'In Monster Land', file: 'Wonder Boy in Monster Land (USA, Europe, Brazil).sms' },
+          { name: 'Phantasy Star', file: 'Phantasy Star (USA, Europe, Brazil).sms' },
+          { name: 'Golden Axe', file: 'Golden Axe (USA, Europe, Brazil).sms' },
+          { name: 'Out Run', file: 'Out Run (USA, Europe, Brazil).sms' },
+          { name: 'After Burner', file: 'After Burner (USA, Europe, Brazil).sms' },
+          { name: 'Double Dragon', file: 'Double Dragon (USA, Europe, Brazil).sms' },
+          { name: 'California Games', file: 'California Games (USA, Europe, Brazil).sms' },
+          { name: 'Castle of Illusion', subtitle: 'Starring Mickey Mouse', file: 'Mickey Mouse - Castle of Illusion (USA, Europe, Brazil).sms' },
+          { name: 'Psycho Fox', file: 'Psycho Fox (USA, Europe, Brazil).sms' },
+          { name: 'Fantasy Zone', file: 'Fantasy Zone (World).sms' },
+          { name: 'Kung Fu Kid', file: 'Kung Fu Kid (USA, Europe, Brazil).sms' },
+          { name: 'R-Type', file: 'R-Type (USA, Europe, Brazil).sms' },
+          { name: 'Space Harrier', file: 'Space Harrier (USA, Europe, Brazil).sms' },
+          { name: 'Shinobi', file: 'Shinobi (USA, Europe, Brazil).sms' },
+          { name: 'Mortal Kombat', file: 'Mortal Kombat (USA, Europe, Brazil).sms' }
         ]
       },
       arcade: {
@@ -655,8 +762,8 @@
     });
 
     /* Conta só o que está visível na home.
-       Card HTML comentado (NES-OCULTO) não entra no DOM.
-       Jogos vêm do CATALOG — se o nes continuar comentado lá, não soma. */
+       Consoles vêm dos cards (a.console-card) e jogos do CATALOG.
+       Se um card não tiver entrada no CATALOG, um aviso sai no console. */
     function renderHeroStats() {
       const cards = [...document.querySelectorAll('a.console-card[href*="console="]')];
       const keys = cards.map((a) => {
@@ -665,6 +772,12 @@
       }).filter(Boolean);
 
       const unique = [...new Set(keys)];
+
+      // Diagnóstico: card de console sem entrada no CATALOG não soma jogos
+      unique.forEach((key) => {
+        if (!CATALOG[key]) console.warn('[RetroVerse] Card de console sem catálogo (0 jogos):', key);
+      });
+
       const gameCount = unique.reduce((n, key) => {
         const cat = CATALOG[key];
         return n + (cat && Array.isArray(cat.games) ? cat.games.length : 0);
@@ -778,6 +891,8 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.babel.js"></script>
 
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a29bde5d6a11a623',t:'MTc4NjQ5OTgzOQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script src="js/fichas.js"></script>
+  <script src="js/card-info.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2ac53e789399da8',t:'MTc4NjY3MjQyNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 
 </html>
