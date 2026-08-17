@@ -24,7 +24,10 @@
       <h1 class="console-header-title">CANAIS AO VIVO</h1>
       <span class="games-count-badge" id="tv-count">0 CANAIS</span>
     </div>
-    <div class="navbar-spacer"></div>
+
+    <!--div class="navbar-spacer">
+      <a href="desenhos-dublado.html" class="btn-desenhos">Desenhos</a>
+    </div-->
   </header>
 
   <!-- ══════════ O APARELHO DE TV ══════════ -->
@@ -56,7 +59,7 @@
 
     <!-- painel inferior do aparelho -->
     <div class="rv-tv-panel">
-      <span class="rv-tv-brand">RETROVERSE<span class="rv-tv-model"> · CANAIS AO VIVO</span></span>
+      <span class="rv-tv-brand">RETROVERSE<span class="rv-tv-model" id="rv-tv-agora"> · CANAIS AO VIVO</span></span>
       <span class="rv-tv-led" id="rv-led"></span>
     </div>
   </div>
@@ -121,6 +124,12 @@
       var guideList = document.getElementById('rv-guide-list');
       var led = document.getElementById('rv-led');
       var keypad = document.getElementById('rv-keypad');
+      var tvAgora = document.getElementById('rv-tv-agora');
+
+      /* mostra o canal sintonizado no painel do aparelho */
+      function painelCanal(texto) {
+        if (tvAgora) tvAgora.textContent = ' · ' + texto;
+      }
 
       var atual = -1;
       var osdTimer = null;
@@ -157,11 +166,36 @@
       }
 
       /* ── sintonizar ── */
+      /* ── MIXED CONTENT ──
+         Se a pagina estiver em https:// o navegador BLOQUEIA
+         qualquer stream http:// (tela preta sem erro visivel).
+         PAGINA_HTTPS diz se estamos nessa situacao; canais com
+         seguro:false so tocam fora do https (file:// ou localhost). */
+      var PAGINA_HTTPS = location.protocol === 'https:';
+      function bloqueado(c) {
+        return PAGINA_HTTPS && c.seguro === false;
+      }
+
       function sintonizar(idx) {
         if (idx < 0 || idx >= CANAIS.length) return;
         atual = idx;
         var c = CANAIS[idx];
         try { localStorage.setItem('rv_tv_ch', String(idx)); } catch (e) {}
+
+        // canal http em pagina https: avisa em vez de deixar a tela preta
+        if (bloqueado(c)) {
+          pararTudo();
+          video.style.display = 'none';
+          yt.style.display = 'none';
+          semSinal.classList.add('on');
+          led.classList.remove('on');
+          guide.classList.remove('on');
+          painelCanal(c.nome);
+          osdMostra('CH ' + String(idx + 1).padStart(2, '0') + ' · ' + c.nome +
+            '\nSEM SINAL NESTE MODO', '#ffaa3c');
+          return;
+        }
+
         semSinal.classList.remove('on');
         led.classList.add('on');
         pararTudo();
@@ -194,6 +228,7 @@
           // se o autoplay for bloqueado, o botão ▶ aparece
           setTimeout(mostraPlayBtn, 3500);
         }
+        painelCanal(c.nome);
         osdMostra('CH ' + String(idx + 1).padStart(2, '0') + ' · ' + c.nome + ' · ' + c.categoria + '\n' + c.programa, c.cor);
       }
 
@@ -204,6 +239,7 @@
         yt.style.display = 'none';
         semSinal.classList.add('on');
         led.classList.remove('on');
+        painelCanal('CANAIS AO VIVO');
         osdMostra('— SEM SINAL —', 'var(--text-muted)');
       }
 
@@ -224,6 +260,7 @@
             b.innerHTML = '<span class="rv-guide-num">CH ' + String(i + 1).padStart(2, '0') + '</span>' +
               '<span class="rv-guide-nome">' + c.nome + '</span>' +
               '<span class="rv-guide-prog">' + c.programa + '</span>';
+            if (bloqueado(c)) b.classList.add('rv-bloq');
             b.onclick = function () { sintonizar(i); };
             guideList.appendChild(b);
           });
@@ -274,9 +311,11 @@
             card.className = 'rv-chan';
             card.innerHTML =
               '<span class="rv-chan-num" style="background:' + c.cor + '">CH ' + String(i + 1).padStart(2, '0') + '</span>' +
+
               '<span class="rv-chan-name">' + c.nome + '</span>' +
               '<span class="rv-chan-cat">' + c.programa + '</span>' +
               '<span class="rv-chan-desc">' + (c.desc || '') + '</span>';
+            if (bloqueado(c)) card.classList.add('rv-bloq');
             card.onclick = function () { sintonizar(i); };
             grid.appendChild(card);
           });
@@ -300,13 +339,23 @@
         this.classList.remove('on');
       };
 
-      /* ── controle remoto ── */
-      document.getElementById('rv-chnext').onclick = function () {
-        atual < 0 ? sintonizar(0) : sintonizar((atual + 1) % CANAIS.length);
-      };
-      document.getElementById('rv-chprev').onclick = function () {
-        atual < 0 ? sintonizar(CANAIS.length - 1) : sintonizar((atual - 1 + CANAIS.length) % CANAIS.length);
-      };
+      /* ── controle remoto ──
+         O zapping PULA os canais bloqueados por mixed content:
+         em pagina https eles nao tem imagem, entao ficariam so
+         atrapalhando o CH+/CH−. Pelo numero ou pela grade ainda
+         da para escolher (ai o OSD explica o motivo). */
+      function zap(passo) {
+        if (!CANAIS.length) return;
+        if (atual < 0) { sintonizar(passo > 0 ? 0 : CANAIS.length - 1); return; }
+        var i = atual;
+        for (var n = 0; n < CANAIS.length; n++) {
+          i = (i + passo + CANAIS.length) % CANAIS.length;
+          if (!bloqueado(CANAIS[i])) { sintonizar(i); return; }
+        }
+        sintonizar((atual + passo + CANAIS.length) % CANAIS.length);
+      }
+      document.getElementById('rv-chnext').onclick = function () { zap(1); };
+      document.getElementById('rv-chprev').onclick = function () { zap(-1); };
       document.getElementById('rv-mute').onclick = function (e) {
         var m = !video.muted;
         video.muted = m;
@@ -414,19 +463,58 @@
         }
       });
 
-      /* ── abre JÁ SINTONIZADO (canal salvo ou CH 01) ── */
+      /* ── abre JÁ SINTONIZADO (canal salvo ou o 1o que funciona) ── */
       montarGuia();
       montarTeclado();
       montarGrade();
+
+      /* NOTA TECNICA (nao aparece na pagina):
+         Alguns canais transmitem em http:// e o navegador bloqueia
+         sinal http em pagina https (mixed content). Eles estao
+         marcados com seguro:false em js/canais-tv.js.
+         Nesta situacao o zapping CH+/CH− pula esses canais e a
+         pagina nunca abre num deles. Para assisti-los, abra o
+         RetroVerse local (arquivo no computador ou http://localhost).
+         Para conferir quantos sao, rode no console:
+           RV_CANAIS.filter(function(c){return c.seguro===false}).length */
+
       var salvo = -1;
       try { salvo = parseInt(localStorage.getItem('rv_tv_ch') || '-1', 10); } catch (e) {}
-      if (salvo >= 0 && salvo < CANAIS.length) sintonizar(salvo);
-      else if (CANAIS.length) sintonizar(0);
+      // nao abre num canal bloqueado: cai no primeiro que realmente toca
+      function primeiroBom() {
+        for (var i = 0; i < CANAIS.length; i++) if (!bloqueado(CANAIS[i])) return i;
+        return CANAIS.length ? 0 : -1;
+      }
+      if (salvo >= 0 && salvo < CANAIS.length && !bloqueado(CANAIS[salvo])) sintonizar(salvo);
+      else if (CANAIS.length) sintonizar(primeiroBom());
       else semSinalFn();
     })();
   </script>
 
   <style>
+    /* atalho para a videoteca de desenhos (navbar) */
+    .btn-desenhos {
+      display: inline-flex;
+      align-items: center;
+      background: var(--green-soft);
+      border: 1px solid rgba(0, 255, 65, .35);
+      color: var(--green-neon);
+      padding: 8px 18px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: .88rem;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      transition: all .3s cubic-bezier(.4, 0, .2, 1);
+    }
+    .btn-desenhos:hover {
+      background: var(--green-neon);
+      color: #030604;
+      box-shadow: 0 0 18px var(--green-glow);
+    }
+
     /* ═══ APARELHO DE TV (usa as variáveis do css/style.css) ═══ */
     .rv-tvset {
       max-width: 900px;
@@ -683,6 +771,16 @@
       padding-left: 10px;
       border-left: 1px dashed var(--border);
     }
+
+    /* ── CANAL BLOQUEADO (http em página https) ──
+       Marcação discreta, sem texto explicativo na página. */
+    .rv-chan.rv-bloq { opacity: .55; position: relative; }
+    .rv-chan.rv-bloq:hover {
+      opacity: .8;
+      border-color: #ffaa3c;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, .6), 0 0 16px rgba(255, 170, 60, .3);
+    }
+    .rv-guide-item.rv-bloq { opacity: .5; }
 
     /* ── GRADE (seções por categoria) ── */
     .rv-grid-sec { max-width: 900px; margin: 0 auto; }

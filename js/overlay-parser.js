@@ -23,6 +23,8 @@
     'b': 'B',
     'y': 'Y',
     'a': 'A',
+    'fire': 'B',      // Atari 2600: o FIRE é o input 0 = botão B (scheme do EJS)
+    'fire1': 'B',     // variação de nome (alguns CFGs usam fire1)
     'x': 'X',
     'c': 'R',  // No layout Saturn 6 botões (A B C / X Y Z), 'c' aciona R (Chute Forte/Médio)
     'z': 'L',  // No layout Saturn 6 botões, 'z' aciona L (Soco Forte/Médio)
@@ -71,6 +73,7 @@
       // Estado do analógico analógico (contínuo) + rebase "seguir o dedo"
       this.activeAnalog = new Map();  // touchId -> { axis, nx, ny }
       this.analogBase = new Map();    // touchId -> { axis, desc, originX, originY }
+      this.dpadVisual = new Map();    // touchId -> { desc, originX, originY } (stick animado)
       this.AV = 0x7fff;               // amplitude máxima do analógico (valor do RetroArch)
       // Fator de inflação da zona de toque (hitbox maior que o visual)
       this.HIT_SCALE = 1.4;
@@ -431,7 +434,7 @@
      */
     setDescHighlight(desc, active, moveX = 0, moveY = 0) {
       if (!desc) return;
-      if (desc.button === 'analog_left' && desc.imgEl) {
+      if ((desc.button === 'analog_left' || desc.button === 'analog_right' || desc.button === 'dpad_area') && desc.imgEl) {
         if (active) {
           desc.imgEl.style.transform = `translate(${moveX}px, ${moveY}px)`;
         } else {
@@ -687,7 +690,12 @@
           : EJS_INPUT_CODES[inputCode]);
       if (this.debug) console.log(`[RA] simulateInput ${inputCode} -> code=${code} pressed=${pressed ? 1 : 0} | EJS pronto: ${!!(window.EJS_emulator?.gameManager)}`);
       if (code === undefined) return;
-      const val = pressed ? 1 : 0;
+      // IMPORTANTE (fix UP/DOWN do NES): o EmulatorJS espera 32767 como valor
+      // "pressionado" para os inputs DIRECIONAIS (UP/DOWN/LEFT/RIGHT = códigos
+      // 4-7) — é o que o controle virtual padrão envia. Enviar 1 fazia LEFT/RIGHT
+      // funcionarem em alguns cores, mas UP/DOWN (eixos verticais) ficarem mortos
+      // no fceumm/nestopia. Botões (A/B/START/SELECT) seguem com valor 1.
+      const val = pressed ? (code >= 4 && code <= 7 ? 32767 : 1) : 0;
       // HUD de diagnóstico (?paddebug=1): play.html exibe cada input na tela.
       if (typeof window.__rvPadHUD === 'function') { try { window.__rvPadHUD(inputCode, pressed); } catch (hudErr) { } }
       try {
@@ -796,6 +804,36 @@
       this.sendAnalog(base.axis, nx, ny);
     }
 
+    /** Inicia o visual do D-PAD (joystick) — o stick se move com o dedo */
+    startDpadVisual(touchId, desc, nX, nY) {
+      if (!desc || !desc.imgEl) return;
+      this.dpadVisual.set(touchId, { desc, originX: nX, originY: nY });
+      this.moveDpadVisual(touchId, nX, nY);
+    }
+
+    /** Move o visual do D-PAD (joystick) seguindo o dedo, clampado ao raio */
+    moveDpadVisual(touchId, nX, nY) {
+      const v = this.dpadVisual.get(touchId);
+      if (!v) return;
+      let dx = nX - v.originX;
+      let dy = nY - v.originY;
+      const rx = v.desc.rx || 0.15;
+      const ry = v.desc.ry || 0.15;
+      const mag = Math.hypot(dx / rx, dy / ry);
+      if (mag > 1) { dx /= mag; dy /= mag; }
+      const nx = dx / rx;
+      const ny = dy / ry;
+      const maxMovePx = 30;
+      this.setDescHighlight(v.desc, true, nx * maxMovePx, ny * maxMovePx);
+    }
+
+    /** Libera o visual do D-PAD (volta ao centro) */
+    releaseDpadVisual(touchId) {
+      const v = this.dpadVisual.get(touchId);
+      if (v) this.setDescHighlight(v.desc, false);
+      this.dpadVisual.delete(touchId);
+    }
+
     /** Libera o analógico (volta ao centro e zera os eixos) */
     releaseAnalog(touchId) {
       const st = this.activeAnalog.get(touchId);
@@ -832,6 +870,10 @@
         const holdItems = [];
         let menuFound = false;
         for (const desc of hitDescs) {
+          // stick animado: inicia o visual do joystick no toque
+          if (desc.button === 'dpad_area' && desc.imgEl && !this.dpadVisual.has(touch.identifier)) {
+            this.startDpadVisual(touch.identifier, desc, nX, nY);
+          }
           const res = this.processDescTouch(desc, nX, nY);
           for (const item of res) {
             if (item.type === 'system') {
@@ -874,6 +916,11 @@
           continue;
         }
 
+        // stick animado do D-PAD: move o visual junto com o dedo
+        if (this.dpadVisual.has(touch.identifier)) {
+          this.moveDpadVisual(touch.identifier, nX, nY);
+        }
+
         const hitDescs = this.findHitDescs(nX, nY);
         const actions = [];
         const holdItems = [];
@@ -909,8 +956,9 @@
           this.activeStylus.delete(touch.identifier);
           continue;
         }
-        // libera analógico deste toque (zera eixos + reseta visual)
+        // libera analógico e o stick do D-PAD deste toque (reseta visual)
         this.releaseAnalog(touch.identifier);
+        this.releaseDpadVisual(touch.identifier);
         this.releaseHoldActions(touch.identifier);
         this.endMenuPress(touch.identifier);
         const descActs = this.activeTouches.get(touch.identifier) || [];
@@ -930,6 +978,7 @@
         if (this.activeTouches.size || this.analogBase.size || this.activeHolds.size || this.activeStylus.size || this.menuPresses.size) {
           this.activeTouches.clear();
           for (const id of [...this.analogBase.keys()]) this.releaseAnalog(id);
+          for (const id of [...this.dpadVisual.keys()]) this.releaseDpadVisual(id);
           for (const id of [...this.activeHolds.keys()]) this.releaseHoldActions(id);
           this.activeStylus.clear();
           this.menuPresses.forEach(p => { try { clearTimeout(p.timer); } catch (_) { } });

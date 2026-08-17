@@ -16,45 +16,45 @@
 window.RV_FICHAS = {
 
 /* ── ATARI 2600 ──────────────────────────────────────────── */
-"Pac-Man (USA).a26":
+"Pac-Man (USA).bin":
   { ano: 1982, gen: "Arcade", dev: "Atari", jog: 2, desc: "O fenômeno dos fliperamas no console — o jogo que fez o Atari vender milhões e virou febre no mundo inteiro." },
-"Pitfall! (USA).a26":
+"Pitfall! (USA).bin":
   { ano: 1982, gen: "Plataforma", dev: "Activision", jog: 1, desc: "Pitfall Harry correndo pela selva — o jogo mais vendido do Atari e a aventura que definiu o gênero." },
-"River Raid (USA).a26":
+"River Raid (USA).bin":
   { ano: 1982, gen: "Tiro", dev: "Activision", jog: 1, desc: "Sobrevoe o rio, desvie de pontes e reabasteça — um dos jogos mais amados do Atari no Brasil." },
-"Enduro (USA).a26":
+"Enduro (USA).bin":
   { ano: 1983, gen: "Corrida", dev: "Activision", jog: 1, desc: "Corra do amanhecer ao anoitecer, desviando de carros na neve e na chuva — o endurance definitivo." },
-"Space Invaders (USA).a26":
+"Space Invaders (USA).bin":
   { ano: 1980, gen: "Tiro Fixo", dev: "Atari", jog: 2, desc: "O jogo que quase quebrou o Japão chega ao console — a versão que fez o Atari 2600 decolar." },
-"Adventure (USA).a26":
+"Adventure (USA).bin":
   { ano: 1979, gen: "Aventura", dev: "Atari", jog: 1, desc: "O primeiro jogo de aventura da história com dragão — e o primeiro easter egg já criado." },
-"Yars' Revenge (USA).a26":
+"Yars' Revenge (USA).bin":
   { ano: 1982, gen: "Tiro", dev: "Atari", jog: 1, desc: "A obra-prima de Howard Scott Warshaw — o tiro mais bonito e estratégico do Atari." },
-"Missile Command (USA).a26":
+"Missile Command (USA).bin":
   { ano: 1980, gen: "Estratégia", dev: "Atari", jog: 2, desc: "Defenda suas cidades dos mísseis com o trackball — a tensão da Guerra Fria num cartucho." },
-"Combat (USA).a26":
+"Combat (USA).bin":
   { ano: 1977, gen: "Ação", dev: "Atari", jog: 2, desc: "O jogo que vinha de fábrica no console — tanques, aviões e o duelo de 2 jogadores que abria toda sessão." },
-"Breakout (USA).a26":
+"Breakout (USA).bin":
   { ano: 1978, gen: "Quebra-cabeça", dev: "Atari", jog: 2, desc: "Quebre os tijolos com a raquete — o clássico de Arnie (sim, aquele) e Steve Jobs." },
-"Frogger (USA).a26":
+"Frogger (USA).bin":
   { ano: 1982, gen: "Ação", dev: "Parker Brothers", jog: 2, desc: "Atravesse a rua e o rio com o sapo — timing perfeito e a trilha sonora mais grudenta do Atari." },
-"Donkey Kong (USA).a26":
+"Donkey Kong (USA).bin":
   { ano: 1982, gen: "Plataforma", dev: "Coleco", jog: 1, desc: "O gorila, a donzela e o encanador — a versão caseira do clássico da Nintendo." },
-"Joust (USA).a26":
+"Joust (USA).bin":
   { ano: 1982, gen: "Ação", dev: "Atari", jog: 2, desc: "Cavalgue avestruzes e lute no ar — o duelo de lanceiros mais divertido do Atari." },
-"Defender (USA).a26":
+"Defender (USA).bin":
   { ano: 1982, gen: "Tiro", dev: "Atari", jog: 1, desc: "Proteja os humanos dos alienígenas em um mundo que rola para os dois lados." },
-"Berzerk (USA).a26":
+"Berzerk (USA).bin":
   { ano: 1982, gen: "Tiro", dev: "Atari", jog: 1, desc: "Labirintos, robôs e o famoso 'Intruder Alert!' — um dos jogos mais tensos do console." },
-"Keystone Kapers (USA).a26":
+"Keystone Kapers (USA).bin":
   { ano: 1983, gen: "Plataforma", dev: "Activision", jog: 1, desc: "O policial Kelly atrás do ladrão — escadas, roletas e muito humor." },
-"Kaboom! (USA).a26":
+"Kaboom! (USA).bin":
   { ano: 1981, gen: "Quebra-cabeça", dev: "Activision", jog: 1, desc: "Pegue as bombas com os baldes — o jogo que exigia reflexos (e um controle de paddle)." },
-"Galaxian (USA).a26":
+"Galaxian (USA).bin":
   { ano: 1983, gen: "Tiro", dev: "Atari", jog: 1, desc: "Naves que mergulham em você — o clássico espacial em versão caseira." },
-"Phoenix (USA).a26":
+"Phoenix (USA).bin":
   { ano: 1982, gen: "Tiro", dev: "Amiga Corporation", jog: 1, desc: "A batalha final contra a nave-mãe — um dos tiros mais bonitos do Atari.", c: 1 },
-"E.T. The Extra Terrestrial (USA).a26":
+"E.T. The Extra Terrestrial (USA).bin":
   { ano: 1982, gen: "Aventura", dev: "Atari", jog: 1, desc: "O jogo mais infame da história — causou o crash de 1983 e virou lenda (e os cartuchos, lenda enterrada no deserto). Jogue e forme sua opinião." },
 
 /* ── NES ─────────────────────────────────────────────────── */
@@ -373,6 +373,66 @@ window.RV_FICHAS = {
 "sfa3.zip":
   { ano: 1998, gen: "Luta", dev: "Capcom", jog: 2, desc: "Street Fighter Alpha 3 — três estilos de luta e o elenco mais completo do Alpha." },
 "vsav.zip":
-  { ano: 1997, gen: "Luta", dev: "Capcom", jog: 2, desc: "Vampire Savior — Darkstalkers com o Dark Force: monstros da Capcom em luta frenética." }
+  { ano: 1997, gen: "Luta", dev: "Capcom", jog: 2, desc: "Vampire Savior — Darkstalkers com o Dark Force: monstros da Capcom em luta frenética." },
+
+/* ── ATARI 2600 · NOVOS ─────────────────────────────────── */
+"Asteroids (USA).bin":
+  { ano: 1979, gen: "Tiro", dev: "Atari", jog: 2, desc: "O asteroide clássico dos fliperamas — desvie, atire e sobreviva no espaço." },
+"Centipede (USA).bin":
+  { ano: 1982, gen: "Tiro Fixo", dev: "Atari", jog: 2, desc: "A centopeia que serpenteia pelos cogumelos — um dos arcades mais vendidos da história." },
+"Q-bert (USA).bin":
+  { ano: 1982, gen: "Quebra-cabeça", dev: "Gottlieb", jog: 1, desc: "O cubo roxo que pula nos degraus — o personagem mais icônico do começo dos anos 80." },
+"Dig Dug (USA).bin":
+  { ano: 1982, gen: "Ação", dev: "Namco", jog: 2, desc: "Cave túneis, encha os inimigos de ar e fuja dos dragões — clássico do arcade." },
+"Demon Attack (USA).bin":
+  { ano: 1982, gen: "Tiro", dev: "Imagic", jog: 2, desc: "Um dos tiros mais vendidos do Atari — demônios em formação, com gráficos impressionantes." },
+"Warlords (USA).bin":
+  { ano: 1980, gen: "Ação", dev: "Atari", jog: 4, desc: "O melhor multiplayer do Atari: 4 jogadores, 4 castelos e uma bola de fogo traiçoeira." },
+"Bowling (USA).bin":
+  { ano: 1978, gen: "Esporte", dev: "Atari", jog: 2, desc: "Um dos jogos de lançamento do console — boliche simples, direto e viciante." },
+"Freeway (USA).bin":
+  { ano: 1981, gen: "Ação", dev: "Activision", jog: 2, desc: "Atravesse a rodovia com seus frangos — a febre da Activision no Brasil." },
+"Cosmic Ark (USA).bin":
+  { ano: 1982, gen: "Tiro", dev: "Imagic", jog: 1, desc: "Defenda sua nave e colete criaturas alienígenas — a atmosfera espacial da Imagic." },
+"Frostbite (USA).bin":
+  { ano: 1983, gen: "Plataforma", dev: "Activision", jog: 1, desc: "O urso que pula nos blocos de gelo para construir um iglu — genial e viciante." },
+"Seaquest (USA).bin":
+  { ano: 1982, gen: "Tiro", dev: "Activision", jog: 1, desc: "Resgate mergulhadores no fundo do mar enquanto o oxigênio acaba." },
+"Mario Bros. (USA).bin":
+  { ano: 1983, gen: "Plataforma", dev: "Atari", jog: 2, desc: "O Mario antes do Mario World — encanadores batendo nas tartarugas pelos canos." },
+"Popeye (USA).bin":
+  { ano: 1983, gen: "Plataforma", dev: "Parker Brothers", jog: 2, desc: "O marinheiro mais famoso dos games — apanhe o espinafre e salve a Olívia." },
+"Carnival (USA).bin":
+  { ano: 1982, gen: "Tiro", dev: "Coleco", jog: 2, desc: "Tiro no parque de diversões — acerte os patos e ganhe o prêmio." },
+"Atlantis (USA).bin":
+  { ano: 1982, gen: "Tiro", dev: "Imagic", jog: 1, desc: "Defenda a cidade submersa dos invasores — a tensão de um bombardeio iminente." },
+"Haunted House (USA).bin":
+  { ano: 1982, gen: "Aventura", dev: "Atari", jog: 1, desc: "A casa mal-assombrada com atmosfera única — ache as peças da urna no escuro." },
+
+/* ── MASTER SYSTEM · NOVOS ───────────────────────────────── */
+"Sonic Chaos (USA, Europe, Brazil).sms":
+  { ano: 1993, gen: "Plataforma", dev: "Sega", jog: 1, desc: "O Sonic 8 bits mais veloz — spin dash e as Esmeraldas do Caos. O melhor ouriço do Master." },
+"Golden Axe Warrior (USA, Europe, Brazil).sms":
+  { ano: 1991, gen: "Ação / RPG", dev: "Sega", jog: 1, desc: "O 'Zelda do Master System' — espada, magia e um mundo para explorar. Tesouro escondido." },
+"Wonder Boy in Monster World (USA, Europe, Brazil).sms":
+  { ano: 1991, gen: "Aventura / Plataforma", dev: "Westone", jog: 1, desc: "A continuação do Dragon's Trap — o melhor da série no Master, com o Genie." },
+"Hang-On (USA, Europe, Brazil).sms":
+  { ano: 1987, gen: "Corrida", dev: "Sega", jog: 1, desc: "O clássico de moto que vinha com o console — curva, acelera e não cai." },
+"Alex Kidd - The Lost Stars (USA, Europe, Brazil).sms":
+  { ano: 1988, gen: "Plataforma", dev: "Sega", jog: 1, desc: "Alex Kidd em busca das estrelas perdidas — mais rápido e variado que o original." },
+"Batman (USA, Europe, Brazil).sms":
+  { ano: 1990, gen: "Plataforma", dev: "Sunsoft", jog: 1, desc: "O Cavaleiro das Trevas em 8 bits — plataforma e ação na veia, com o batarang." },
+"Asterix (Europe, Brazil).sms":
+  { ano: 1991, gen: "Plataforma", dev: "Sega", jog: 1, desc: "O gaulês mais famoso — pule, bata e colete menires pelos cenários da Gália." },
+"Operation Wolf (USA, Europe, Brazil).sms":
+  { ano: 1989, gen: "Tiro", dev: "Taito", jog: 1, desc: "O comando de elite contra a guerrilha — o rail shooter do fliperama no Master." },
+"ESWAT - Cyber Police (USA, Europe, Brazil).sms":
+  { ano: 1990, gen: "Ação", dev: "Sega", jog: 1, desc: "O policial ciborgue em missão — run 'n' gun com direito a jetpack nas fases finais." },
+"Power Strike (USA, Europe, Brazil).sms":
+  { ano: 1988, gen: "Tiro", dev: "Compile", jog: 1, desc: "O melhor shooter do Master System — naves, power-ups e dificuldade justa." },
+"Master of Darkness (Europe, Brazil).sms":
+  { ano: 1993, gen: "Ação / Aventura", dev: "Sega", jog: 1, desc: "O 'Castlevania do Master' — Dr. Feud e sua horda de vampiros na Londres vitoriana." },
+"Michael Jackson's Moonwalker (USA, Europe, Brazil).sms":
+  { ano: 1990, gen: "Plataforma", dev: "Sega", jog: 1, desc: "O Rei do Pop em 8 bits — resgate as crianças, use a magia e dance para vencer." },
 
 };
