@@ -10,7 +10,7 @@
       calibrate.html (faltavam → offline quebrava o player).
    4. Versão fixada do EmulatorJS (4.2.3) no warmup — veja play.html.
    ═══════════════════════════════════════════════════════════ */
-const CACHE_NAME = 'retroverse-v9';
+const CACHE_NAME = 'retroverse-v10';
 const CACHE_EJS = CACHE_NAME + '-ejs'; // núcleos/framework do EmulatorJS
 const EJS_CDN = 'https://cdn.emulatorjs.org/4.2.3/data/';
 
@@ -19,6 +19,7 @@ const STATIC_ASSETS = [
   'games.html',
   'play.html',
   'profile.html',
+  'retroflix.html',
   'calibrate.html',
   'css/style.css',
   'assets/rv-icon.png',

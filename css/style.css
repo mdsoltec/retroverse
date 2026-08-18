@@ -63,6 +63,8 @@
   --cs16-glow: rgba(255, 180, 0, 0.5);
   --retrotv-color: #00bfff;
   --retrotv-glow: rgba(0, 191, 255, 0.5);
+  --retroflix-color: #ff4fa3;
+  --retroflix-glow: rgba(255, 79, 163, 0.5);
 }
 
 * {
@@ -1081,6 +1083,11 @@ body {
 .console-card.retrotv {
   --console-color: var(--retrotv-color);
   --console-glow: var(--retrotv-glow);
+}
+
+.console-card.retroflix {
+  --console-color: var(--retroflix-color);
+  --console-glow: var(--retroflix-glow);
 }
 
 /* ==========================================

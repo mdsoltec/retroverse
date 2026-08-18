@@ -1,7 +1,7 @@
 {
-  "name": "RetroVerse - Enter The Classics",
-  "short_name": "RetroVerse",
-  "description": "Plataforma de emulação de jogos retro no navegador. 11 consoles, 100+ jogos.",
+  "name": "Retroverso - Enter The Classics",
+  "short_name": "Retroverso",
+  "description": "Plataforma de emulação de jogos retro e streaming no navegador. 13 consoles, 195+ jogos, filmes e séries.",
   "id": "./",
   "start_url": "./index.html",
   "scope": "./",
